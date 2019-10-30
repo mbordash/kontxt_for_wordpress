@@ -1,0 +1,16 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+
+
+.svgKontxt {
+    margin-left: auto;
+    margin-right: auto;
+    display:block;
+}
+
+
+svg {
+    margin: 0 auto;
+}

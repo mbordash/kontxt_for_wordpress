@@ -1,0 +1,91 @@
+=== Plugin Name ===
+Contributors: mbordash
+Donate link: http://www.kontxt.com
+Tags: cognitive, article, admin, post, watson, content, seo, tagging, automatic, auto tag
+Requires at least: 4.0
+Tested up to: 4.9.2
+Stable tag: 1.3.2
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
+
+KONTXT for Wordpress is a free cognitive content analyzer and tagging plugin providing deep text analysis of your articles, products, and pages.
+
+== Description ==
+
+The KONTXT for Wordpress cognitive content analyzer plugin provides deep text analysis of your posts, pages, and product listings. With our cognitive approach to content analysis, you can get an objective review of your tone, discover hidden keywords and concepts buried within your content, and explore the emotions your articles are projecting.   Use these discoveries to adjust your writing style to your target audience and optimize search engine indexing through cognitive automatic tagging and linking related keyword tags to your content. Works with both article content and product descriptions, like WooCommerce.
+
+Features of our  WordPress plugin include:
+
+*   Tone & Sentiment analysis (positive, mixed, neutral, negative)
+*   Emotion detection and breakdown
+*   Keyword and related keyword extraction
+*   Concept extraction and discovery
+*   Cognitive tagging: automatically tag your content
+
+Please give us many stars if you like the cognitive magic!
+
+== Installation ==
+
+1. Upload `kontxt.zip` to your Plugins
+2. Activate the plugin through the 'Plugins' menu in WordPress
+
+== Frequently Asked Questions ==
+
+= Is this a free service? =
+
+Yes. But you can purchase a paid subscription.
+
+= Do you have a paid version? =
+
+Yes, the paid version is available via subscription at https://www.kontxt.com
+
+== Screenshots ==
+
+1. This screen shot depicts real-time content analysis for an article after pressing the Kontxt button.
+2. This screen shot depicts the Kontxt button now appearing in your content editing form.
+
+== Changelog ==
+
+= 1.3.2 =
+* Minor bug fix and API Key option for paid subscribers
+
+= 1.3.0 =
+* Major UI change, removed modal presentation in favor of in-page container with tab controller
+
+= 1.2.7 =
+* Fixed repo discrepancy which caused an exception
+
+= 1.2.6 =
+* Fixed bug when appending tags to an article
+
+= 1.2.5 =
+* Included ability to show emotion analysis on public posts
+* If public display is on, cognitive analysis will process content on public view (and then cached)
+* Code cleanup
+
+= 1.2.4 =
+* Added settings page so you can display sentiment analysis on your public posts
+* Slight update to chart UI
+* Code cleanup
+
+= 1.1.9 =
+* Fixed plugin activation error
+
+= 1.1.6 =
+* Fixed trial key issue
+
+= 1.1.4 =
+* Set default trial key, so no more manual activation. Also converted color bars to blue.
+
+= 1.1.0 =
+* BUG-FIX: Fixed modal height based on viewport.
+
+= 1.0.2 =
+* Cleaned up the README file and instructions, also included some screenshots.
+
+= 1.0.1 =
+* Minor display fixes
+
+= 1.0.0 =
+* First release of Kontxt plugin and corresponding SaaS service w/ keyed activation
+* Feature set includes: emotion detection, sentiment analysis, keyword extraction, concept expansion

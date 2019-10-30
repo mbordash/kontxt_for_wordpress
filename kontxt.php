@@ -1,0 +1,69 @@
+<?php
+
+/**
+ *
+ * @link              http://www.kontxt.com
+ * @since             1.0.0
+ * @package           Kontxt
+ *
+ * @wordpress-plugin
+ * Plugin Name:       KONTXT for Wordpress Intent Analyzer
+ * Plugin URI:        http://www.kontxt.com
+ * Description:       Plugin for discovering insights from your content. Helpful for editing and tagging your posts and pages.
+ * Version:           1.3.2
+ * Author:            Michael Bordash
+ * Author URI:        https://github.com/mbordash
+ * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
+ * Text Domain:       kontxt
+ * Domain Path:       /languages
+ */
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-kontxt-activator.php
+ */
+function activate_kontxt() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-kontxt-activator.php';
+	Kontxt_Activator::activate();
+}
+
+/**
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/class-kontxt-deactivator.php
+ */
+
+function deactivate_kontxt() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-kontxt-deactivator.php';
+	Kontxt_Deactivator::deactivate();
+}
+
+register_activation_hook( __FILE__, 'activate_kontxt' );
+register_deactivation_hook( __FILE__, 'deactivate_kontxt' );
+
+/**
+ * The core plugin class that is used to define internationalization,
+ * admin-specific hooks, and public-facing site hooks.
+ */
+require plugin_dir_path( __FILE__ ) . 'includes/class-kontxt.php';
+
+/**
+ * Begins execution of the plugin.
+ *
+ * Since everything within the plugin is registered via hooks,
+ * then kicking off the plugin from this point in the file does
+ * not affect the page life cycle.
+ *
+ * @since    1.0.0
+ */
+function run_kontxt() {
+
+	$plugin = new Kontxt();
+	$plugin->run();
+
+}
+run_kontxt();
