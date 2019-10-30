@@ -1,4 +1,6 @@
 ( function( wp ) {
+
+
     var KontxtButton = function( props ) {
         return wp.element.createElement(
             wp.editor.RichTextToolbarButton, {
@@ -28,6 +30,7 @@
 } )( window.wp );
 
 jQuery(function($) {
+
 
     // craft tab controller navigation
 
@@ -71,93 +74,8 @@ jQuery(function($) {
         });
     });
 
-    if (typeof(tinyMCE) != "undefined") {
 
-        tinyMCE.create('tinymce.plugins.Kontxt', {
-
-            init: function (ed, url) {
-
-                ed.addButton('kontxt', {
-                    title: 'Kontxt',
-                    cmd: 'kontxt',
-                    image : url + '/images/kontxt_button.png'
-                });
-
-                ed.addCommand('kontxt', function () {
-                    var selected_text = ed.selection.getContent();
-                    if (selected_text === "") {
-                        selected_text = ed.getContent();
-                    }
-
-                    kontxtHandleFormPost(selected_text);
-
-                    return false;
-                });
-            },
-
-            createControl: function (n, cm) {
-                return null;
-            },
-
-            getInfo: function () {
-                return {
-                    longname: 'Kontxt Button',
-                    author: 'Michael Bordash',
-                    authorurl: 'http://www.kontxt.com',
-                    infourl: 'http://www.kontxt.com',
-                    version: "1.3.0"
-                };
-            }
-        });
-
-        // Register plugin
-        tinyMCE.PluginManager.add('kontxt', tinyMCE.plugins.Kontxt);
-
-    }
 });
-
-function kontxt_add_concepts_to_post_tags() {
-
-    var items = [];
-
-    jQuery('#kontxt_concepts  tbody tr td:nth-child(1)').each( function(){
-        items.push( jQuery(this).text() );
-    });
-
-    var items = jQuery.unique( items );
-
-    jQuery('#new-tag-post_tag').val(jQuery('#new-tag-post_tag').val() + items.join(', '));
-    jQuery('#new-tag-product_tag').val(jQuery('#new-tag-product_tag').val() + items.join(', '));
-
-    jQuery('#kontxt_add_concepts_as_tags_div').html('Added to Tags within your Post!').fadeOut({ duration: 2000 });
-
-}
-
-function kontxt_add_keywords_to_post_tags() {
-
-    var items = [];
-
-    var minTagSize = 4;
-
-    d3.selectAll('#keywords_chart svg text').each( function() {
-
-        var tag = jQuery(this).text();
-
-        if ( tag.length >= minTagSize ) {
-
-            items.push( jQuery(this).text() );
-
-        }
-
-    });
-
-    var items = jQuery.unique( items );
-
-    jQuery('#new-tag-post_tag').val(jQuery('#new-tag-post_tag').val() + items.join(', '));
-    jQuery('#new-tag-product_tag').val(jQuery('#new-tag-product_tag').val() + items.join(', '));
-
-    jQuery('#kontxt_add_keywords_as_tags_div').html('Added to Tags within your Post!').fadeOut({ duration: 2000 });
-}
 
 function kontxtHandleFormPost(return_text) {
 
@@ -208,19 +126,14 @@ function kontxtHandleFormPost(return_text) {
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            var contentTable = '<table id="kontxt_concepts" class="widefat"><thead><th>Concept</th><th>Relevance</th><th>More Information</th></thead><tbody>';
+            var contentTable = '<table id="kontxt_concepts" class="widefat"><thead><th>Concept</th><th>Relevance</th></thead><tbody>';
             for( var elem in jsonResponse ) {
                 contentTable  += '<tr><td>' + jsonResponse[elem]['text'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['relevance'] * 100 )) + '%</td>';
-                contentTable  += '<td><a target="_blank" href="' + jsonResponse[elem]['dbpedia'] + '">dbpedia</a>, ' +
-                    '                   <a target="_blank" href="' + jsonResponse[elem]['freebase'] + '">freebase</a>, ' +
-                    '                   <a target="_blank" href="' + jsonResponse[elem]['opencyc'] + '">opencyc</a></td></tr>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['relevance'] * 100 )) + '%</td></tr>';
             }
             contentTable += '</tbody></table>';
 
-            jQuery('#concepts').html( contentTable ).show();
-
-            jQuery('#kontxt-add-concepts-as-tags').show();
+            jQuery('#concepts_chart').html( contentTable ).show();
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         },
@@ -241,43 +154,21 @@ function kontxtHandleFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-results-success').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            // get it into the form required by `nvd3`
-            input = [{ key: '', values: jsonResponse }]
+            var contentTable = '<table id="kontxt_keywords" class="widefat"><thead><th>Keyword</th><th>Relevance</th></thead><tbody>';
+            for( var elem in jsonResponse ) {
+                contentTable  += '<tr><td>' + jsonResponse[elem]['text'] + '</td>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['relevance'] * 100 )) + '%</td></tr>';
+            }
+            contentTable += '</tbody></table>';
 
-            nv.addGraph(function() {
-                var height = 500;
-                var chart = nv.models.multiBarHorizontalChart()
-                    .x(function(d) {return d.text})
-                    .y(function(d) {return d.relevance})
-                    .margin({top: 30, right: 20, bottom: 50, left: 175})
-                    .height(height)
-                    .showLegend(false)
-                    .showControls(false)
-                    .stacked(true)
-                    .showValues(false);
-
-                chart.yAxis
-                    .tickFormat(d3.format('%'));
-
-                d3.select('#keywords_chart svg')
-                    .datum(input)
-                    .transition(1000)
-                    .call(chart)
-                    .style({ 'height': height });
-
-                nv.utils.windowResize(chart.update);
-                return chart;
-
-            });
-
-            jQuery('#kontxt-add-keywords-as-tags').show();
+            jQuery('#keywords_chart').html( contentTable ).show();
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         },
@@ -362,8 +253,6 @@ function kontxtHandleFormPost(return_text) {
         }
 
     });
-
-
 
     jQuery.ajax({
         type: 'post',
