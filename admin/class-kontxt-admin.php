@@ -110,6 +110,7 @@ class Kontxt_Admin {
 
 	}
 
+
     public function kontxt_add_button( $plugin_array ) {
 
         $plugin_array['kontxt'] = plugin_dir_url( __FILE__ ) . 'js/kontxt-admin.js';
@@ -412,8 +413,7 @@ class Kontxt_Admin {
      */
     public function add_kontxt_results_box( ) {
 
-        add_meta_box('kontxt-results-box', 'Kontxt Cognitive Content Analyzer', array( $this, 'kontxt_create_results_div' ), 'page','normal','high',null);
-        add_meta_box('kontxt-results-box', 'Kontxt Cognitive Content Analyzer', array( $this, 'kontxt_create_results_div' ), 'post','normal','high',null);
+        add_meta_box('kontxt-results-box', 'Kontxt Cognitive Content Analyzer', array( $this, 'kontxt_create_results_div' ), ['post', 'page'],'normal','high',null);
 
     }
 
