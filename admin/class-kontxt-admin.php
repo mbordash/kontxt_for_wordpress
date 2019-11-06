@@ -12,7 +12,7 @@
  */
 class Kontxt_Admin {
 
-    private $option_name    = 'kontxt';
+    private $option_name    = 'KONTXT';
     protected $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
 	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
 
@@ -111,26 +111,6 @@ class Kontxt_Admin {
 	}
 
 
-    public function kontxt_add_button( $plugin_array ) {
-
-        $plugin_array['kontxt'] = plugin_dir_url( __FILE__ ) . 'js/kontxt-admin.js';
-        return $plugin_array;
-
-    }
-
-    public function kontxt_register_button( $buttons ) {
-
-        array_push( $buttons, 'kontxt' );
-        return $buttons;
-
-    }
-
-    public function kontxt_create_results_div( ) {
-
-        include_once 'partials/kontxt-analyze-display-box.php';
-
-    }
-
     /**
      * Handle ajax request for text processing and display
      *
@@ -216,6 +196,32 @@ class Kontxt_Admin {
         }
 
     }
+
+	/**
+	 * Add the KONTXT analyze page under the Tools submenu
+	 *
+	 * @since  1.0.0
+	 */
+	public function add_management_page() {
+
+		$this->plugin_screen_hook_suffix = add_management_page(
+			__( 'KONTXT Analyze', 'kontxt' ),
+			__( 'KONTXT Analyze', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name,
+			array( $this, 'display_analyze_page' )
+		);
+
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_analyze_page() {
+		include_once 'partials/kontxt-analyze-display.php';
+	}
 
     /**
      * Add an options page under the Settings submenu
@@ -400,20 +406,6 @@ class Kontxt_Admin {
     public function kontxt_sanitize_text( $text ) {
 
         return sanitize_text_field( $text );
-
-    }
-
-
-    /**
-     * Add kontxt meta box to edit post page
-     *
-     * @param
-     * @since  1.0.0
-     * @return string           Sanitized value
-     */
-    public function add_kontxt_results_box( ) {
-
-        add_meta_box('kontxt-results-box', 'Kontxt Cognitive Content Analyzer', array( $this, 'kontxt_create_results_div' ), ['post', 'page'],'normal','high',null);
 
     }
 
