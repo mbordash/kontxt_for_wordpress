@@ -27,13 +27,13 @@
 
             <div id="kontxt-results-box" class="wrap">
 
-                <h3>Enter some content and let KONTXT analyze it for you</h3>
+                <h4>Enter some content and let KONTXT analyze it for you</h4>
 
                 <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
 
                     <div id="kontxt-input-text">
 
-                        <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text"></textarea>
+                        <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text">The full moon warns that you need to plan your moves carefully, especially if they could affect the people around you. You don't live in isolation (though sometimes you think you might like to) so be aware that your actions have consequences.</textarea>
 
                         <input id="kontxt-input-button" class="button-primary" type="submit" value="Analyze">
 
@@ -159,8 +159,12 @@
 
         <div class="inside hidden">
             <h3>Analytics</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <h4>Deep analytics are enabled once you opt-in to KONTXT data collection. <a href="options-general.php?page=kontxt">Edit your settings</a>.</h4>
+
+            </div>
         </div>
-
     </div>
-
 </div>

@@ -231,8 +231,8 @@ class Kontxt_Admin {
     public function add_options_page() {
 
         $this->plugin_screen_hook_suffix = add_options_page(
-            __( 'Kontxt Settings', 'kontxt' ),
-            __( 'Kontxt', 'kontxt' ),
+            __( 'KONTXT Settings', 'kontxt' ),
+            __( 'KONTXT', 'kontxt' ),
             'manage_options',
             $this->plugin_name,
             array( $this, 'display_options_page' )
@@ -264,21 +264,12 @@ class Kontxt_Admin {
         );
 
         add_settings_field(
-            $this->option_name . '_sentiment',
-            __( 'Display Sentiment on Public Posts?', 'kontxt' ),
-            array( $this, $this->option_name . '_sentiment_cb' ),
+            $this->option_name . '_datasharing',
+            __( 'Opt-in to deep analytics and share usage data with KONTXT?', 'kontxt' ),
+            array( $this, $this->option_name . '_datasharing_cb' ),
             $this->plugin_name,
             $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_sentiment' )
-        );
-
-        add_settings_field(
-            $this->option_name . '_emotion',
-            __( 'Display Emotions on Public Posts?', 'kontxt' ),
-            array( $this, $this->option_name . '_emotion_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_emotion' )
+            array( 'label_for' => $this->option_name . '_datasharing' )
         );
 
         add_settings_field(
@@ -291,8 +282,7 @@ class Kontxt_Admin {
         );
 
 
-        register_setting( $this->plugin_name, $this->option_name . '_sentiment', array( $this, $this->option_name . '_sanitize_option' ) );
-        register_setting( $this->plugin_name, $this->option_name . '_emotion', array( $this, $this->option_name . '_sanitize_option' ) );
+        register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
         register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 
     }
@@ -303,8 +293,6 @@ class Kontxt_Admin {
      * @since  1.0.0
      */
     public function kontxt_general_cb() {
-
-        echo '<p>' . __( 'Please change the settings accordingly.', 'kontxt' ) . '</p>';
 
     }
 
@@ -330,24 +318,24 @@ class Kontxt_Admin {
     }
 
     /**
-     * Render the radio input field for sentiment option
+     * Render the radio input field for datasharing option
      *
      * @since  1.0.0
      */
-    public function kontxt_sentiment_cb() {
+    public function kontxt_datasharing_cb() {
 
-        $sentiment = get_option( $this->option_name . '_sentiment' );
+        $datasharing = get_option( $this->option_name . '_datasharing' );
 
         ?>
 
         <fieldset>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_sentiment' ?>" id="<?php echo $this->option_name . '_sentiment' ?>" value="yes" <?php checked( $sentiment, 'yes' ); ?>>
+                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" id="<?php echo $this->option_name . '_datasharing' ?>" value="yes" <?php checked( $datasharing, 'yes' ); ?>>
                 <?php _e( 'Yes', 'kontxt' ); ?>
             </label>
             <br>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_sentiment' ?>" value="no" <?php checked( $sentiment, 'no' ); ?>>
+                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" value="no" <?php checked( $datasharing, 'no' ); ?>>
                 <?php _e( 'No', 'kontxt' ); ?>
             </label>
         </fieldset>
@@ -355,32 +343,6 @@ class Kontxt_Admin {
         <?php
     }
 
-
-    /**
-     * Render the radio input field for emotion option
-     *
-     * @since  1.0.0
-     */
-    public function kontxt_emotion_cb() {
-
-        $emotion = get_option( $this->option_name . '_emotion' );
-
-        ?>
-
-        <fieldset>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_emotion' ?>" id="<?php echo $this->option_name . '_emotion' ?>" value="yes" <?php checked( $emotion, 'yes' ); ?>>
-                <?php _e( 'Yes', 'kontxt' ); ?>
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_emotion' ?>" value="no" <?php checked( $emotion, 'no' ); ?>>
-                <?php _e( 'No', 'kontxt' ); ?>
-            </label>
-        </fieldset>
-
-        <?php
-    }
 
     /**
      * Sanitize the text value before being saved to database
