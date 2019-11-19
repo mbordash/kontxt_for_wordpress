@@ -241,6 +241,8 @@ function kontxtHandleFormPost(return_text) {
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
 
+            console.log('here')
+
             function sentimentData() {
                 return  [{
                     key: "Sentiment",
