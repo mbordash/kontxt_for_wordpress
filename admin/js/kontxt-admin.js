@@ -1,34 +1,5 @@
 jQuery(function($) {
 
-    // Deep Analytics UI
-
-    /**************************************
-     * Simple test data generator
-     */
-    function randomData(groups, points) { //# groups,# points per group
-        var data = [],
-            shapes = ['circle', 'cross', 'triangle-up', 'triangle-down', 'diamond', 'square'],
-            random = d3.random.normal();
-
-        for (i = 0; i < groups; i++) {
-            data.push({
-                key: 'Group ' + i,
-                values: []
-            });
-
-            for (j = 0; j < points; j++) {
-                data[i].values.push({
-                    x: random()
-                    , y: random()
-                    , size: Math.random()   //Configure the size of each scatter point
-                    , shape: (Math.random() > 0.95) ? shapes[j % 6] : "circle"  //Configure the shape of each scatter point.
-                });
-            }
-        }
-
-        return data;
-    }
-
     // Experiments UI
 
     document.addEventListener('visibilitychange', () => {
@@ -266,28 +237,9 @@ function kontxtHandleFormPost(return_text) {
                 }
             }
 
-            toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + sentimentScore + ' from neutral using a range of -1 to 1.'
-
+            toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + Math.round(sentimentScore * 100 ) / 100 + ' from neutral using a range of -1 to 1.'
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
-
-            nv.addGraph(function() {
-
-                var chart = nv.models.multiBarHorizontalChart()
-
-                    .x(function(d) {return d.label})
-                    .y(function(d) {return d.value})
-                    .forceY([-1,1])
-                    .showLegend(false)
-                    .showControls(false)
-                    .showValues(true);
-
-
-                d3.select("#sentiment_chart svg")
-                    .datum(sentimentData())
-                    .transition().duration(1200)
-                    .call(chart);
-            });
 
             function sentimentData() {
                 return  [{
@@ -298,6 +250,15 @@ function kontxtHandleFormPost(return_text) {
                     }]
                 }]
             }
+
+            var data = [{
+                type: 'bar',
+                x: ['Sentiment'],
+                y: [sentimentScore],
+                orientation: 'h'
+            }];
+
+            Plotly.newPlot('sentiment_chart', data);
 
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
@@ -325,37 +286,37 @@ function kontxtHandleFormPost(return_text) {
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            var jsArr = [];
+            console.log ({jsonResponse})
 
-            var counter = 0;
+            var emotionLabels = [];
+            var emotionValues = [];
+
+            var counter = 0
             for( var elem in jsonResponse ) {
-                jsArr[counter] = {
-                    'key': elem,
-                    'y': jsonResponse[elem]
-                };
-                counter++;
+                emotionLabels[counter] = elem
+                emotionValues[counter] = Math.round(jsonResponse[elem]*100)
+                counter++
+
+                console.log({elem})
             }
 
-            var height = 300;
-            var width = 300;
+            console.log({emotionValues});
+            console.log({emotionLabels});
 
-            nv.addGraph(function() {
-                var chart = nv.models.pieChart()
-                    .x(function(d) { return d.key })
-                    .y(function(d) { return d.y })
-                    .width(width)
-                    .height(height)
-                    .labelType('percent')
-                    .labelSunbeamLayout(true);
+            var data = [{
+                values: emotionValues,
+                labels: emotionLabels,
+                type: 'pie'
+            }];
 
-                d3.select("#emotion_chart svg")
-                    .datum(jsArr)
-                    .transition().duration(1200)
-                    .attr('height', height)
-                    .call(chart);
+            var layout = {
+                height: 350,
+                width: 260,
+                showlegend: true,
+                legend: {"orientation": "h"}
+            };
 
-                return chart;
-            });
+            Plotly.newPlot('emotion_chart', data, layout);
 
 
         },

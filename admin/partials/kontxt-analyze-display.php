@@ -41,6 +41,7 @@
 
                 </form>
 
+
                 <div id="kontxt-results-status" class="wrap"></div>
 
                 <div id="kontxt-results-success" class="hidden">
@@ -126,9 +127,7 @@
                                             <h2><span><?php esc_attr_e( 'Emotion', 'WpAdminStyle' ); ?></span></h2>
 
                                             <div class="inside">
-                                                <div id="emotion_chart">
-                                                    <svg id="emotion_chart_svg" style="min-height:300px"></svg>
-                                                </div>
+                                                <div id="emotion_chart"></div>
                                             </div>
                                             <!-- .inside -->
 
