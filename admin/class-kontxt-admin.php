@@ -104,8 +104,6 @@ class Kontxt_Admin {
 
 		wp_enqueue_script( $this->plugin_name);
 
-        wp_enqueue_script( $this->plugin_name . '-d3', plugin_dir_url( __FILE__ ) . 'js/d3.v3.min.js', array( 'jquery' ), $this->version, true );
-        wp_enqueue_script( $this->plugin_name . '-nvd3', plugin_dir_url( __FILE__ ) . 'js/nv.d3.min.js', array( $this->plugin_name . '-d3' ), $this->version, true );
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', array( $this->plugin_name . '-d3' ), $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
 

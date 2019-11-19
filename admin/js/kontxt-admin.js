@@ -237,13 +237,9 @@ function kontxtHandleFormPost(return_text) {
                 }
             }
 
-            console.log("new great analytical feature!")
-
             toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + Math.round(sentimentScore * 100 ) / 100 + ' from neutral using a range of -1 to 1.'
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
-
-            console.log('here')
 
             function sentimentData() {
                 return  [{
@@ -255,14 +251,35 @@ function kontxtHandleFormPost(return_text) {
                 }]
             }
 
+            var barColor = 'rgba(55,128,191,0.6)'
+            if( sentimentScore < 0 ) {
+                barColor = 'rgba(255,0,50,0.6)'
+            }
+
             var data = [{
                 type: 'bar',
-                x: ['Sentiment'],
-                y: [sentimentScore],
-                orientation: 'h'
+                y: ['Sentiment'],
+                x: [sentimentScore],
+                orientation: 'h',
+                marker: {
+                    color: barColor
+                }
             }];
 
-            Plotly.newPlot('sentiment_chart', data);
+            var layout = {
+                xaxis: {
+                    range: [-1, 1]
+                },
+                height: 100,
+                margin: {
+                    l: 100,
+                    r: 100,
+                    t: 20,
+                    b: 20
+                }
+            }
+
+            Plotly.newPlot('sentiment_chart', data, layout, {displayModeBar: false});
 
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
@@ -290,8 +307,6 @@ function kontxtHandleFormPost(return_text) {
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            console.log ({jsonResponse})
-
             var emotionLabels = [];
             var emotionValues = [];
 
@@ -300,28 +315,26 @@ function kontxtHandleFormPost(return_text) {
                 emotionLabels[counter] = elem
                 emotionValues[counter] = Math.round(jsonResponse[elem]*100)
                 counter++
-
-                console.log({elem})
             }
-
-            console.log({emotionValues});
-            console.log({emotionLabels});
 
             var data = [{
                 values: emotionValues,
                 labels: emotionLabels,
-                type: 'pie'
+                type: 'pie',
+                hoverinfo: 'label+percent',
+                textposition: 'inside'
+
             }];
 
             var layout = {
                 height: 350,
                 width: 260,
                 showlegend: true,
-                legend: {"orientation": "h"}
+                legend: {"orientation": "h"},
+                margin: {"t": 0, "b": 0, "l": 0, "r": 0},
             };
 
-            Plotly.newPlot('emotion_chart', data, layout);
-
+            Plotly.newPlot('emotion_chart', data, layout, {displayModeBar: false});
 
         },
         error: function(response) {

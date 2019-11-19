@@ -67,9 +67,7 @@
 
                                             <div class="inside">
                                                 <div id="overall_tone"></div>
-                                                <div id="sentiment_chart">
-                                                    <svg></svg>
-                                                </div>
+                                                <div id="sentiment_chart"></div>
                                             </div>
                                             <!-- .inside -->
 
