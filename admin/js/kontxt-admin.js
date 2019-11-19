@@ -1,36 +1,22 @@
-( function( wp ) {
-
-
-    var KontxtButton = function( props ) {
-        return wp.element.createElement(
-            wp.editor.RichTextToolbarButton, {
-                icon: 'editor-code',
-                title: 'KONTXT',
-                onClick: function() {
-                    console.log( 'toggle format' );
-
-                    var selected_text = props.value;
-                    if (selected_text === "") {
-                        selected_text = props.attributes.content;
-                    }
-
-                    kontxtHandleFormPost('Welcome to WordPress. This is your first post. Edit or delete it, then start writing! Welcome to WordPress. This is your first post. Edit or delete it, then start writing!');
-                },
-            }
-        );
-    }
-    wp.richText.registerFormatType(
-        'kontxt/analyze-content-button', {
-            title: 'KONTXT',
-            tagName: 'kontxt',
-            className: null,
-            edit: KontxtButton,
-        }
-    );
-} )( window.wp );
-
 jQuery(function($) {
 
+    // Experiments UI
+
+    document.addEventListener('visibilitychange', () => {
+        console.log(document.visibilityState);
+        window.dispatchEvent(new Event('resize'));
+    });
+
+    // capture KONTXT form post and pass to handler
+
+    jQuery( '#kontxt-input-button' ).click( function( e ) {
+        e.preventDefault();
+
+        var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val()
+
+        kontxtHandleFormPost( textToAnalyze )
+
+    });
 
     // craft tab controller navigation
 
@@ -40,6 +26,7 @@ jQuery(function($) {
     navTabs.children().each(function() {
 
         $(this).on('click', function (evt) {
+
 
             evt.preventDefault();
 
@@ -67,15 +54,12 @@ jQuery(function($) {
                     .children('div:nth-child( ' + ( tabIndex + 2 ) + ')')
                     .removeClass('hidden');
 
-                window.dispatchEvent(new Event('resize'));
 
             }
-
         });
     });
-
-
 });
+
 
 function kontxtHandleFormPost(return_text) {
 
@@ -83,20 +67,24 @@ function kontxtHandleFormPost(return_text) {
 
     if ( !return_text || return_text.length === 0 ) {
 
-        $('#kontxt-results-status').html('<p>You haven\'t entered any content yet. Please enter some content before trying to analyze.</p>');
+        jQuery('#kontxt-results-status').html('<p>You haven\'t entered any content yet. Please enter some content before trying to analyze.</p>');
+        jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
+
         return false;
     }
 
     if ( return_text && return_text.length <= 100 ) {
 
-        $('#kontxt-results-status').html('<p>You haven\'t entered enough content yet. Please enter at least 100 characters before trying to analyze.</p>');
+        jQuery('#kontxt-results-status').html('<p>You haven\'t entered enough content yet. Please enter at least 100 characters before trying to analyze.</p>');
+        jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
+
         return false;
     }
 
-    $('#kontxt-results-status').hide();
-    $('#kontxt-results-success').show();
+    jQuery('#kontxt-results-status').hide();
+    jQuery('#kontxt-results-success').show();
 
-    //$('#kontxt_text_to_analyze').val(return_text);
+    // jQuery('#kontxt-text-to-analyze').val(return_text);
 
     // prepare data for posting
 
@@ -108,6 +96,43 @@ function kontxtHandleFormPost(return_text) {
     });
 
     var security = kontxtAjaxObject.security;
+
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data + '&service=intents',
+        action: 'kontxt_analyze',
+        cache: false,
+        success: function(response) {
+
+            if( response.status == 'error' ) {
+                jQuery('#kontxt-results-success').html(response.message).show();
+                jQuery('#kontxt-results-success').hide();
+                return false;
+            }
+
+            var jsonResponse = jQuery.parseJSON(response);
+
+            var contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th><th>Accurate?</th></th></thead><tbody>';
+            for( var elem in jsonResponse ) {
+                contentTable  += '<tr><td>' + jsonResponse[elem]['class_name'] + '</td>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td>';
+                contentTable  += '<td><a href="">Yes</a> | <a href="">No</a></td></tr>';
+
+            }
+            contentTable += '</tbody></table>';
+
+            jQuery('#intents_chart').html( contentTable ).show();
+
+            jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
+        },
+        error: function(response) {
+            jQuery('#kontxt-results-status').html(response.message);
+            return false;
+        }
+
+    });
 
     jQuery.ajax({
         type: 'post',
@@ -212,28 +237,9 @@ function kontxtHandleFormPost(return_text) {
                 }
             }
 
-            toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + sentimentScore + ' from neutral using a range of -1 to 1.'
-
+            toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + Math.round(sentimentScore * 100 ) / 100 + ' from neutral using a range of -1 to 1.'
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
-
-            nv.addGraph(function() {
-
-                var chart = nv.models.multiBarHorizontalChart()
-
-                    .x(function(d) {return d.label})
-                    .y(function(d) {return d.value})
-                    .forceY([-1,1])
-                    .showLegend(false)
-                    .showControls(false)
-                    .showValues(true);
-
-
-                d3.select("#sentiment_chart svg")
-                    .datum(sentimentData())
-                    .transition().duration(1200)
-                    .call(chart);
-            });
 
             function sentimentData() {
                 return  [{
@@ -244,6 +250,15 @@ function kontxtHandleFormPost(return_text) {
                     }]
                 }]
             }
+
+            var data = [{
+                type: 'bar',
+                x: ['Sentiment'],
+                y: [sentimentScore],
+                orientation: 'h'
+            }];
+
+            Plotly.newPlot('sentiment_chart', data);
 
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
@@ -271,37 +286,37 @@ function kontxtHandleFormPost(return_text) {
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            var jsArr = [];
+            console.log ({jsonResponse})
 
-            var counter = 0;
+            var emotionLabels = [];
+            var emotionValues = [];
+
+            var counter = 0
             for( var elem in jsonResponse ) {
-                jsArr[counter] = {
-                    'key': elem,
-                    'y': jsonResponse[elem]
-                };
-                counter++;
+                emotionLabels[counter] = elem
+                emotionValues[counter] = Math.round(jsonResponse[elem]*100)
+                counter++
+
+                console.log({elem})
             }
 
-            var height = 400;
-            var width = 400;
+            console.log({emotionValues});
+            console.log({emotionLabels});
 
-            nv.addGraph(function() {
-                var chart = nv.models.pieChart()
-                    .x(function(d) { return d.key })
-                    .y(function(d) { return d.y })
-                    .width(width)
-                    .height(height)
-                    .labelType('percent')
-                    .labelSunbeamLayout(true);
+            var data = [{
+                values: emotionValues,
+                labels: emotionLabels,
+                type: 'pie'
+            }];
 
-                d3.select("#emotion_chart svg")
-                    .datum(jsArr)
-                    .transition().duration(1200)
-                    .attr('height', height)
-                    .call(chart);
+            var layout = {
+                height: 350,
+                width: 260,
+                showlegend: true,
+                legend: {"orientation": "h"}
+            };
 
-                return chart;
-            });
+            Plotly.newPlot('emotion_chart', data, layout);
 
 
         },
@@ -309,7 +324,6 @@ function kontxtHandleFormPost(return_text) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
     });
-
 
     return false;
 };
