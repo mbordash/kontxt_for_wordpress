@@ -62,7 +62,6 @@ class Kontxt {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
-        $this->define_public_hooks();
 	}
 
 	/**
@@ -99,12 +98,6 @@ class Kontxt {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-kontxt-admin.php';
 
-        /**
-         * The class responsible for defining all actions that occur in the public-facing
-         * side of the site.
-         */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
-
 		$this->loader = new Kontxt_Loader();
 
 	}
@@ -140,34 +133,13 @@ class Kontxt {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-		// add meta box to edit post page
-        $this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'add_kontxt_results_box' );
-
         // load an action to handle the incoming ajax request for text analysis
         $this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
 
-        // load filters for including the kontxt button and actions to the tiny MCE editor
-        $this->loader->add_filter( 'mce_external_plugins', $plugin_admin, 'kontxt_add_button');
-        $this->loader->add_filter( 'mce_buttons', $plugin_admin, 'kontxt_register_button');
-
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
-        $this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
-    }
-
-    /**
-     * Register all of the hooks related to the public-facing functionality
-     * of the plugin.
-     *
-     * @since    1.0.0
-     * @access   private
-     */
-    private function define_public_hooks() {
-        $plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version() );
-        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
-        $this->loader->add_filter( 'the_content', $plugin_public, 'kontxt_create_public_results_div');
     }
 
 	/**

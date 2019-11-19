@@ -12,7 +12,7 @@
  */
 class Kontxt_Admin {
 
-    private $option_name    = 'kontxt';
+    private $option_name    = 'KONTXT';
     protected $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
 	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
 
@@ -106,30 +106,11 @@ class Kontxt_Admin {
 
         wp_enqueue_script( $this->plugin_name . '-d3', plugin_dir_url( __FILE__ ) . 'js/d3.v3.min.js', array( 'jquery' ), $this->version, true );
         wp_enqueue_script( $this->plugin_name . '-nvd3', plugin_dir_url( __FILE__ ) . 'js/nv.d3.min.js', array( $this->plugin_name . '-d3' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', array( $this->plugin_name . '-d3' ), $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
 
 	}
 
-
-    public function kontxt_add_button( $plugin_array ) {
-
-        $plugin_array['kontxt'] = plugin_dir_url( __FILE__ ) . 'js/kontxt-admin.js';
-        return $plugin_array;
-
-    }
-
-    public function kontxt_register_button( $buttons ) {
-
-        array_push( $buttons, 'kontxt' );
-        return $buttons;
-
-    }
-
-    public function kontxt_create_results_div( ) {
-
-        include_once 'partials/kontxt-analyze-display-box.php';
-
-    }
 
     /**
      * Handle ajax request for text processing and display
@@ -217,6 +198,32 @@ class Kontxt_Admin {
 
     }
 
+	/**
+	 * Add the KONTXT analyze page under the Tools submenu
+	 *
+	 * @since  1.0.0
+	 */
+	public function add_management_page() {
+
+		$this->plugin_screen_hook_suffix = add_management_page(
+			__( 'KONTXT Analyze', 'kontxt' ),
+			__( 'KONTXT Analyze', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name,
+			array( $this, 'display_analyze_page' )
+		);
+
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_analyze_page() {
+		include_once 'partials/kontxt-analyze-display.php';
+	}
+
     /**
      * Add an options page under the Settings submenu
      *
@@ -225,8 +232,8 @@ class Kontxt_Admin {
     public function add_options_page() {
 
         $this->plugin_screen_hook_suffix = add_options_page(
-            __( 'Kontxt Settings', 'kontxt' ),
-            __( 'Kontxt', 'kontxt' ),
+            __( 'KONTXT Settings', 'kontxt' ),
+            __( 'KONTXT', 'kontxt' ),
             'manage_options',
             $this->plugin_name,
             array( $this, 'display_options_page' )
@@ -258,21 +265,12 @@ class Kontxt_Admin {
         );
 
         add_settings_field(
-            $this->option_name . '_sentiment',
-            __( 'Display Sentiment on Public Posts?', 'kontxt' ),
-            array( $this, $this->option_name . '_sentiment_cb' ),
+            $this->option_name . '_datasharing',
+            __( 'Opt-in to deep analytics and share usage data with KONTXT?', 'kontxt' ),
+            array( $this, $this->option_name . '_datasharing_cb' ),
             $this->plugin_name,
             $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_sentiment' )
-        );
-
-        add_settings_field(
-            $this->option_name . '_emotion',
-            __( 'Display Emotions on Public Posts?', 'kontxt' ),
-            array( $this, $this->option_name . '_emotion_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_emotion' )
+            array( 'label_for' => $this->option_name . '_datasharing' )
         );
 
         add_settings_field(
@@ -285,8 +283,7 @@ class Kontxt_Admin {
         );
 
 
-        register_setting( $this->plugin_name, $this->option_name . '_sentiment', array( $this, $this->option_name . '_sanitize_option' ) );
-        register_setting( $this->plugin_name, $this->option_name . '_emotion', array( $this, $this->option_name . '_sanitize_option' ) );
+        register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
         register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 
     }
@@ -297,8 +294,6 @@ class Kontxt_Admin {
      * @since  1.0.0
      */
     public function kontxt_general_cb() {
-
-        echo '<p>' . __( 'Please change the settings accordingly.', 'kontxt' ) . '</p>';
 
     }
 
@@ -324,24 +319,24 @@ class Kontxt_Admin {
     }
 
     /**
-     * Render the radio input field for sentiment option
+     * Render the radio input field for datasharing option
      *
      * @since  1.0.0
      */
-    public function kontxt_sentiment_cb() {
+    public function kontxt_datasharing_cb() {
 
-        $sentiment = get_option( $this->option_name . '_sentiment' );
+        $datasharing = get_option( $this->option_name . '_datasharing' );
 
         ?>
 
         <fieldset>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_sentiment' ?>" id="<?php echo $this->option_name . '_sentiment' ?>" value="yes" <?php checked( $sentiment, 'yes' ); ?>>
+                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" id="<?php echo $this->option_name . '_datasharing' ?>" value="yes" <?php checked( $datasharing, 'yes' ); ?>>
                 <?php _e( 'Yes', 'kontxt' ); ?>
             </label>
             <br>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_sentiment' ?>" value="no" <?php checked( $sentiment, 'no' ); ?>>
+                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" value="no" <?php checked( $datasharing, 'no' ); ?>>
                 <?php _e( 'No', 'kontxt' ); ?>
             </label>
         </fieldset>
@@ -349,32 +344,6 @@ class Kontxt_Admin {
         <?php
     }
 
-
-    /**
-     * Render the radio input field for emotion option
-     *
-     * @since  1.0.0
-     */
-    public function kontxt_emotion_cb() {
-
-        $emotion = get_option( $this->option_name . '_emotion' );
-
-        ?>
-
-        <fieldset>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_emotion' ?>" id="<?php echo $this->option_name . '_emotion' ?>" value="yes" <?php checked( $emotion, 'yes' ); ?>>
-                <?php _e( 'Yes', 'kontxt' ); ?>
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_emotion' ?>" value="no" <?php checked( $emotion, 'no' ); ?>>
-                <?php _e( 'No', 'kontxt' ); ?>
-            </label>
-        </fieldset>
-
-        <?php
-    }
 
     /**
      * Sanitize the text value before being saved to database
@@ -400,20 +369,6 @@ class Kontxt_Admin {
     public function kontxt_sanitize_text( $text ) {
 
         return sanitize_text_field( $text );
-
-    }
-
-
-    /**
-     * Add kontxt meta box to edit post page
-     *
-     * @param
-     * @since  1.0.0
-     * @return string           Sanitized value
-     */
-    public function add_kontxt_results_box( ) {
-
-        add_meta_box('kontxt-results-box', 'Kontxt Cognitive Content Analyzer', array( $this, 'kontxt_create_results_div' ), ['post', 'page'],'normal','high',null);
 
     }
 
