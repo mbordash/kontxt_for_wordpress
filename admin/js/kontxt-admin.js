@@ -237,6 +237,8 @@ function kontxtHandleFormPost(return_text) {
                 }
             }
 
+            console.log("new great analytical feature!")
+
             toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + Math.round(sentimentScore * 100 ) / 100 + ' from neutral using a range of -1 to 1.'
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
