@@ -251,7 +251,8 @@ function kontxtHandleFormPost(return_text) {
                 }]
             }
 
-            var barColor = 'rgba(55,128,191,0.6)'
+            let barColor = 'rgba(55,128,191,0.6)';
+
             if( sentimentScore < 0 ) {
                 barColor = 'rgba(255,0,50,0.6)'
             }
@@ -317,20 +318,28 @@ function kontxtHandleFormPost(return_text) {
                 counter++
             }
 
+            var pieColors = [
+                ['rgb(101,195,166)', 'rgb(252,141,98)', 'rgb(141,160,204)', 'rgb(232,138,196)', 'rgb(166, 217, 83)', 'rgb(255, 217, 47)' ]
+            ];
+
             var data = [{
                 values: emotionValues,
                 labels: emotionLabels,
                 type: 'pie',
                 hoverinfo: 'label+percent',
-                textposition: 'inside'
+                textposition: 'inside',
+                marker : {
+                    colors : pieColors[0]
+                },
 
             }];
 
+
             var layout = {
-                height: 350,
-                width: 260,
-                showlegend: true,
-                legend: {"orientation": "h"},
+                height : 350,
+                width : 260,
+                showlegend : true,
+                legend : {"orientation": "h"},
                 margin: {"t": 0, "b": 0, "l": 0, "r": 0},
             };
 

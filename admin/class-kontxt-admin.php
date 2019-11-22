@@ -67,7 +67,6 @@ class Kontxt_Admin {
 		 * class.
 		 */
 
-        wp_enqueue_style( $this->plugin_name . 'nvd3', plugin_dir_url( __FILE__ ) . 'css/nv.d3.css', array(), $this->version, 'all' );
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/kontxt-admin.css', array(), $this->version, 'all' );
         wp_enqueue_style( $this->plugin_name . '-jquery-ui', plugin_dir_url( __FILE__ ) . 'css/jquery-ui.min.css', array(), $this->version, 'all' );
 
@@ -104,7 +103,7 @@ class Kontxt_Admin {
 
 		wp_enqueue_script( $this->plugin_name);
 
-		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', array( $this->plugin_name . '-d3' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
 
 	}
@@ -271,6 +270,15 @@ class Kontxt_Admin {
             array( 'label_for' => $this->option_name . '_datasharing' )
         );
 
+	    add_settings_field(
+		    $this->option_name . '_site_id',
+		    __( 'Site ID (do not change)', 'kontxt' ),
+		    array( $this, $this->option_name . '_site_id_cb' ),
+		    $this->plugin_name,
+		    $this->option_name . '_general',
+		    array( 'label_for' => $this->option_name . '_site_id' )
+	    );
+
         add_settings_field(
             $this->option_name . '_apikey',
             __( 'API Key (if you have <a target="_blank" href="https://www.kontxt.com">purchased a subscription</a>)', 'kontxt' ),
@@ -282,7 +290,8 @@ class Kontxt_Admin {
 
 
         register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
-        register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_site_id', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 
     }
 
@@ -315,6 +324,28 @@ class Kontxt_Admin {
 
         <?php
     }
+
+
+	/**
+	 * Render the text input field for site_id
+	 *
+	 * @since  1.3.2
+	 */
+	public function kontxt_site_id_cb() {
+
+		$site_id = get_option( $this->option_name . '_site_id' );
+
+		?>
+
+        <fieldset>
+            <label>
+                <input type="text" name="<?php echo $this->option_name . '_site_id' ?>" id="<?php echo $this->option_name . '_site_id' ?>" value="<?php echo $site_id; ?>">
+            </label>
+        </fieldset>
+
+		<?php
+	}
+
 
     /**
      * Render the radio input field for datasharing option
