@@ -13,54 +13,71 @@
  */
 class Kontxt_Activator {
 
-	private $option_name    = 'KONTXT';
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
-
-		$this->plugin_name  = $plugin_name;
-		$this->version      = $version;
-
-	}
 	/**
 	 * Short Description. (use period)
 	 *
 	 * Long Description.
 	 *
+	 * @return false|string
 	 * @since    1.0.0
 	 */
 	public function activate() {
 
-		// get site id, site name
-		// register with KONTXT Site API endpoint
+		$option_name  = 'KONTXT';
+		$api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
 
-		register_setting( $this->plugin_name, $this->option_name . '_site_id', array( $this, $this->option_name . '_sanitize_text' ) );
-		register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
+		// first check to make sure the KONTXT settings are already set in wordpress options
+		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
 
+		$apiKey = get_option( $option_name . '_apikey' );
+		$apiUid = get_option( $option_name . '_apiuid' );
+
+		if( !isset($apiKey) || $apiKey === '' ) {
+
+			// install site and get a key from kontxt
+
+			$siteName   = get_bloginfo( 'name' );
+			$siteDomain = get_bloginfo( 'url' );
+			$siteEmail  = get_bloginfo( 'admin_email' );
+			$apiUid     = md5( $siteName . $siteDomain );
+			$service    = 'install';
+
+			// register with KONTXT Site API endpoint
+			$requestBody = array(
+				'api_uid'                   => $apiUid,
+				'site_name'                 => $siteName,
+				'site_domain'               => $siteDomain,
+				'site_email'                => $siteEmail,
+				'service'                   => $service
+			);
+
+			// error_log(print_r($requestBody, TRUE));
+
+			$opts = array(
+				'body'      => $requestBody,
+				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			$response = wp_remote_get($api_host, $opts);
+
+			if( $response['response']['code'] === 200 ) {
+
+				$apiKey = str_replace( '"', '', $response['body']);
+
+				update_option( $option_name .  '_apiuid', $apiUid);
+				update_option( $option_name .  '_apikey', $apiKey);
+
+			} else {
+
+				$response_array['status'] = "error";
+				$response_array['message'] = "Plugin Install Error. Something went wrong with this request. Code received: " . $response['response']['code'];
+
+				return json_encode($response_array);
+
+			}
+
+		}
 
 	}
 

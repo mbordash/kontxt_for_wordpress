@@ -18,6 +18,13 @@ jQuery(function($) {
 
     });
 
+    jQuery( '#kontxt-analyze-input-button' ).click( function( e ) {
+        e.preventDefault();
+
+        kontxtAnalyzeFormPost( );
+
+    });
+
     // craft tab controller navigation
 
     var navTabs = jQuery( '#kontxt-results-navigation' ).children( '.nav-tab-wrapper' ),
@@ -241,16 +248,6 @@ function kontxtHandleFormPost(return_text) {
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
 
-            function sentimentData() {
-                return  [{
-                    key: "Sentiment",
-                    values: [{
-                        "label": "Sentiment",
-                        "value": sentimentScore
-                    }]
-                }]
-            }
-
             let barColor = 'rgba(55,128,191,0.6)';
 
             if( sentimentScore < 0 ) {
@@ -281,7 +278,6 @@ function kontxtHandleFormPost(return_text) {
             }
 
             Plotly.newPlot('sentiment_chart', data, layout, {displayModeBar: false});
-
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         },
@@ -349,6 +345,87 @@ function kontxtHandleFormPost(return_text) {
         error: function(response) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
+    });
+
+    return false;
+};
+
+function kontxtAnalyzeFormPost( ) {
+
+    jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
+
+    jQuery('#kontxt-analyze-results-status').hide();
+    jQuery('#kontxt-analyze-results-success').show();
+
+    // jQuery('#kontxt-text-to-analyze').val(return_text);
+
+    // prepare data for posting
+
+    var data = jQuery.param({
+        'api_uid': '41da302e5f3a5302d97a136a70835558',
+        'api_key': 'DCC75FFA-746C-419C-AEB8-CB5BCA59AB69',
+        'service' : 'events',
+        'event_type': 'sentiment'
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    jQuery.ajax({
+        type: 'get',
+        url: 'http://localhost/wp-json/kontxt/v1/analyze',
+        data: data,
+        cache: false,
+        success: function(response) {
+
+            if( response.status == 'error' ) {
+                jQuery('#kontxt-analyze-results-success').html(response.message).show();
+                jQuery('#kontxt-analyze-results-success').hide();
+                return false;
+            }
+
+            //var jsonResponse = jQuery.parseJSON(response);
+            var jsonResponse = response;
+
+            var eventLabels = jsonResponse.map(function(e) {
+                return e.created;
+            })
+
+            var eventValues = jsonResponse.map( function(e) {
+                return e.event_value;
+            })
+
+            var data = [{
+                type: 'scatter',
+                y: eventValues,
+                x: eventLabels
+            }];
+
+            var layout = {
+                yaxis: {
+                    range: [-1, 1]
+                }
+            }
+
+            Plotly.newPlot('sentiment_analyze_chart', data, layout);
+
+
+            var contentTable = '<table id="kontxt_analyze_sentiment" class="widefat"><thead><th>ID</th><th>Results</th><th>Time</th></th></thead><tbody>';
+            for( var elem in jsonResponse ) {
+                contentTable  += '<tr><td>' + jsonResponse[elem]['id'] + '</td>';
+                contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td>';
+                contentTable  += '<td>' + jsonResponse[elem]['created'] + '</td></tr>';
+            }
+            contentTable += '</tbody></table>';
+
+            jQuery('#sentiment_analyze_table').html( contentTable ).show();
+
+            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+        },
+        error: function(response) {
+            jQuery('#kontxt-results-status').html(response.message);
+            return false;
+        }
+
     });
 
     return false;

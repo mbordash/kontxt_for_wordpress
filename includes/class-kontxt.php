@@ -46,6 +46,15 @@ class Kontxt {
 	protected $version;
 
 	/**
+	 * The current option name used by the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      string    $option_name    The current option name scope used by the plugin.
+	 */
+	protected $option_name;
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -56,12 +65,14 @@ class Kontxt {
 	 */
 	public function __construct() {
 
-		$this->plugin_name = 'kontxt';
-		$this->version = '1.2.0';
+		$this->plugin_name  = 'kontxt';
+		$this->version      = '1.2.0';
+		$this->option_name  = 'KONTXT';
 
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+
 	}
 
 	/**
@@ -140,7 +151,17 @@ class Kontxt {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
+		// capture basic wp information from site usage
+		// query_vars, page_link, post_link, pre_user_login->user-reg
+		$this->loader->add_filter( 'the_content', $plugin_admin, 'kontxt_capture_user_event' );
+
+		// capture woo commerce information if available
+		// add to cart -> product
+		// checkout -> product
+		// view -> product
+		// search string -> product-array
     }
+
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.

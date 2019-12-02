@@ -13,11 +13,11 @@
 class Kontxt_Admin {
 
     private $option_name    = 'KONTXT';
-    protected $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
+    private $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
 	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
 
 	/**
-	 * The ID of this plugin.
+	 * The ID of this plugin
 	 *
 	 * @since    1.0.0
 	 * @access   private
@@ -90,13 +90,14 @@ class Kontxt_Admin {
 		 * class.
 		 */
 
-        wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-admin.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+        wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
         $kontxt_local_arr = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
             'postID'    => get_the_ID(),
-            'apikey'    => get_option( $this->option_name . '_apikey' )
+            'apikey'    => get_option( $this->option_name . '_apikey' ),
+	        'apiuid'    => get_option( $this->option_name . '_apiuid' )
         );
 
         wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
@@ -136,19 +137,15 @@ class Kontxt_Admin {
     public function kontxt_cognitive( $textToAnalyze, $service, $postId ) {
 
         //get and check API key exists, pass key along server side request
-        $kontxtApiKey       = 'wc_order_58773985ef2e1_am_Vu6R0EbYeLPE';
-        $kontxtApiEmail     = 'trial_key@kontxt.com';
-        $kontxtProductId    = 'Kontxt Content Analyzer - Free';
-        $kontxtInstanceId   = 'gUgGHLFPjl2V';
+	    $apiKey = get_option( $this->option_name . '_apikey' );
+	    $apiUid = get_option( $this->option_name . '_apiuid' );
 
-        if ( !isset($kontxtApiKey) || $kontxtApiKey === '' ) {
+        if ( !isset($apiKey) || $apiKey === '' ) {
 
             $response_array['status'] = "error";
-            $response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > Kontxt Content Analyzer - Free API Key Activation to set your key first.";
+            $response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first.";
 
             return json_encode($response_array);
-
-            wp_die();
 
         }
 
@@ -159,8 +156,10 @@ class Kontxt_Admin {
             $postId         = sanitize_text_field( $postId );
 
             $requestBody = array(
-                'kontxt_text_to_analyze'    => $textToAnalyze,
-                'service'                   => $service,
+                    'api_uid'                   => $apiUid,
+                    'api_key'                   => $apiKey,
+                    'kontxt_text_to_analyze'    => $textToAnalyze,
+                    'service'                   => $service,
             );
 
             $opts = array(
@@ -186,7 +185,7 @@ class Kontxt_Admin {
 	            // error_log( print_r($_POST,true) );
 
                 $response_array['status'] = "error";
-                $response_array['message'] = "Something went wrong with this request. Code received: " . $response['response']['code'];
+                $response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
 
                 return json_encode($response_array);
 
@@ -271,27 +270,37 @@ class Kontxt_Admin {
         );
 
 	    add_settings_field(
-		    $this->option_name . '_site_id',
-		    __( 'Site ID (do not change)', 'kontxt' ),
-		    array( $this, $this->option_name . '_site_id_cb' ),
+		    $this->option_name . '_apiuid',
+		    __( 'API User ID', 'kontxt' ),
+		    array( $this, $this->option_name . '_apiuid_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
-		    array( 'label_for' => $this->option_name . '_site_id' )
+		    array( 'label_for' => $this->option_name . '_apiuid' )
 	    );
 
         add_settings_field(
             $this->option_name . '_apikey',
-            __( 'API Key (if you have <a target="_blank" href="https://www.kontxt.com">purchased a subscription</a>)', 'kontxt' ),
+            __( 'API Key', 'kontxt' ),
             array( $this, $this->option_name . '_apikey_cb' ),
             $this->plugin_name,
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_apikey' )
         );
 
+	    add_settings_field(
+		    $this->option_name . '_email',
+		    __( 'Contact Email', 'kontxt' ),
+		    array( $this, $this->option_name . '_email_cb' ),
+		    $this->plugin_name,
+		    $this->option_name . '_general',
+		    array( 'label_for' => $this->option_name . '_email' )
+	    );
+
 
         register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
-	    register_setting( $this->plugin_name, $this->option_name . '_site_id', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_text' ) );
 
     }
 
@@ -303,6 +312,26 @@ class Kontxt_Admin {
     public function kontxt_general_cb() {
 
     }
+
+	/**
+	 * Render the text input field for email option
+	 *
+	 * @since  1.3.2
+	 */
+	public function kontxt_email_cb() {
+
+		$email = get_option( $this->option_name . '_email' );
+
+		?>
+
+        <fieldset>
+            <label>
+                <input type="text" name="<?php echo $this->option_name . '_email' ?>" id="<?php echo $this->option_name . '_email' ?>" value="<?php echo $email; ?>">
+            </label>
+        </fieldset>
+
+		<?php
+	}
 
 
     /**
@@ -327,19 +356,19 @@ class Kontxt_Admin {
 
 
 	/**
-	 * Render the text input field for site_id
+	 * Render the text input field for apiuid
 	 *
 	 * @since  1.3.2
 	 */
-	public function kontxt_site_id_cb() {
+	public function kontxt_apiuid_cb() {
 
-		$site_id = get_option( $this->option_name . '_site_id' );
+		$apiuid = get_option( $this->option_name . '_apiuid' );
 
 		?>
 
         <fieldset>
             <label>
-                <input type="text" name="<?php echo $this->option_name . '_site_id' ?>" id="<?php echo $this->option_name . '_site_id' ?>" value="<?php echo $site_id; ?>">
+                <input type="text" name="<?php echo $this->option_name . '_apiuid' ?>" id="<?php echo $this->option_name . '_apiuid' ?>" value="<?php echo $apiuid; ?>">
             </label>
         </fieldset>
 

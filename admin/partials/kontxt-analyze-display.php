@@ -161,6 +161,56 @@
 
                 <h4>Deep analytics are enabled once you opt-in to KONTXT data collection. <a href="options-general.php?page=kontxt">Edit your settings</a>.</h4>
 
+                <form id="kontxt-analyze-input-form" action="" method="post" enctype="multipart/form-data">
+
+                    <div id="kontxt-analyze-input">
+
+                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Analyze">
+
+                    </div>
+
+                </form>
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                            <div id="post-body" class="metabox-holder columns-2">
+
+                                <!-- main content -->
+                                <div id="post-body-content">
+
+                                    <div class="meta-box-sortables ui-sortable">
+
+                                        <div class="postbox">
+
+                                            <h2><span><?php esc_attr_e( 'Sentiment History', 'WpAdminStyle' ); ?></span></h2>
+
+                                            <div class="inside">
+
+                                                <div id="sentiment_analyze_chart"></div>
+
+                                                <div id="sentiment_analyze_table"></div>
+
+                                            </div>
+                                            <!-- .inside -->
+
+                                        </div>
+                                        <!-- .postbox -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
