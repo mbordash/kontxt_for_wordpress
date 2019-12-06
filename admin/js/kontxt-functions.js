@@ -9,12 +9,12 @@ jQuery(function($) {
 
     // capture KONTXT form post and pass to handler
 
-    jQuery( '#kontxt-input-button' ).click( function( e ) {
+    jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
 
         var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val()
 
-        kontxtHandleFormPost( textToAnalyze )
+        kontxtExperimentFormPost( textToAnalyze )
 
     });
 
@@ -25,7 +25,7 @@ jQuery(function($) {
 
     });
 
-    // craft tab controller navigation
+    // tab controller navigation
 
     var navTabs = jQuery( '#kontxt-results-navigation' ).children( '.nav-tab-wrapper' ),
         tabIndex = null;
@@ -33,7 +33,6 @@ jQuery(function($) {
     navTabs.children().each(function() {
 
         $(this).on('click', function (evt) {
-
 
             evt.preventDefault();
 
@@ -68,7 +67,7 @@ jQuery(function($) {
 });
 
 
-function kontxtHandleFormPost(return_text) {
+function kontxtExperimentFormPost(return_text) {
 
     jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
@@ -96,10 +95,10 @@ function kontxtHandleFormPost(return_text) {
     // prepare data for posting
 
     var data = jQuery.param({
-        'post_ID': kontxtAjaxObject.postID,
         'kontxt_text_to_analyze': return_text,
-        'action' : 'kontxt_analyze',
-        'apikey' : kontxtAjaxObject.apikey,
+        'action': 'kontxt_analyze',
+        'apikey': kontxtAjaxObject.apikey,
+        'request_id': makeid(20)
     });
 
     var security = kontxtAjaxObject.security;
@@ -114,7 +113,7 @@ function kontxtHandleFormPost(return_text) {
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-success').html(response.message).show();
+                jQuery('#kontxt-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -151,7 +150,7 @@ function kontxtHandleFormPost(return_text) {
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-success').html(response.message).show();
+                jQuery('#kontxt-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -186,7 +185,7 @@ function kontxtHandleFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-success').html(response.message).show();
+                jQuery('#kontxt-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -357,37 +356,41 @@ function kontxtAnalyzeFormPost( ) {
     jQuery('#kontxt-analyze-results-status').hide();
     jQuery('#kontxt-analyze-results-success').show();
 
-    // jQuery('#kontxt-text-to-analyze').val(return_text);
+    var dimension = jQuery('#event_type').val();
 
     // prepare data for posting
 
     var data = jQuery.param({
-        'api_uid': '41da302e5f3a5302d97a136a70835558',
-        'api_key': 'DCC75FFA-746C-419C-AEB8-CB5BCA59AB69',
-        'service' : 'events',
-        'event_type': 'sentiment'
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    dimension
     });
 
     var security = kontxtAjaxObject.security;
 
     jQuery.ajax({
-        type: 'get',
-        url: 'http://localhost/wp-json/kontxt/v1/analyze',
+        type: 'post',
+        url: ajaxurl,
+        security: security,
         data: data,
         cache: false,
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-analyze-results-success').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-analyze-results-success').hide();
                 return false;
             }
 
-            //var jsonResponse = jQuery.parseJSON(response);
-            var jsonResponse = response;
+            jQuery('#analyze_results_title').html(dimension + ' analytics ').css('text-transform', 'capitalize');
+
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
 
             var eventLabels = jsonResponse.map(function(e) {
-                return e.created;
+                return Date.parse(e.event_date);
             })
 
             var eventValues = jsonResponse.map( function(e) {
@@ -403,21 +406,25 @@ function kontxtAnalyzeFormPost( ) {
             var layout = {
                 yaxis: {
                     range: [-1, 1]
+                },
+                xaxis: {
+                    autorange: true,
+                    type: 'date'
                 }
             }
 
-            Plotly.newPlot('sentiment_analyze_chart', data, layout);
+            Plotly.newPlot('analyze_results_chart', data, layout);
 
-
-            var contentTable = '<table id="kontxt_analyze_sentiment" class="widefat"><thead><th>ID</th><th>Results</th><th>Time</th></th></thead><tbody>';
+            let contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Data</th></th></thead><tbody>';
             for( var elem in jsonResponse ) {
-                contentTable  += '<tr><td>' + jsonResponse[elem]['id'] + '</td>';
-                contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td>';
-                contentTable  += '<td>' + jsonResponse[elem]['created'] + '</td></tr>';
+                contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
+
             }
             contentTable += '</tbody></table>';
 
-            jQuery('#sentiment_analyze_table').html( contentTable ).show();
+            jQuery('#analyze_results_table').html( contentTable ).show();
+
 
             jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
         },
@@ -430,3 +437,15 @@ function kontxtAnalyzeFormPost( ) {
 
     return false;
 };
+
+function makeid(length) {
+    // from SO: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}

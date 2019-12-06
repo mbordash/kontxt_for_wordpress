@@ -35,7 +35,7 @@
 
                         <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text">The full moon warns that you need to plan your moves carefully, especially if they could affect the people around you. You don't live in isolation (though sometimes you think you might like to) so be aware that your actions have consequences.</textarea>
 
-                        <input id="kontxt-input-button" class="button-primary" type="submit" value="Analyze">
+                        <input id="kontxt-experiment-input-button" class="button-primary" type="submit" value="Analyze">
 
                     </div>
 
@@ -165,7 +165,15 @@
 
                     <div id="kontxt-analyze-input">
 
-                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Analyze">
+                        <select id="event_type" name="event_type">
+                            <option value="sentiment">Sentiment</option>
+                            <option value="emotion">Emotion</option>
+                            <option value="keywords">Keywords</option>
+                            <option value="concepts">Concepts</option>
+                            <option value="intents">Intents</option>
+                        </select>
+
+                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Get Recent">
 
                     </div>
 
@@ -183,31 +191,24 @@
 
                         <div id="poststuff">
 
-                            <div id="post-body" class="metabox-holder columns-2">
+                                <div class="postbox">
 
-                                <!-- main content -->
-                                <div id="post-body-content">
+                                    <h2 id="analyze_results_title"></h2>
 
-                                    <div class="meta-box-sortables ui-sortable">
+                                    <div class="inside">
 
-                                        <div class="postbox">
+                                        <div id="analyze_results_chart"></div>
 
-                                            <h2><span><?php esc_attr_e( 'Sentiment History', 'WpAdminStyle' ); ?></span></h2>
-
-                                            <div class="inside">
-
-                                                <div id="sentiment_analyze_chart"></div>
-
-                                                <div id="sentiment_analyze_table"></div>
-
-                                            </div>
-                                            <!-- .inside -->
-
-                                        </div>
-                                        <!-- .postbox -->
                                     </div>
+
+                                    <div class="inside">
+
+                                        <div id="analyze_results_table"></div>
+
+                                    </div>
+
                                 </div>
-                            </div>
+                                <!-- .postbox -->
                         </div>
                     </div>
                 </div>

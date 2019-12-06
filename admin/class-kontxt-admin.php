@@ -95,7 +95,6 @@ class Kontxt_Admin {
         $kontxt_local_arr = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
-            'postID'    => get_the_ID(),
             'apikey'    => get_option( $this->option_name . '_apikey' ),
 	        'apiuid'    => get_option( $this->option_name . '_apiuid' )
         );
@@ -106,6 +105,81 @@ class Kontxt_Admin {
 
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
+
+	}
+
+	/**
+	 * Handle retrival of analytics results
+     *
+	 */
+	public function kontxt_analyze_results()
+    {
+
+        error_log( 'here' );
+
+	    if (!current_user_can('manage_options')) {
+		    wp_die('You are not allowed to be on this page.');
+	    }
+
+	    check_ajax_referer( 'kontxt-ajax-string', 'security', false );
+
+	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
+
+		    //header('Content-type: application/json');
+		    echo $this->kontxt_get_results( $_POST['dimension'] );
+
+	    }
+
+	    exit;
+    }
+
+
+	public function kontxt_get_results( $dimension ) {
+
+		//get and check API key exists, pass key along server side request
+		$apiKey = get_option( $this->option_name . '_apikey' );
+		$apiUid = get_option( $this->option_name . '_apiuid' );
+
+		if ( !isset($apiKey) || $apiKey === '' ) {
+
+			$response_array['status'] = "error";
+			$response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first.";
+
+			return json_encode($response_array);
+
+		}
+
+		if ( isset( $dimension ) && $dimension !== '' ) {
+
+		    $dimension = sanitize_text_field( $dimension );
+
+			$requestBody = array (
+                'api_uid'       => $apiUid,
+                'api_key'       => $apiKey,
+                'service'       => 'events',
+                'event_type'    => $dimension
+            );
+
+			$opts = array(
+				'body'      => $requestBody,
+				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			$response = wp_remote_get($this->api_host, $opts);
+
+			if( $response['response']['code'] === 200 ) {
+
+				return $response['body'];
+
+			} else {
+
+				$response_array['status'] = "error";
+				$response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
+
+				return json_encode($response_array);
+
+			}
+		}
 
 	}
 
@@ -127,14 +201,14 @@ class Kontxt_Admin {
         if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
 
             //header('Content-type: application/json');
-            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['post_ID'] );
+            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['post_ID'], $_POST['request_id'] );
 
         }
 
         exit;
     }
 
-    public function kontxt_cognitive( $textToAnalyze, $service, $postId ) {
+    public function kontxt_cognitive( $textToAnalyze, $service, $postId, $requestId ) {
 
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
@@ -154,12 +228,14 @@ class Kontxt_Admin {
             $textToAnalyze  = urlencode( sanitize_text_field( $textToAnalyze ) );
             $service        = sanitize_text_field( $service );
             $postId         = sanitize_text_field( $postId );
+            $requestId      = sanitize_text_field( $requestId );
 
             $requestBody = array(
                     'api_uid'                   => $apiUid,
                     'api_key'                   => $apiKey,
                     'kontxt_text_to_analyze'    => $textToAnalyze,
                     'service'                   => $service,
+                    'request_id'                => $requestId
             );
 
             $opts = array(
