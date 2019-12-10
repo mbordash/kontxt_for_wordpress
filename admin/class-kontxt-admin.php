@@ -208,7 +208,7 @@ class Kontxt_Admin {
         exit;
     }
 
-    public function kontxt_cognitive( $textToAnalyze, $service, $postId, $requestId ) {
+    public function kontxt_cognitive( $textToAnalyze, $service, $requestId ) {
 
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
@@ -227,7 +227,6 @@ class Kontxt_Admin {
 
             $textToAnalyze  = urlencode( sanitize_text_field( $textToAnalyze ) );
             $service        = sanitize_text_field( $service );
-            $postId         = sanitize_text_field( $postId );
             $requestId      = sanitize_text_field( $requestId );
 
             $requestBody = array(
@@ -246,8 +245,6 @@ class Kontxt_Admin {
             $response = wp_remote_get($this->api_host, $opts);
 
             if( $response['response']['code'] === 200 ) {
-
-                update_post_meta( $postId, $service, $response['body'] );
 
                 return $response['body'];
 

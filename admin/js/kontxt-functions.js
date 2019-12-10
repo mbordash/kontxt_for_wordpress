@@ -384,47 +384,192 @@ function kontxtAnalyzeFormPost( ) {
 
             jQuery('#analyze_results_title').html(dimension + ' analytics ').css('text-transform', 'capitalize');
 
-
             var jsonResponse = jQuery.parseJSON(response);
             // var jsonResponse = response;
 
-
-            var eventLabels = jsonResponse.map(function(e) {
+            var eventDates = jsonResponse.map(function(e) {
                 return Date.parse(e.event_date);
-            })
+            });
 
             var eventValues = jsonResponse.map( function(e) {
                 return e.event_value;
-            })
+            });
 
-            var data = [{
-                type: 'scatter',
-                y: eventValues,
-                x: eventLabels
-            }];
+            var groupBy = function(xs, key) {
+                return xs.reduce(function(rv, x) {
+                    (rv[x[key]] = rv[x[key]] || []).push(x);
+                    return rv;
+                }, {});
+            };
 
-            var layout = {
-                yaxis: {
-                    range: [-1, 1]
-                },
-                xaxis: {
-                    autorange: true,
-                    type: 'date'
-                }
+            let data = [];
+            let avgByDates = [];
+            let layout;
+            let contentTable;
+
+            switch( dimension ) {
+
+                case 'sentiment':
+                    data = [{
+                        type: 'scatter',
+                        y: eventValues,
+                        x: eventDates
+                    }];
+
+                    layout = {
+                        yaxis: {
+                            range: [-1, 1]
+                        },
+                        xaxis: {
+                            autorange: true,
+                            type: 'date'
+                        }
+                    }
+
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'intents':
+
+                    var groupByIntent = groupBy(jsonResponse, 'event_value_name' );
+
+                    for( var elem in groupByIntent ) {
+
+                        var eventValueDate = groupByIntent[elem].map( function(e) {
+                            return  Date.parse(e.event_date);
+                        });
+
+                        var eventValueCount = groupByIntent[elem].map( function(e) {
+                            return e.event_value_count;
+                        });
+
+                        data.push( {
+                            x: eventValueDate,
+                            y: eventValueCount,
+                            name: elem,
+                            stackgroup: 'one'
+                        } );
+
+                    }
+
+                    console.log(data);
+
+                    layout = {
+                        xaxis: {
+                            title: 'Date',
+                            type: 'date'
+                        },
+                        yaxis: {
+                            title: 'Frequency'
+                        }
+                    }
+
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name</th><th>Count</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_count'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'emotion':
+
+                    // there's a much cleaner way to do this that is not brute force, please have at it!
+                    // Mjb
+
+                    let joy = [];
+                    let fear = [];
+                    let anger = [];
+                    let disgust = [];
+                    let sadness = [];
+
+                    jsonResponse.forEach( function( element ) {
+
+                        emoJson = JSON.parse( element.event_value_name );
+
+                        joy.push( emoJson['joy'] );
+                        fear.push( emoJson['fear'] );
+                        anger.push( emoJson['anger'] );
+                        disgust.push( emoJson['disgust'] );
+                        sadness.push( emoJson['sadness'] );
+
+                    } );
+
+                    joy = {
+                        x: eventDates,
+                        y: joy,
+                        name: 'joy',
+                        stackgroup: 'one'
+                    };
+
+                    fear = {
+                        x: eventDates,
+                        y: fear,
+                        name: 'fear',
+                        stackgroup: 'one'
+                    };
+
+                    anger = {
+                        x: eventDates,
+                        y: anger,
+                        name: 'anger',
+                        stackgroup: 'one'
+                    };
+
+                    disgust = {
+                        x: eventDates,
+                        y: disgust,
+                        name: 'disgust',
+                        stackgroup: 'one'
+                    };
+
+                    sadness = {
+                        x: eventDates,
+                        y: sadness,
+                        name: 'sadness',
+                        stackgroup: 'one'
+                    };
+
+                    data = [ joy, fear, anger, disgust, sadness ];
+
+                    layout = {
+                        xaxis: {
+                            title: 'Date',
+                            type: 'date'
+                        },
+                        yaxis: {
+                            title: 'Average',
+                            tickformat: ',.0%',
+                            range: [0,1]
+                        }
+                    }
+
+                    console.log(data);
+
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name/Average</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
             }
 
             Plotly.newPlot('analyze_results_chart', data, layout);
 
-            let contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Data</th></th></thead><tbody>';
-            for( var elem in jsonResponse ) {
-                contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
-
-            }
-            contentTable += '</tbody></table>';
-
             jQuery('#analyze_results_table').html( contentTable ).show();
-
 
             jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
         },
