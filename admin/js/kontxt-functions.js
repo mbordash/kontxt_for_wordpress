@@ -403,7 +403,6 @@ function kontxtAnalyzeFormPost( ) {
             };
 
             let data = [];
-            let avgByDates = [];
             let layout;
             let contentTable;
 
@@ -565,9 +564,31 @@ function kontxtAnalyzeFormPost( ) {
                     contentTable += '</tbody></table>';
 
                     break;
+
+                case 'keywords':
+
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted Text</th><th>Count</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['keywords']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                case 'concepts':
+
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted Text</th><th>Count</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
             }
 
-            Plotly.newPlot('analyze_results_chart', data, layout);
+            if( data.length > 0 ) {
+                Plotly.newPlot('analyze_results_chart', data, layout);
+            }
 
             jQuery('#analyze_results_table').html( contentTable ).show();
 
