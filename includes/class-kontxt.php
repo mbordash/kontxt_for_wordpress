@@ -109,6 +109,11 @@ class Kontxt {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-kontxt-admin.php';
 
+		/**
+		 * The class responsible for defining all actions that occur in the admin area.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
+
 		$this->loader = new Kontxt_Loader();
 
 	}
@@ -140,6 +145,8 @@ class Kontxt {
 	private function define_admin_hooks() {
 
 		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version() );
+
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -148,20 +155,13 @@ class Kontxt {
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze_results', $plugin_admin, 'kontxt_analyze_results');
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
 
-
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
 		// capture basic wp information from site usage
-		// query_vars, page_link, post_link, pre_user_login->user-reg
-		$this->loader->add_filter( 'the_content', $plugin_admin, 'kontxt_capture_user_event' );
+		$this->loader->add_action( 'wp_loaded', $plugin_public, 'kontxt_capture_user_event');
 
-		// capture woo commerce information if available
-		// add to cart -> product
-		// checkout -> product
-		// view -> product
-		// search string -> product-array
     }
 
 

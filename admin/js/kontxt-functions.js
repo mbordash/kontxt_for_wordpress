@@ -382,6 +382,8 @@ function kontxtAnalyzeFormPost( ) {
                 return false;
             }
 
+            Plotly.purge('analyze_results_chart');
+
             jQuery('#analyze_results_title').html(dimension + ' analytics ').css('text-transform', 'capitalize');
 
             var jsonResponse = jQuery.parseJSON(response);
@@ -567,7 +569,7 @@ function kontxtAnalyzeFormPost( ) {
 
                 case 'keywords':
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted Text</th><th>Count</th></thead><tbody>';
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['keywords']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
@@ -575,15 +577,19 @@ function kontxtAnalyzeFormPost( ) {
                     }
                     contentTable += '</tbody></table>';
 
+                    break;
+
                 case 'concepts':
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted Text</th><th>Count</th></thead><tbody>';
+                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted concept</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
 
                     }
                     contentTable += '</tbody></table>';
+
+                    break;
             }
 
             if( data.length > 0 ) {

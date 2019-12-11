@@ -41,7 +41,8 @@ class Kontxt_Admin {
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name, $version )
+	{
 
 		$this->plugin_name  = $plugin_name;
 		$this->version      = $version;
@@ -53,7 +54,8 @@ class Kontxt_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -77,7 +79,8 @@ class Kontxt_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 *
@@ -143,7 +146,7 @@ class Kontxt_Admin {
 		if ( !isset($apiKey) || $apiKey === '' ) {
 
 			$response_array['status'] = "error";
-			$response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first.";
+			$response_array['message'] = "Your API Key for KONTXT is not set. Please go to Settings > KONTXT to make sure you have a key first.";
 
 			return json_encode($response_array);
 
@@ -201,15 +204,17 @@ class Kontxt_Admin {
         if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
 
             //header('Content-type: application/json');
-            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['post_ID'], $_POST['request_id'] );
+            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['request_id'] );
 
         }
 
         exit;
     }
 
-    public function kontxt_cognitive( $textToAnalyze, $service, $requestId ) {
+    public function kontxt_cognitive( $textToAnalyze, $service, $requestId )
+    {
 
+	    error_log( "request id: " . $requestId );
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );
@@ -228,6 +233,8 @@ class Kontxt_Admin {
             $textToAnalyze  = urlencode( sanitize_text_field( $textToAnalyze ) );
             $service        = sanitize_text_field( $service );
             $requestId      = sanitize_text_field( $requestId );
+
+
 
             $requestBody = array(
                     'api_uid'                   => $apiUid,
@@ -272,7 +279,8 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.0.0
 	 */
-	public function add_management_page() {
+	public function add_management_page()
+	{
 
 		$this->plugin_screen_hook_suffix = add_management_page(
 			__( 'KONTXT Analyze', 'kontxt' ),
@@ -289,7 +297,8 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.0.0
 	 */
-	public function display_analyze_page() {
+	public function display_analyze_page()
+	{
 		include_once 'partials/kontxt-analyze-display.php';
 	}
 
@@ -298,7 +307,8 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function add_options_page() {
+    public function add_options_page()
+    {
 
         $this->plugin_screen_hook_suffix = add_options_page(
             __( 'KONTXT Settings', 'kontxt' ),
@@ -315,7 +325,8 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function display_options_page() {
+    public function display_options_page()
+    {
         include_once 'partials/kontxt-admin-display.php';
     }
 
@@ -324,7 +335,8 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function register_setting() {
+    public function register_setting()
+    {
 
         add_settings_section(
             $this->option_name . '_general',
@@ -382,7 +394,8 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function kontxt_general_cb() {
+    public function kontxt_general_cb()
+    {
 
     }
 
@@ -391,7 +404,8 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.3.2
 	 */
-	public function kontxt_email_cb() {
+	public function kontxt_email_cb()
+	{
 
 		$email = get_option( $this->option_name . '_email' );
 
@@ -412,7 +426,8 @@ class Kontxt_Admin {
      *
      * @since  1.3.2
      */
-    public function kontxt_apikey_cb() {
+    public function kontxt_apikey_cb()
+    {
 
         $apikey = get_option( $this->option_name . '_apikey' );
 
@@ -433,7 +448,8 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.3.2
 	 */
-	public function kontxt_apiuid_cb() {
+	public function kontxt_apiuid_cb()
+	{
 
 		$apiuid = get_option( $this->option_name . '_apiuid' );
 
@@ -454,7 +470,8 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function kontxt_datasharing_cb() {
+    public function kontxt_datasharing_cb()
+    {
 
         $datasharing = get_option( $this->option_name . '_datasharing' );
 
@@ -484,7 +501,8 @@ class Kontxt_Admin {
      * @since  1.0.0
      * @return string           Sanitized value
      */
-    public function kontxt_sanitize_option( $text ) {
+    public function kontxt_sanitize_option( $text )
+    {
         if ( in_array( $text, array( 'yes', 'no' ), true ) ) {
             return $text;
         }
@@ -497,7 +515,8 @@ class Kontxt_Admin {
      * @since  1.3.2
      * @return string           Sanitized value
      */
-    public function kontxt_sanitize_text( $text ) {
+    public function kontxt_sanitize_text( $text )
+    {
 
         return sanitize_text_field( $text );
 

@@ -20,6 +20,8 @@
 
             <a class="nav-tab nav-tab-active" href="javascript:;"><?php esc_attr_e( 'Experiment', 'wp_admin_style' ); ?></a>
             <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Analytics', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Deep Analytics', 'wp_admin_style' ); ?></a>
+
 
         </h2>
 
@@ -159,8 +161,6 @@
 
             <div id="kontxt-results-box" class="wrap">
 
-                <h4>Deep analytics are enabled once you opt-in to KONTXT data collection. <a href="options-general.php?page=kontxt">Edit your settings</a>.</h4>
-
                 <form id="kontxt-analyze-input-form" action="" method="post" enctype="multipart/form-data">
 
                     <div id="kontxt-analyze-input">
@@ -212,6 +212,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="inside hidden">
+            <h3>Deep Analytics</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <h4>Coming Soon! KONTXT Deep Analytics will provide customer journey analytics, trend forecasting and other intelligence based on our unique machine learning models.</h4>
+
             </div>
         </div>
     </div>
