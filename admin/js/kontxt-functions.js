@@ -79,7 +79,7 @@ function kontxtExperimentFormPost(return_text) {
         return false;
     }
 
-    if ( return_text && return_text.length <= 100 ) {
+    if ( return_text && return_text.length <= 50 ) {
 
         jQuery('#kontxt-results-status').html('<p>You haven\'t entered enough content yet. Please enter at least 100 characters before trying to analyze.</p>');
         jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
@@ -255,25 +255,26 @@ function kontxtExperimentFormPost(return_text) {
 
             var data = [{
                 type: 'bar',
-                y: ['Sentiment'],
-                x: [sentimentScore],
-                orientation: 'h',
+                y: [sentimentScore],
+                x: ['Sentiment'],
+                orientation: 'v',
                 marker: {
                     color: barColor
                 }
             }];
 
             var layout = {
-                xaxis: {
+                yaxis: {
                     range: [-1, 1]
                 },
-                height: 100,
+                height: '450',
                 margin: {
-                    l: 100,
-                    r: 100,
-                    t: 20,
-                    b: 20
+                    l: 20,
+                    r: 20,
+                    b: 30,
+                    t: 20
                 }
+
             }
 
             Plotly.newPlot('sentiment_chart', data, layout, {displayModeBar: false});
@@ -318,24 +319,30 @@ function kontxtExperimentFormPost(return_text) {
             ];
 
             var data = [{
-                values: emotionValues,
-                labels: emotionLabels,
-                type: 'pie',
-                hoverinfo: 'label+percent',
-                textposition: 'inside',
-                marker : {
-                    colors : pieColors[0]
-                },
-
+                type: 'scatterpolar',
+                r: emotionValues,
+                theta: emotionLabels,
+                fill: 'toself',
+                name: 'Emotions detected'
             }];
 
 
             var layout = {
-                height : 350,
-                width : 260,
-                showlegend : true,
-                legend : {"orientation": "h"},
-                margin: {"t": 0, "b": 0, "l": 0, "r": 0},
+                width: 'auto',
+                height: 'auto',
+                polar: {
+                    radialaxis: {
+                        visible: true,
+                        range: [0, 100]
+                    }
+                },
+                showlegend: true,
+                margin: {
+                    l: 10,
+                    r: 10,
+                    b: 20,
+                    t: 10
+                }
             };
 
             Plotly.newPlot('emotion_chart', data, layout, {displayModeBar: false});
@@ -413,6 +420,7 @@ function kontxtAnalyzeFormPost( ) {
                 case 'sentiment':
                     data = [{
                         type: 'scatter',
+                        fill: 'tozeroy',
                         y: eventValues,
                         x: eventDates
                     }];
@@ -498,11 +506,11 @@ function kontxtAnalyzeFormPost( ) {
 
                         emoJson = JSON.parse( element.event_value_name );
 
-                        joy.push( emoJson['joy'] );
-                        fear.push( emoJson['fear'] );
-                        anger.push( emoJson['anger'] );
-                        disgust.push( emoJson['disgust'] );
-                        sadness.push( emoJson['sadness'] );
+                        joy.push( Math.round(emoJson['joy']*100 ) );
+                        fear.push( Math.round(emoJson['fear']*100 ) );
+                        anger.push( Math.round(emoJson['anger']*100 ) );
+                        disgust.push( Math.round(emoJson['disgust']*100 ) );
+                        sadness.push( Math.round(emoJson['sadness']*100 ) );
 
                     } );
 
@@ -549,9 +557,9 @@ function kontxtAnalyzeFormPost( ) {
                             type: 'date'
                         },
                         yaxis: {
-                            title: 'Average',
-                            tickformat: ',.0%',
-                            range: [0,1]
+                            title: 'Emotion distribution',
+                            tickformat: ',.0',
+                            range: [0,100]
                         }
                     }
 

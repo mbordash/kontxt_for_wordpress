@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The admin-specific functionality of the plugin.
+ * The public-specific functionality of the plugin.
  *
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
@@ -10,7 +10,7 @@
  * @subpackage Kontxt/admin
  * @author     Michael Bordash <michael@internetdj.com>
  */
-class Kontxt_Admin {
+class Kontxt_Public {
 
     private $option_name    = 'KONTXT';
     private $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
@@ -41,8 +41,7 @@ class Kontxt_Admin {
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version )
-	{
+	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name  = $plugin_name;
 		$this->version      = $version;
@@ -54,8 +53,7 @@ class Kontxt_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles()
-	{
+	public function enqueue_styles() {
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -69,8 +67,6 @@ class Kontxt_Admin {
 		 * class.
 		 */
 
-        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/kontxt-admin.css', array(), $this->version, 'all' );
-        wp_enqueue_style( $this->plugin_name . '-jquery-ui', plugin_dir_url( __FILE__ ) . 'css/jquery-ui.min.css', array(), $this->version, 'all' );
 
     }
 
@@ -79,8 +75,7 @@ class Kontxt_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts()
-	{
+	public function enqueue_scripts() {
 
 		/**
 		 *
@@ -93,166 +88,41 @@ class Kontxt_Admin {
 		 * class.
 		 */
 
-        wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
-
-        $kontxt_local_arr = array(
-            'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-            'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
-            'apikey'    => get_option( $this->option_name . '_apikey' ),
-	        'apiuid'    => get_option( $this->option_name . '_apiuid' )
-        );
-
-        wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
-
-		wp_enqueue_script( $this->plugin_name);
-
-		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
-        wp_enqueue_script( 'jquery-ui-dialog' );
-
-	}
-
-	/**
-	 * Handle retrival of analytics results
-     *
-	 */
-	public function kontxt_analyze_results()
-    {
-
-        error_log( 'here' );
-
-	    if (!current_user_can('manage_options')) {
-		    wp_die('You are not allowed to be on this page.');
-	    }
-
-	    check_ajax_referer( 'kontxt-ajax-string', 'security', false );
-
-	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
-
-		    //header('Content-type: application/json');
-		    echo $this->kontxt_get_results( $_POST['dimension'] );
-
-	    }
-
-	    exit;
-    }
-
-
-	public function kontxt_get_results( $dimension ) {
-
-		//get and check API key exists, pass key along server side request
-		$apiKey = get_option( $this->option_name . '_apikey' );
-		$apiUid = get_option( $this->option_name . '_apiuid' );
-
-		if ( !isset($apiKey) || $apiKey === '' ) {
-
-			$response_array['status'] = "error";
-			$response_array['message'] = "Your API Key for KONTXT is not set. Please go to Settings > KONTXT to make sure you have a key first.";
-
-			return json_encode($response_array);
-
-		}
-
-		if ( isset( $dimension ) && $dimension !== '' ) {
-
-		    $dimension = sanitize_text_field( $dimension );
-
-			// get current user info, if no user, set as session
-			$current_user = wp_get_current_user();
-			if( 0 == $current_user->ID ) {
-				$current_user_username = 0;
-			} else {
-				$current_user_username = $current_user->user_login;
-			}
-
-
-
-			$requestBody = array (
-                'api_uid'       => $apiUid,
-                'api_key'       => $apiKey,
-                'service'       => 'events',
-                'event_type'    => $dimension,
-				'site_uid'      => $current_user_username,
-            );
-
-			$opts = array(
-				'body'      => $requestBody,
-				'headers'   => 'Content-type: application/x-www-form-urlencoded'
-			);
-
-			$response = wp_remote_get($this->api_host, $opts);
-
-			if( $response['response']['code'] === 200 ) {
-
-				return $response['body'];
-
-			} else {
-
-				$response_array['status'] = "error";
-				$response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
-
-				return json_encode($response_array);
-
-			}
-		}
 
 	}
 
 
-    /**
-     * Handle ajax request for text processing and display
-     *
-     * @since  1.0.0
-     */
-    public function kontxt_process_text()
-    {
+	public function kontxt_capture_user_event( ) {
 
-        if (!current_user_can('manage_options')) {
-            wp_die('You are not allowed to be on this page.');
-        }
-
-        check_ajax_referer( 'kontxt-ajax-string', 'security', false );
-
-        if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
-
-            //header('Content-type: application/json');
-            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['request_id'] );
-
-        }
-
-        exit;
-    }
-
-    public function kontxt_cognitive( $textToAnalyze, $service, $requestId )
-    {
-
-	    error_log( "request id: " . $requestId );
         //get and check API key exists, pass key along server side request
-	    $apiKey = get_option( $this->option_name . '_apikey' );
-	    $apiUid = get_option( $this->option_name . '_apiuid' );
+	    $apiKey             = get_option( $this->option_name . '_apikey' );
+	    $apiUid             = get_option( $this->option_name . '_apiuid' );
 	    $current_session    = $_COOKIE['kontxt_anon_session'];
-	    $current_user       = wp_get_current_user();
+		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
 
             $response_array['status'] = "error";
             $response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first.";
 
-            return json_encode($response_array);
+            error_log(json_encode($response_array));
 
         }
 
-	    if( 0 == $current_user->ID ) {
-		    $current_user_username = wp_get_session_token();
-	    } else {
-		    $current_user_username = $current_user->user_login;
-	    }
+        // get current user info, if no user, set anon id
 
-	    if( !isset( $current_session ) ) {
-		    $current_session = 'anon_' . $this->genKey();
-		    setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
-	    }
+        if( 0 == $current_user->ID ) {
+	        $current_user_username = wp_get_session_token();
+        } else {
+	        $current_user_username = $current_user->user_login;
+        }
 
-	    if ( isset( $textToAnalyze ) && $textToAnalyze !== '' ) {
+        if( !isset( $current_session ) ) {
+	        $current_session = 'anon_' . $this->genKey();
+			setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+        }
+
+        if ( isset( $textToAnalyze ) && $textToAnalyze !== '' ) {
 
             $textToAnalyze  = urlencode( sanitize_text_field( $textToAnalyze ) );
             $service        = sanitize_text_field( $service );
@@ -264,9 +134,9 @@ class Kontxt_Admin {
                     'kontxt_text_to_analyze'    => $textToAnalyze,
                     'service'                   => $service,
                     'request_id'                => $requestId,
-                    'current_user_username'     => $current_user_username,
-                    'current_session_id'        => $current_session,
-                    'user_class'                => 'admin'
+	                'current_user_username'     => $current_user_username,
+	                'current_session_id'        => $current_session,
+	                'user_class'                => 'public'
             );
 
             $opts = array(
@@ -304,8 +174,7 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.0.0
 	 */
-	public function add_management_page()
-	{
+	public function add_management_page() {
 
 		$this->plugin_screen_hook_suffix = add_management_page(
 			__( 'KONTXT Analyze', 'kontxt' ),
@@ -322,8 +191,7 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.0.0
 	 */
-	public function display_analyze_page()
-	{
+	public function display_analyze_page() {
 		include_once 'partials/kontxt-analyze-display.php';
 	}
 
@@ -332,8 +200,7 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function add_options_page()
-    {
+    public function add_options_page() {
 
         $this->plugin_screen_hook_suffix = add_options_page(
             __( 'KONTXT Settings', 'kontxt' ),
@@ -350,8 +217,7 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function display_options_page()
-    {
+    public function display_options_page() {
         include_once 'partials/kontxt-admin-display.php';
     }
 
@@ -360,8 +226,7 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function register_setting()
-    {
+    public function register_setting() {
 
         add_settings_section(
             $this->option_name . '_general',
@@ -419,8 +284,7 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function kontxt_general_cb()
-    {
+    public function kontxt_general_cb() {
 
     }
 
@@ -429,8 +293,7 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.3.2
 	 */
-	public function kontxt_email_cb()
-	{
+	public function kontxt_email_cb() {
 
 		$email = get_option( $this->option_name . '_email' );
 
@@ -451,8 +314,7 @@ class Kontxt_Admin {
      *
      * @since  1.3.2
      */
-    public function kontxt_apikey_cb()
-    {
+    public function kontxt_apikey_cb() {
 
         $apikey = get_option( $this->option_name . '_apikey' );
 
@@ -473,8 +335,7 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.3.2
 	 */
-	public function kontxt_apiuid_cb()
-	{
+	public function kontxt_apiuid_cb() {
 
 		$apiuid = get_option( $this->option_name . '_apiuid' );
 
@@ -495,8 +356,7 @@ class Kontxt_Admin {
      *
      * @since  1.0.0
      */
-    public function kontxt_datasharing_cb()
-    {
+    public function kontxt_datasharing_cb() {
 
         $datasharing = get_option( $this->option_name . '_datasharing' );
 
@@ -526,8 +386,7 @@ class Kontxt_Admin {
      * @since  1.0.0
      * @return string           Sanitized value
      */
-    public function kontxt_sanitize_option( $text )
-    {
+    public function kontxt_sanitize_option( $text ) {
         if ( in_array( $text, array( 'yes', 'no' ), true ) ) {
             return $text;
         }
@@ -540,12 +399,24 @@ class Kontxt_Admin {
      * @since  1.3.2
      * @return string           Sanitized value
      */
-    public function kontxt_sanitize_text( $text )
-    {
+    public function kontxt_sanitize_text( $text ) {
 
         return sanitize_text_field( $text );
 
     }
+
+	/**
+	 * @return string
+	 */
+	public function genKey() {
+
+		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+
+		//error_log( "uniq id site key: " . $api_key);
+
+		return $api_key;
+
+	}
 
 
 }
