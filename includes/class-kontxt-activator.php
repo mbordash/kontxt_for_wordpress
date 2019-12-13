@@ -25,7 +25,7 @@ class Kontxt_Activator {
 	public function activate() {
 
 		$option_name  = 'KONTXT';
-		$api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
+		$api_host     = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
 
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key

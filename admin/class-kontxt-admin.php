@@ -13,7 +13,7 @@
 class Kontxt_Admin {
 
     private $option_name    = 'KONTXT';
-    private $api_host     = 'http://localhost/wp-json/kontxt/v1/analyze';
+    private $api_host       = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
 	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
 
 	/**
@@ -142,6 +142,9 @@ class Kontxt_Admin {
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
+		$current_session    = $_COOKIE['kontxt_anon_session'];
+		$current_user       = wp_get_current_user();
+
 
 		if ( !isset($apiKey) || $apiKey === '' ) {
 
@@ -157,21 +160,26 @@ class Kontxt_Admin {
 		    $dimension = sanitize_text_field( $dimension );
 
 			// get current user info, if no user, set as session
-			$current_user = wp_get_current_user();
+
 			if( 0 == $current_user->ID ) {
-				$current_user_username = 0;
+				$current_user_username = $current_session;
 			} else {
 				$current_user_username = $current_user->user_login;
 			}
 
-
+			if( !isset( $current_session ) ) {
+				$current_session = 'anon_' . $this->genKey();
+				setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+			}
 
 			$requestBody = array (
-                'api_uid'       => $apiUid,
-                'api_key'       => $apiKey,
-                'service'       => 'events',
-                'event_type'    => $dimension,
-				'site_uid'      => $current_user_username,
+                'api_uid'                   => $apiUid,
+                'api_key'                   => $apiKey,
+                'service'                   => 'events',
+                'event_type'                => $dimension,
+                'current_user_username'     => $current_user_username,
+                'current_session_id'        => $current_session,
+                'user_class'                => 'admin',
             );
 
 			$opts = array(
@@ -222,7 +230,7 @@ class Kontxt_Admin {
         exit;
     }
 
-    public function kontxt_cognitive( $textToAnalyze, $service, $requestId )
+    public function kontxt_cognitive( $textToAnalyze, $service, $requestId, $silent = false )
     {
 
 	    error_log( "request id: " . $requestId );
@@ -242,7 +250,7 @@ class Kontxt_Admin {
         }
 
 	    if( 0 == $current_user->ID ) {
-		    $current_user_username = wp_get_session_token();
+		    $current_user_username = $current_session;
 	    } else {
 		    $current_user_username = $current_user->user_login;
 	    }
@@ -266,7 +274,8 @@ class Kontxt_Admin {
                     'request_id'                => $requestId,
                     'current_user_username'     => $current_user_username,
                     'current_session_id'        => $current_session,
-                    'user_class'                => 'admin'
+                    'user_class'                => 'admin',
+                    'silent'                    => $silent
             );
 
             $opts = array(
@@ -547,5 +556,17 @@ class Kontxt_Admin {
 
     }
 
+	/**
+	 * @return string
+	 */
+	public function genKey() {
+
+		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+
+		//error_log( "uniq id site key: " . $api_key);
+
+		return $api_key;
+
+	}
 
 }

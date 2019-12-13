@@ -160,7 +160,7 @@ class Kontxt {
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
 		// capture basic wp information from site usage
-		$this->loader->add_action( 'wp_loaded', $plugin_public, 'kontxt_capture_user_event');
+		$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_search');
 
     }
 
