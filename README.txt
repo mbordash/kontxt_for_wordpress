@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: mbordash
 Donate link: http://www.kontxt.com
-Tags: cognitive, article, admin, post, watson, content, seo, tagging, automatic, auto tag
+Tags: cognitive, machine learning, analytics, commerce, reports, behavior, article, admin, post, content, seo, tagging, automatic, auto tag
 Requires at least: 4.0
 Tested up to: 4.9.2
 Stable tag: 1.3.2

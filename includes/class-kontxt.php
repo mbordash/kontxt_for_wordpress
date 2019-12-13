@@ -46,6 +46,15 @@ class Kontxt {
 	protected $version;
 
 	/**
+	 * The current option name used by the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      string    $option_name    The current option name scope used by the plugin.
+	 */
+	protected $option_name;
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -56,12 +65,14 @@ class Kontxt {
 	 */
 	public function __construct() {
 
-		$this->plugin_name = 'kontxt';
-		$this->version = '1.2.0';
+		$this->plugin_name  = 'kontxt';
+		$this->version      = '1.2.0';
+		$this->option_name  = 'KONTXT';
 
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+
 	}
 
 	/**
@@ -98,6 +109,11 @@ class Kontxt {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-kontxt-admin.php';
 
+		/**
+		 * The class responsible for defining all actions that occur in the admin area.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
+
 		$this->loader = new Kontxt_Loader();
 
 	}
@@ -129,18 +145,25 @@ class Kontxt {
 	private function define_admin_hooks() {
 
 		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version() );
+
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
         // load an action to handle the incoming ajax request for text analysis
-        $this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
+		$this->loader->add_action( 'wp_ajax_kontxt_analyze_results', $plugin_admin, 'kontxt_analyze_results');
+		$this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
 
-        $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
+		// capture basic wp information from site usage
+		$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_search');
+
     }
+
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.

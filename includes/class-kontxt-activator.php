@@ -13,14 +13,71 @@
  */
 class Kontxt_Activator {
 
+
 	/**
 	 * Short Description. (use period)
 	 *
 	 * Long Description.
 	 *
+	 * @return false|string
 	 * @since    1.0.0
 	 */
-	public static function activate() {
+	public function activate() {
+
+		$option_name  = 'KONTXT';
+		$api_host     = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
+
+		// first check to make sure the KONTXT settings are already set in wordpress options
+		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
+
+		$apiKey = get_option( $option_name . '_apikey' );
+		$apiUid = get_option( $option_name . '_apiuid' );
+
+		if( !isset($apiKey) || $apiKey === '' ) {
+
+			// install site and get a key from kontxt
+
+			$siteName   = get_bloginfo( 'name' );
+			$siteDomain = get_bloginfo( 'url' );
+			$siteEmail  = get_bloginfo( 'admin_email' );
+			$apiUid     = md5( $siteName . $siteDomain );
+			$service    = 'install';
+
+			// register with KONTXT Site API endpoint
+			$requestBody = array(
+				'api_uid'                   => $apiUid,
+				'site_name'                 => $siteName,
+				'site_domain'               => $siteDomain,
+				'site_email'                => $siteEmail,
+				'service'                   => $service
+			);
+
+			// error_log(print_r($requestBody, TRUE));
+
+			$opts = array(
+				'body'      => $requestBody,
+				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			$response = wp_remote_get($api_host, $opts);
+
+			if( $response['response']['code'] === 200 ) {
+
+				$apiKey = str_replace( '"', '', $response['body']);
+
+				update_option( $option_name .  '_apiuid', $apiUid);
+				update_option( $option_name .  '_apikey', $apiKey);
+
+			} else {
+
+				$response_array['status'] = "error";
+				$response_array['message'] = "Plugin Install Error. Something went wrong with this request. Code received: " . $response['response']['code'];
+
+				return json_encode($response_array);
+
+			}
+
+		}
 
 	}
 

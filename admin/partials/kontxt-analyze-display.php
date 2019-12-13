@@ -20,6 +20,8 @@
 
             <a class="nav-tab nav-tab-active" href="javascript:;"><?php esc_attr_e( 'Experiment', 'wp_admin_style' ); ?></a>
             <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Analytics', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Deep Analytics', 'wp_admin_style' ); ?></a>
+
 
         </h2>
 
@@ -33,9 +35,9 @@
 
                     <div id="kontxt-input-text">
 
-                        <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text">The full moon warns that you need to plan your moves carefully, especially if they could affect the people around you. You don't live in isolation (though sometimes you think you might like to) so be aware that your actions have consequences.</textarea>
+                        <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text">Fourscore and seven years ago our fathers brought forth, on this continent, a new nation, conceived in liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived, and so dedicated, can long endure. We are met on a great battle-field of that war. We have come to dedicate a portion of that field, as a final resting-place for those who here gave their lives, that that nation might live. It is altogether fitting and proper that we should do this. But, in a larger sense, we cannot dedicate, we cannot consecrate—we cannot hallow—this ground. The brave men, living and dead, who struggled here, have consecrated it far above our poor power to add or detract. The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so nobly advanced. It is rather for us to be here dedicated to the great task remaining before us—that from these honored dead we take increased devotion to that cause for which they here gave the last full measure of devotion—that we here highly resolve that these dead shall not have died in vain—that this nation, under God, shall have a new birth of freedom, and that government of the people, by the people, for the people, shall not perish from the earth.</textarea>
 
-                        <input id="kontxt-input-button" class="button-primary" type="submit" value="Analyze">
+                        <input id="kontxt-experiment-input-button" class="button-primary" type="submit" value="Analyze">
 
                     </div>
 
@@ -61,19 +63,18 @@
 
                                     <div class="meta-box-sortables ui-sortable">
 
+
                                         <div class="postbox">
 
-                                            <h2><span><?php esc_attr_e( 'Sentiment', 'WpAdminStyle' ); ?></span></h2>
+                                            <h2><span><?php esc_attr_e( 'Emotion', 'WpAdminStyle' ); ?></span></h2>
 
                                             <div class="inside">
-                                                <div id="overall_tone"></div>
-                                                <div id="sentiment_chart"></div>
+                                                <div id="emotion_chart"></div>
                                             </div>
                                             <!-- .inside -->
 
                                         </div>
                                         <!-- .postbox -->
-
 
                                         <div class="postbox">
 
@@ -122,10 +123,11 @@
 
                                         <div class="postbox">
 
-                                            <h2><span><?php esc_attr_e( 'Emotion', 'WpAdminStyle' ); ?></span></h2>
+                                            <h2><span><?php esc_attr_e( 'Sentiment', 'WpAdminStyle' ); ?></span></h2>
 
                                             <div class="inside">
-                                                <div id="emotion_chart"></div>
+                                                <div id="overall_tone"></div>
+                                                <div id="sentiment_chart"></div>
                                             </div>
                                             <!-- .inside -->
 
@@ -159,7 +161,65 @@
 
             <div id="kontxt-results-box" class="wrap">
 
-                <h4>Deep analytics are enabled once you opt-in to KONTXT data collection. <a href="options-general.php?page=kontxt">Edit your settings</a>.</h4>
+                <form id="kontxt-analyze-input-form" action="" method="post" enctype="multipart/form-data">
+
+                    <div id="kontxt-analyze-input">
+
+                        <select id="event_type" name="event_type">
+                            <option value="sentiment">Sentiment</option>
+                            <option value="emotion">Emotion</option>
+                            <option value="keywords">Keywords</option>
+                            <option value="concepts">Concepts</option>
+                            <option value="intents">Intents</option>
+                        </select>
+
+                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Get Recent">
+
+                    </div>
+
+                </form>
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                                <div class="postbox">
+
+                                    <h2 id="analyze_results_title"></h2>
+
+                                    <div class="inside">
+
+                                        <div id="analyze_results_chart"></div>
+
+                                    </div>
+
+                                    <div class="inside">
+
+                                        <div id="analyze_results_table"></div>
+
+                                    </div>
+
+                                </div>
+                                <!-- .postbox -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inside hidden">
+            <h3>Deep Analytics</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <h4>Coming Soon! KONTXT Deep Analytics will provide customer journey analytics, trend forecasting and other intelligence based on our unique machine learning models.</h4>
 
             </div>
         </div>
