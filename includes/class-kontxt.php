@@ -26,33 +26,14 @@ class Kontxt {
 	 * @var      Kontxt_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
-
-	/**
-	 * The unique identifier of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
-	 */
 	protected $plugin_name;
-
-	/**
-	 * The current version of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      string    $version    The current version of the plugin.
-	 */
 	protected $version;
-
-	/**
-	 * The current option name used by the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      string    $option_name    The current option name scope used by the plugin.
-	 */
 	protected $option_name;
+	protected $api_host;
+	protected $api_host_only;
+	protected $api_host_uri;
+	protected $api_host_proto;
+	protected $api_host_port;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -65,12 +46,19 @@ class Kontxt {
 	 */
 	public function __construct() {
 
-		$this->plugin_name  = 'kontxt';
-		$this->version      = '1.2.0';
-		$this->option_name  = 'KONTXT';
+		$this->plugin_name      = 'kontxt';
+		$this->version          = '1.2.0';
+		$this->option_name      = 'KONTXT';
+		$this->api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
+		$this->api_host_only    = 'localhost'; // api.kontxt.cloud
+		$this->api_host_uri     = '/wp-json/kontxt/v1/analyze';
+		$this->api_host_proto   = 'http://';
+		$this->api_host_port    = 80;
 
 		$this->load_dependencies();
 		$this->set_locale();
+
+		$this->define_public_hooks();
 		$this->define_admin_hooks();
 
 	}
@@ -110,7 +98,7 @@ class Kontxt {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-kontxt-admin.php';
 
 		/**
-		 * The class responsible for defining all actions that occur in the admin area.
+		 * The class responsible for defining all actions that occur in the public area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
 
@@ -144,14 +132,12 @@ class Kontxt {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version() );
-		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version() );
-
+		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->api_host_only, $this->api_host_uri, $this->api_host_proto, $this->api_host_port );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-        // load an action to handle the incoming ajax request for text analysis
+		// load an action to handle the incoming ajax request for text analysis
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze_results', $plugin_admin, 'kontxt_analyze_results');
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
 
@@ -159,10 +145,26 @@ class Kontxt {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
-		// capture basic wp information from site usage
-		$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_search');
-
     }
+
+	/**
+	 * Register all of the hooks related to the public area functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_public_hooks() {
+
+		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->api_host_only, $this->api_host_uri, $this->api_host_proto, $this->api_host_port );
+
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+
+		// capture basic wp information from site usage
+		// $this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_search');
+
+	}
 
 
 	/**

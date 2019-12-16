@@ -8,49 +8,42 @@
  *
  * @package    Kontxt
  * @subpackage Kontxt/admin
- * @author     Michael Bordash <michael@internetdj.com>
+ * @author     Michael Bordash <mbordash@realnetworks.com>
  */
 class Kontxt_Public {
 
-    private $option_name    = 'KONTXT';
-    private $api_host       = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-	private $api_host_only  = 'api.kontxt.cloud';
-	private $api_host_uri   = '/wp-json/kontxt/v1/analyze';
-	private $api_host_proto = 'http://';
-	private $api_host_port  = 80;
-
-	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
-
-	/**
-	 * The ID of this plugin
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
+	private $api_host_only;
+	private $api_host_uri;
+	private $api_host_proto;
+	private $api_host_port;
 	private $plugin_name;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
 	private $version;
+	private $option_name;
+	private $api_host;
 
 	/**
-	 * Initialize the class and set its properties.
+	 * Kontxt_Public constructor.
 	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param $plugin_name
+	 * @param $version
+	 * @param $option_name
+	 * @param $api_host
+	 * @param $api_host_only
+	 * @param $api_host_uri
+	 * @param $api_host_proto
+	 * @param $api_host_port
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
+	{
 
-		$this->plugin_name  = $plugin_name;
-		$this->version      = $version;
-		// $this->fp           = @pfsockopen($this->api_host_only, $this->api_host_port, $errno, $errstr );
+		$this->plugin_name      = $plugin_name;
+		$this->version          = $version;
+		$this->option_name      = $option_name;
+		$this->api_host         = $api_host;
+		$this->api_host_only    = $api_host_only;
+		$this->api_host_uri     = $api_host_uri;
+		$this->api_host_proto   = $api_host_proto;
+		$this->api_host_port    = $api_host_port;
 
 	}
 
@@ -80,7 +73,8 @@ class Kontxt_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 *
@@ -93,23 +87,79 @@ class Kontxt_Public {
 		 * class.
 		 */
 
+		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
-	}
-
-	public function kontxt_capture_search( ) {
+		$kontxt_local_arr = array(
+			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+			'security'      => wp_create_nonce( 'kontxt-ajax-string' ),
+			'apikey'        => get_option( $this->option_name . '_apikey' ),
+			'apiuid'        => get_option( $this->option_name . '_apiuid' )
+		);
 
 		// capture text input
 		$searchQuery = get_search_query();
+		if( $searchQuery ) {
+			$kontxt_local_arr['search_query'] =  $searchQuery;
 
-		if( isset( $searchQuery ) || $searchQuery !== '' ) {
+			// statistically interesting to see which search queries returned not results
+			if ( !have_posts() ) {
+				$kontxt_local_arr['no_results'] =  true;
+			}
+		}
 
-				$services = [ 'intents', 'concepts', 'sentiment', 'keywords', 'emotion' ];
-		        $this->kontxt_capture_user_event( $searchQuery, $services );
+		// current post type
+		$postType = get_post_type();
+		if( $postType ) {
+			$kontxt_local_arr['post_type'] =  $postType;
+		}
+
+		if ( class_exists( 'woocommerce' ) ) {
+
+			// current product data
+			if( wc_get_product() ) {
+
+				$productId = wc_get_product()->get_id();
+				$productName = wc_get_product()->get_name();
+
+				$productDataArray = array(
+
+					'product_id'    => $productId,
+					'product_name'  => $productName
+
+				);
+				$kontxt_local_arr['product_data'] = $productDataArray;
+			}
+
+			// current cart data
+			if( WC()->cart->get_cart_contents_count() >= 1 ) {
+
+				$cartData = WC()->cart->get_cart_contents();
+
+
+				foreach ( $cartData as $cart_item_key => $cart_item ) {
+
+					$cartDataArray = array(
+						'cart_product_id'   => $cart_item['product_id'],
+						'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
+					);
+
+				}
+					$kontxt_local_arr['cart_data'] = $cartDataArray;
+			}
+
+			// current open order data
+			//$orderData = wc_get_orders();
+			//$kontxt_local_arr['order_data'] = $orderData;
 
 		}
 
-	}
+		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
 
+		wp_enqueue_script( $this->plugin_name);
+
+
+
+	}
 
 	/**
 	 * @param $eventData
@@ -118,7 +168,9 @@ class Kontxt_Public {
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_capture_user_event( $eventData, $services, $silent = true ) {
+	public function kontxt_send_event( $eventData, $services, $silent = true ) {
+
+		check_ajax_referer( 'kontxt-ajax-string', 'security', false );
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
@@ -224,6 +276,8 @@ class Kontxt_Public {
 		return $api_key;
 
 	}
+
+
 
 	/**
 	 * Initialize the class and set its properties.

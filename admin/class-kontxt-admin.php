@@ -8,44 +8,42 @@
  *
  * @package    Kontxt
  * @subpackage Kontxt/admin
- * @author     Michael Bordash <michael@internetdj.com>
+ * @author     Michael Bordash <mbordash@realnetworks.com>
  */
 class Kontxt_Admin {
 
-    private $option_name    = 'KONTXT';
-    private $api_host       = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-	# protected string $api_host     = 'http://kontxt.com/wp-json/kontxt/v1/analyze';
-
-	/**
-	 * The ID of this plugin
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
+	private $api_host_only;
+	private $api_host_uri;
+	private $api_host_proto;
+	private $api_host_port;
 	private $plugin_name;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
 	private $version;
+	private $option_name;
+	private $api_host;
 
 	/**
-	 * Initialize the class and set its properties.
+	 * Kontxt_Public constructor.
 	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param $plugin_name
+	 * @param $version
+	 * @param $option_name
+	 * @param $api_host
+	 * @param $api_host_only
+	 * @param $api_host_uri
+	 * @param $api_host_proto
+	 * @param $api_host_port
 	 */
-	public function __construct( $plugin_name, $version )
+	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
 	{
 
-		$this->plugin_name  = $plugin_name;
-		$this->version      = $version;
+		$this->plugin_name      = $plugin_name;
+		$this->version          = $version;
+		$this->option_name      = $option_name;
+		$this->api_host         = $api_host;
+		$this->api_host_only    = $api_host_only;
+		$this->api_host_uri     = $api_host_uri;
+		$this->api_host_proto   = $api_host_proto;
+		$this->api_host_port    = $api_host_port;
 
 	}
 
@@ -93,7 +91,7 @@ class Kontxt_Admin {
 		 * class.
 		 */
 
-        wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+        wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-admin-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
         $kontxt_local_arr = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
@@ -112,13 +110,11 @@ class Kontxt_Admin {
 	}
 
 	/**
-	 * Handle retrival of analytics results
+	 * Handle retrieval of analytics results
      *
 	 */
 	public function kontxt_analyze_results()
     {
-
-        error_log( 'here' );
 
 	    if (!current_user_can('manage_options')) {
 		    wp_die('You are not allowed to be on this page.');

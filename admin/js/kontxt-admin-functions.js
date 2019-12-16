@@ -79,14 +79,6 @@ function kontxtExperimentFormPost(return_text) {
         return false;
     }
 
-    if ( return_text && return_text.length <= 50 ) {
-
-        jQuery('#kontxt-results-status').html('<p>You haven\'t entered enough content yet. Please enter at least 100 characters before trying to analyze.</p>');
-        jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
-
-        return false;
-    }
-
     jQuery('#kontxt-results-status').hide();
     jQuery('#kontxt-results-success').show();
 
