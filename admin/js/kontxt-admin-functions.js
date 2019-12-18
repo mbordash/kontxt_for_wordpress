@@ -12,7 +12,7 @@ jQuery(function($) {
     jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
 
-        var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val()
+        var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val();
 
         kontxtExperimentFormPost( textToAnalyze )
 
@@ -74,14 +74,6 @@ function kontxtExperimentFormPost(return_text) {
     if ( !return_text || return_text.length === 0 ) {
 
         jQuery('#kontxt-results-status').html('<p>You haven\'t entered any content yet. Please enter some content before trying to analyze.</p>');
-        jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
-
-        return false;
-    }
-
-    if ( return_text && return_text.length <= 50 ) {
-
-        jQuery('#kontxt-results-status').html('<p>You haven\'t entered enough content yet. Please enter at least 100 characters before trying to analyze.</p>');
         jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
 
         return false;
