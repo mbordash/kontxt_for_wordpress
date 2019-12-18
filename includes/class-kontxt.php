@@ -158,11 +158,15 @@ class Kontxt {
 
 		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->api_host_only, $this->api_host_uri, $this->api_host_proto, $this->api_host_port );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+		//$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		// capture basic wp information from site usage
-		// $this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_search');
+		// $this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+
+		// capture all page state information from site user
+		$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
+
+		// capture post review content
+		$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post');
 
 	}
 

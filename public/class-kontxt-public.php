@@ -75,6 +75,7 @@ class Kontxt_Public {
 	 */
 	public function enqueue_scripts()
 	{
+		global $comment, $wp_query, $category;
 
 		/**
 		 *
@@ -87,47 +88,111 @@ class Kontxt_Public {
 		 * class.
 		 */
 
-		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+		// wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
-		$kontxt_local_arr = array(
-			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-			'security'      => wp_create_nonce( 'kontxt-ajax-string' ),
-			'apikey'        => get_option( $this->option_name . '_apikey' ),
-			'apiuid'        => get_option( $this->option_name . '_apiuid' )
-		);
+	}
+
+	public function kontxt_comment_post( $commentId ) {
+
+		$kontxt_comment_arr = [];
+
+		// capture comment content
+		if ( $commentId ) {
+
+			$comment = get_comment( intval( $commentId ) );
+
+			$comment_text   = $comment->comment_content;
+			$comment_product_id = $comment->comment_post_ID;
+			$comment_product_name = wc_get_product( $comment_product_id )->get_name();
+			$comment_rating = get_comment_meta( $commentId, 'rating', true);
+
+			if ( ! empty( $comment_text ) ) {
+
+				$kontxt_comment_arr['comment_text'] = $comment_text;
+				$kontxt_comment_arr['comment_rating'] = $comment_rating;
+				$kontxt_comment_arr['comment_product_id'] = $comment_product_id;
+				$kontxt_comment_arr['comment_product_name'] = $comment_product_name;
+
+			}
+		}
+
+		// send directly to backend
+		$this->kontxt_send_event( $kontxt_comment_arr, 'public_event', true );
+
+	}
+
+	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
+		global $wp_query, $category;
+
+		$kontxt_user_session = [];
 
 		// capture text input
 		$searchQuery = get_search_query();
 		if( $searchQuery ) {
-			$kontxt_local_arr['search_query'] =  $searchQuery;
+			$kontxt_user_session['search_query'] =  $searchQuery;
 
 			// statistically interesting to see which search queries returned not results
 			if ( !have_posts() ) {
-				$kontxt_local_arr['no_results'] =  true;
+				$kontxt_user_session['no_results'] =  true;
 			}
 		}
 
-		// current post type
-		$postType = get_post_type();
-		if( $postType ) {
-			$kontxt_local_arr['post_type'] =  $postType;
+		// current blog category or page name
+		if( is_category() ) {
+			$kontxt_user_session['blog_page'] = $category;
+		} else {
+			$pageName = $wp_query->queried_object->post_name;
+			if ( $pageName ) {
+				$kontxt_user_session['blog_page'] = $pageName;
+			} elseif( is_front_page() || is_home() ) {
+				$kontxt_user_session['blog_page'] = 'Site home';
+			}
 		}
 
+
+		// get commerce related major actions
 		if ( class_exists( 'woocommerce' ) ) {
 
-			// current product data
-			if( wc_get_product() ) {
+			// override page as shop home
+			if ( $searchQuery ) {
 
-				$productId = wc_get_product()->get_id();
-				$productName = wc_get_product()->get_name();
+				$kontxt_user_session['shop_page'] = "Search results";
 
-				$productDataArray = array(
+			} elseif( is_shop() ) {
 
-					'product_id'    => $productId,
-					'product_name'  => $productName
+				$kontxt_user_session['shop_page'] = "Shop home";
+
+			} elseif( get_queried_object()->term_id ) {
+				$categoryId   = get_queried_object()->term_id;
+				$categoryName = get_the_category_by_ID( get_queried_object( )->term_id);
+
+				$categoryDataArray = array(
+
+					'view_category_id'   => $categoryId,
+					'view_category_name' => $categoryName
 
 				);
-				$kontxt_local_arr['product_data'] = $productDataArray;
+
+				$kontxt_user_session['shop_page'] = "category";
+				$kontxt_user_session['category_data'] = $categoryDataArray;
+
+			} else {
+
+				// current product data
+				if ( wc_get_product() ) {
+
+					$productId   = wc_get_product()->get_id();
+					$productName = wc_get_product()->get_name();
+
+					$productDataArray = array(
+
+						'view_product_id'   => $productId,
+						'view_product_name' => $productName
+
+					);
+					$kontxt_user_session['shop_page'] = 'product';
+					$kontxt_user_session['product_data'] = $productDataArray;
+				}
 			}
 
 			// current cart data
@@ -135,29 +200,36 @@ class Kontxt_Public {
 
 				$cartData = WC()->cart->get_cart_contents();
 
+				$cartDataArray[] = array();
 
 				foreach ( $cartData as $cart_item_key => $cart_item ) {
 
-					$cartDataArray = array(
+					$cartDataArray[] = array(
 						'cart_product_id'   => $cart_item['product_id'],
 						'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
 					);
 
 				}
-					$kontxt_local_arr['cart_data'] = $cartDataArray;
+				$kontxt_user_session['cart_data'] = $cartDataArray;
 			}
 
-			// current open order data
-			//$orderData = wc_get_orders();
-			//$kontxt_local_arr['order_data'] = $orderData;
+			$currentUserId = get_current_user_id();
+			if( $currentUserId ) {
+
+				$customerOrdersArray = wc_get_orders( array(
+					'meta_key' => '_customer_user',
+					'meta_value' => $currentUserId,
+					'post_status' => [ 'wc-completed' ],
+					'numberposts' => -1
+				) );
+				if ($customerOrdersArray ) {
+					$kontxt_user_session['completed_orders'] = $customerOrdersArray;
+				}
+			}
 
 		}
 
-		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
-
-		wp_enqueue_script( $this->plugin_name);
-
-
+		$this->kontxt_send_event( $kontxt_user_session, 'public_event', true );
 
 	}
 
@@ -168,9 +240,9 @@ class Kontxt_Public {
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_send_event( $eventData, $services, $silent = true ) {
+	public function kontxt_send_event( $eventData, $service, $silent = true ) {
 
-		check_ajax_referer( 'kontxt-ajax-string', 'security', false );
+		//error_log(print_r($eventData, true));
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
@@ -180,8 +252,8 @@ class Kontxt_Public {
 
         if ( !isset($apiKey) || $apiKey === '' ) {
 
-            $response_array['status'] = "error";
-            $response_array['message'] = "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first.";
+            error_log( "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first." );
+            return;
 
         }
 
@@ -205,17 +277,14 @@ class Kontxt_Public {
 
         if ( isset( $eventData ) && $eventData !== '' ) {
 
-        	$eventData = urlencode( sanitize_text_field( $eventData ) );
 	        $requestId = sanitize_text_field( $requestId );
-
-	        foreach ( $services as $service ) {
 
 	        	$service   = sanitize_text_field( $service );
 
 		        $requestBody = array(
 			        'api_uid'                => $apiUid,
 			        'api_key'                => $apiKey,
-			        'kontxt_text_to_analyze' => $eventData,
+			        'kontxt_text_to_analyze' => [$eventData],
 			        'service'                => $service,
 			        'request_id'             => $requestId,
 			        'current_user_username'  => $current_user_username,
@@ -225,11 +294,11 @@ class Kontxt_Public {
 		        );
 
 		        $args = array(
-			        'timeout'   => '0.01',
+			        'timeout'   => '1',
 		        	'body'      => $requestBody,
 			        'headers'   => 'Content-type: application/x-www-form-urlencoded',
                     'blocking'  => false,
-                    'method'    => 'PUT',
+                    'method'    => 'GET',
                     'sslverify' => false
 		        );
 
@@ -245,8 +314,8 @@ class Kontxt_Public {
 //			        @fwrite( $this->fp, $out );
 //		        }
 
-		        wp_remote_get( $this->api_host, $args );
-	        }
+		        wp_remote_request( $this->api_host, $args );
+
         }
     }
 
