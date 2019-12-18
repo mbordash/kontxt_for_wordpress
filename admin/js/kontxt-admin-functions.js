@@ -12,7 +12,7 @@ jQuery(function($) {
     jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
 
-        var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val()
+        var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val();
 
         kontxtExperimentFormPost( textToAnalyze )
 

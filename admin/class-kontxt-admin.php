@@ -175,7 +175,7 @@ class Kontxt_Admin {
                 'event_type'                => $dimension,
                 'current_user_username'     => $current_user_username,
                 'current_session_id'        => $current_session,
-                'user_class'                => 'admin',
+                'user_class'                => 'admin'
             );
 
 			$opts = array(
@@ -192,7 +192,7 @@ class Kontxt_Admin {
 			} else {
 
 				$response_array['status'] = "error";
-				$response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
+				$response_array['message'] = "Plugin Error. Could not get event data. Code received: " . $response['response']['code'];
 
 				return json_encode($response_array);
 
