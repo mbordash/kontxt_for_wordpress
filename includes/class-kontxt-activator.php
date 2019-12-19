@@ -23,6 +23,8 @@ class Kontxt_Activator {
 	 */
 	public function activate() {
 
+		error_log( 'Beginning Activation');
+
 		$option_name      = 'KONTXT';
 		$api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
 
@@ -52,7 +54,7 @@ class Kontxt_Activator {
 				'service'                   => $service
 			);
 
-			// error_log(print_r($requestBody, TRUE));
+			error_log( 'Request Body:: ' . print_r($requestBody, TRUE));
 
 			$opts = array(
 				'body'      => $requestBody,
@@ -60,6 +62,9 @@ class Kontxt_Activator {
 			);
 
 			$response = wp_remote_get($api_host, $opts);
+
+			error_log( 'Response Body:: ' . print_r($response, true) );
+
 
 			if( $response['response']['code'] === 200 ) {
 

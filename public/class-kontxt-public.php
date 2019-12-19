@@ -151,7 +151,7 @@ class Kontxt_Public {
 
 
 		// get commerce related major actions
-		if ( class_exists( 'woocommerce' ) ) {
+		if ( class_exists( 'WooCommerce', false )  ) {
 
 			// override page as shop home
 			if ( $searchQuery ) {
@@ -196,7 +196,7 @@ class Kontxt_Public {
 			}
 
 			// current cart data
-			if( WC()->cart->get_cart_contents_count() >= 1 ) {
+			if( is_object( WC()->cart ) ) {
 
 				$cartData = WC()->cart->get_cart_contents();
 

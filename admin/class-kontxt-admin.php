@@ -106,6 +106,7 @@ class Kontxt_Admin {
 
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_enqueue_script( 'jquery-ui-datepicker' );
 
 	}
 

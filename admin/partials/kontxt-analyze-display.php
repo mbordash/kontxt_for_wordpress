@@ -18,14 +18,220 @@
 
         <h2 class="nav-tab-wrapper current">
 
-            <a class="nav-tab nav-tab-active" href="javascript:;"><?php esc_attr_e( 'Experiment', 'wp_admin_style' ); ?></a>
-            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Analytics', 'wp_admin_style' ); ?></a>
-            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Deep Analytics', 'wp_admin_style' ); ?></a>
-
+            <a class="nav-tab" nav-tab-active" href="javascript:;"><?php esc_attr_e( 'Sentiment', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Emotion', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Intents', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Keywords', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Concepts', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Settings', 'wp_admin_style' ); ?></a>
 
         </h2>
 
-        <div class="inside">
+        <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+
+        <div id="sentiment" class="inside">
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div class="wrap">
+
+                        <div id="poststuff">
+
+                            <div class="postbox">
+
+                                <h2 id="analyze_results_title"></h2>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_chart"></div>
+
+                                </div>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_table"></div>
+
+                                </div>
+
+                            </div>
+                            <!-- .postbox -->
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <div id="emotion" class="inside hidden">
+            <h3>Emotion Analytics</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                            <div class="postbox">
+
+                                <h2 id="analyze_results_title"></h2>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_chart"></div>
+
+                                </div>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_table"></div>
+
+                                </div>
+
+                            </div>
+                            <!-- .postbox -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="intents" class="inside hidden">
+            <h3>Intent Analytics</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                            <div class="postbox">
+
+                                <h2 id="analyze_results_title"></h2>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_chart"></div>
+
+                                </div>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_table"></div>
+
+                                </div>
+
+                            </div>
+                            <!-- .postbox -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inside hidden">
+            <h3>Keywords</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                            <div class="postbox">
+
+                                <h2 id="analyze_results_title"></h2>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_chart"></div>
+
+                                </div>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_table"></div>
+
+                                </div>
+
+                            </div>
+                            <!-- .postbox -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inside hidden">
+            <h3>Concepts</h3>
+
+            <div id="kontxt-results-box" class="wrap">
+
+                <div id="kontxt-analyze-results-status" class="wrap"></div>
+
+                <div id="kontxt-analyze-results-success" class="hidden">
+
+                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+                    <div class="wrap">
+
+                        <div id="icon-options-general" class="icon32"></div>
+
+                        <div id="poststuff">
+
+                            <div class="postbox">
+
+                                <h2 id="analyze_results_title"></h2>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_chart"></div>
+
+                                </div>
+
+                                <div class="inside">
+
+                                    <div id="analyze_results_table"></div>
+
+                                </div>
+
+                            </div>
+                            <!-- .postbox -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inside hidden">
 
             <div id="kontxt-results-box" class="wrap">
 
@@ -156,72 +362,5 @@
 
         </div>
 
-        <div class="inside hidden">
-            <h3>Analytics</h3>
-
-            <div id="kontxt-results-box" class="wrap">
-
-                <form id="kontxt-analyze-input-form" action="" method="post" enctype="multipart/form-data">
-
-                    <div id="kontxt-analyze-input">
-
-                        <select id="event_type" name="event_type">
-                            <option value="sentiment">Sentiment</option>
-                            <option value="emotion">Emotion</option>
-                            <option value="keywords">Keywords</option>
-                            <option value="concepts">Concepts</option>
-                            <option value="intents">Intents</option>
-                        </select>
-
-                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Get Recent">
-
-                    </div>
-
-                </form>
-
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
-
-                <div id="kontxt-analyze-results-success" class="hidden">
-
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
-
-                    <div class="wrap">
-
-                        <div id="icon-options-general" class="icon32"></div>
-
-                        <div id="poststuff">
-
-                                <div class="postbox">
-
-                                    <h2 id="analyze_results_title"></h2>
-
-                                    <div class="inside">
-
-                                        <div id="analyze_results_chart"></div>
-
-                                    </div>
-
-                                    <div class="inside">
-
-                                        <div id="analyze_results_table"></div>
-
-                                    </div>
-
-                                </div>
-                                <!-- .postbox -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="inside hidden">
-            <h3>Deep Analytics</h3>
-
-            <div id="kontxt-results-box" class="wrap">
-
-                <h4>Coming Soon! KONTXT Deep Analytics will provide customer journey analytics, trend forecasting and other intelligence based on our unique machine learning models.</h4>
-
-            </div>
-        </div>
     </div>
 </div>
