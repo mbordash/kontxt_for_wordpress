@@ -13,43 +13,6 @@
  */
 class Kontxt_Activator {
 
-
-	private $api_host_only;
-	private $api_host_uri;
-	private $api_host_proto;
-	private $api_host_port;
-	private $plugin_name;
-	private $version;
-	private $option_name;
-	private $api_host;
-
-	/**
-	 * Kontxt_Public constructor.
-	 *
-	 * @param $plugin_name
-	 * @param $version
-	 * @param $option_name
-	 * @param $api_host
-	 * @param $api_host_only
-	 * @param $api_host_uri
-	 * @param $api_host_proto
-	 * @param $api_host_port
-	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
-	{
-
-		$this->plugin_name      = $plugin_name;
-		$this->version          = $version;
-		$this->option_name      = $option_name;
-		$this->api_host         = $api_host;
-		$this->api_host_only    = $api_host_only;
-		$this->api_host_uri     = $api_host_uri;
-		$this->api_host_proto   = $api_host_proto;
-		$this->api_host_port    = $api_host_port;
-
-	}
-
-
 	/**
 	 * Short Description. (use period)
 	 *
@@ -60,11 +23,15 @@ class Kontxt_Activator {
 	 */
 	public function activate() {
 
+		$option_name      = 'KONTXT';
+		$api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
+
+
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
 
-		$apiKey = get_option( $this->option_name . '_apikey' );
-		$apiUid = get_option( $this->option_name . '_apiuid' );
+		$apiKey = get_option( $option_name . '_apikey' );
+		$apiUid = get_option( $option_name . '_apiuid' );
 
 		if( !isset($apiKey) || $apiKey === '' ) {
 
