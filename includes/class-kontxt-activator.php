@@ -65,8 +65,8 @@ class Kontxt_Activator {
 
 				$apiKey = str_replace( '"', '', $response['body']);
 
-				update_option( $option_name . '_apikey', $apiUid);
-				update_option( $option_name . '_apiuid', $apiKey);
+				update_option( $option_name . '_apikey', $apiKey);
+				update_option( $option_name . '_apiuid', $apiUid);
 
 			} else {
 
