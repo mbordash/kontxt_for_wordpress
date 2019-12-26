@@ -281,8 +281,6 @@ class Kontxt_Admin {
                     'silent'                    => $silent
             );
 
-            error_log(print_f($requestBody, true));
-
             $opts = array(
                 'body'      => $requestBody,
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
