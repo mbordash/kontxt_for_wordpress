@@ -23,18 +23,15 @@
             <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Intents', 'wp_admin_style' ); ?></a>
             <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Keywords', 'wp_admin_style' ); ?></a>
             <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Concepts', 'wp_admin_style' ); ?></a>
-            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Settings', 'wp_admin_style' ); ?></a>
+            <a class="nav-tab" style="float: right" href="javascript:;"><?php esc_attr_e( 'Settings', 'wp_admin_style' ); ?></a>
 
         </h2>
 
-        <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
-
-
         <div id="sentiment" class="inside">
 
-            <div id="kontxt-results-box" class="wrap">
+            <div id="sentiment-results-box" class="wrap">
 
-                <div id="kontxt-analyze-results-success" class="hidden">
+                <div id="sentiment-results-success" class="hidden">
 
                     <div class="wrap">
 
@@ -42,17 +39,30 @@
 
                             <div class="postbox">
 
-                                <h2 id="analyze_results_title"></h2>
+                                <h2>Sentiment Analytics</h2>
+
+                                <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
+
+                                    <div id="kontxt-input-text">
+
+                                        Date Range: <input type="text" style="" name="date_range" id="date_range" value="" placeholder="YYYY-MM-DD - YYYY-MM-DD" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]) - [0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])">
+
+                                        <input id="kontxt-experiment-input-button" class="button-primary" type="submit" value="Get " />
+
+                                    </div>
+
+                                </form>
+
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_chart"></div>
+                                    <div id="sentiment_results_chart"></div>
 
                                 </div>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_table"></div>
+                                    <div id="sentiment_results_table"></div>
 
                                 </div>
 
@@ -60,8 +70,6 @@
                             <!-- .postbox -->
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
@@ -70,13 +78,9 @@
         <div id="emotion" class="inside hidden">
             <h3>Emotion Analytics</h3>
 
-            <div id="kontxt-results-box" class="wrap">
+            <div id="emotion-results-box" class="wrap">
 
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
-
-                <div id="kontxt-analyze-results-success" class="hidden">
-
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+                <div id="emotion-results-success" class="hidden">
 
                     <div class="wrap">
 
@@ -86,17 +90,17 @@
 
                             <div class="postbox">
 
-                                <h2 id="analyze_results_title"></h2>
+                                <h2>Emotion analytics</h2>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_chart"></div>
+                                    <div id="emotion_results_chart"></div>
 
                                 </div>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_table"></div>
+                                    <div id="emotion_results_table"></div>
 
                                 </div>
 
@@ -107,17 +111,14 @@
                 </div>
             </div>
         </div>
+
 
         <div id="intents" class="inside hidden">
             <h3>Intent Analytics</h3>
 
-            <div id="kontxt-results-box" class="wrap">
+            <div id="intenst-results-box" class="wrap">
 
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
-
-                <div id="kontxt-analyze-results-success" class="hidden">
-
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+                <div id="intents-results-success" class="hidden">
 
                     <div class="wrap">
 
@@ -127,17 +128,17 @@
 
                             <div class="postbox">
 
-                                <h2 id="analyze_results_title"></h2>
+                                <h2 id="intents_results_title"></h2>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_chart"></div>
+                                    <div id="intents_results_chart"></div>
 
                                 </div>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_table"></div>
+                                    <div id="intent_results_table"></div>
 
                                 </div>
 
@@ -149,16 +150,13 @@
             </div>
         </div>
 
-        <div class="inside hidden">
+
+        <div id="keywords" class="inside hidden">
             <h3>Keywords</h3>
 
-            <div id="kontxt-results-box" class="wrap">
+            <div id="keywords-results-box" class="wrap">
 
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
-
-                <div id="kontxt-analyze-results-success" class="hidden">
-
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+                <div id="keywords-results-success" class="hidden">
 
                     <div class="wrap">
 
@@ -168,17 +166,17 @@
 
                             <div class="postbox">
 
-                                <h2 id="analyze_results_title"></h2>
+                                <h2 id="keywords_results_title"></h2>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_chart"></div>
+                                    <div id="keywords_results_chart"></div>
 
                                 </div>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_table"></div>
+                                    <div id="keywords_results_table"></div>
 
                                 </div>
 
@@ -190,16 +188,13 @@
             </div>
         </div>
 
-        <div class="inside hidden">
+
+        <div id="concepts" class="inside hidden">
             <h3>Concepts</h3>
 
-            <div id="kontxt-results-box" class="wrap">
+            <div id="concepts-results-box" class="wrap">
 
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
-
-                <div id="kontxt-analyze-results-success" class="hidden">
-
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+                <div id="concepts-results-success" class="hidden">
 
                     <div class="wrap">
 
@@ -209,17 +204,17 @@
 
                             <div class="postbox">
 
-                                <h2 id="analyze_results_title"></h2>
+                                <h2 id="concepts_results_title"></h2>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_chart"></div>
+                                    <div id="concepts_results_chart"></div>
 
                                 </div>
 
                                 <div class="inside">
 
-                                    <div id="analyze_results_table"></div>
+                                    <div id="concepts_results_table"></div>
 
                                 </div>
 
@@ -249,16 +244,9 @@
 
                 </form>
 
-
-                <div id="kontxt-results-status" class="wrap"></div>
-
                 <div id="kontxt-results-success" class="hidden">
 
-                    <div id="spinner" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
-
                     <div class="wrap">
-
-                        <div id="icon-options-general" class="icon32"></div>
 
                         <div id="poststuff">
 
@@ -363,4 +351,9 @@
         </div>
 
     </div>
+
+    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+    <div id="kontxt-analyze-results-status" class="wrap"></div>
+
 </div>

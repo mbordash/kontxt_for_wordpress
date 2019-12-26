@@ -1,6 +1,14 @@
 jQuery(function($) {
 
-    $( "#datepicker" ).datepicker();
+    $.datepicker.setDefaults({
+        showOn: "both",
+        buttonImageOnly: true,
+        buttonImage: "/wp-content/plugins/kontxt-for-wordpress/admin/css/images/calendar.gif",
+        buttonText: "Calendar"
+    });
+
+    $( "#date_range" ).datepicker();
+
 
     // Experiments UI
 
@@ -14,60 +22,14 @@ jQuery(function($) {
     jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
 
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
+
         var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val();
 
         kontxtExperimentFormPost( textToAnalyze )
 
     });
 
-    // tab controller navigation
-
-    var navTabs = jQuery( '#kontxt-results-navigation' ).children( '.nav-tab-wrapper' ),
-        tabIndex = null;
-
-    navTabs.children().each(function() {
-
-        let dimension = 'sentiment';
-
-        kontxtAnalyze( dimension );
-
-        $(this).on('click', function (evt) {
-
-            evt.preventDefault();
-
-            // If this tab is not active...
-
-
-            if (!$(this).hasClass('nav-tab-active')) {
-
-                dimension = $(this).text().toLowerCase();
-
-                // Unmark the current tab and mark the new one as active
-                $('.nav-tab-active').removeClass('nav-tab-active');
-                $(this).addClass('nav-tab-active');
-
-                // Save the index of the tab that's just been marked as active. It will be 0 - 3.
-                tabIndex = jQuery(this).index();
-
-                // Hide the old active content
-                $('#kontxt-results-navigation')
-                    .children('div:not( .inside.hidden )')
-                    .addClass('hidden');
-
-                $('#kontxt-results-navigation')
-                    .children('div:nth-child(' + (tabIndex) + ')')
-                    .addClass('hidden');
-
-                // And display the new content
-                $('#kontxt-results-navigation')
-                    .children('div:nth-child( ' + (tabIndex + 2) + ')')
-                    .removeClass('hidden');
-
-                kontxtAnalyze(dimension);
-
-            }
-        });
-    });
 });
 
 function kontxtAnalyze( dimension ) {
@@ -75,7 +37,6 @@ function kontxtAnalyze( dimension ) {
     jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
 
     jQuery('#kontxt-analyze-results-status').hide();
-    jQuery('#kontxt-analyze-results-success').show();
 
     // prepare data for posting
 
@@ -97,13 +58,8 @@ function kontxtAnalyze( dimension ) {
 
             if( response.status == 'error' ) {
                 jQuery('#kontxt-analyze-results-status').html(response.message).show();
-                jQuery('#kontxt-analyze-results-success').hide();
                 return false;
             }
-
-            Plotly.purge('analyze_results_chart');
-
-            jQuery('#analyze_results_title').html(dimension + ' analytics ').css('text-transform', 'capitalize');
 
             var jsonResponse = jQuery.parseJSON(response);
             // var jsonResponse = response;
@@ -147,7 +103,9 @@ function kontxtAnalyze( dimension ) {
                         }
                     }
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
+                    jQuery('#sentiment-results-success').show();
+
+                    contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
@@ -192,7 +150,9 @@ function kontxtAnalyze( dimension ) {
                         }
                     }
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name</th><th>Count</th></thead><tbody>';
+                    jQuery('#intents-results-success').show();
+
+                    contentTable = '<table id="intents_results_id" class="widefat"><thead><th>Date</th><th>Name</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td>';
@@ -275,9 +235,9 @@ function kontxtAnalyze( dimension ) {
                         }
                     }
 
-                    console.log(data);
+                    jQuery('#emotion-results-success').show();
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name/Average</th></thead><tbody>';
+                    contentTable = '<table id="emotion_results_id" class="widefat"><thead><th>Date</th><th>Name/Average</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
@@ -289,7 +249,9 @@ function kontxtAnalyze( dimension ) {
 
                 case 'keywords':
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
+                    jQuery('#keywords-results-success').show();
+
+                    contentTable = '<table id="keywords_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['keywords']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
@@ -301,7 +263,9 @@ function kontxtAnalyze( dimension ) {
 
                 case 'concepts':
 
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted concept</th><th>Count</th></thead><tbody>';
+                    jQuery('#concepts-results-success').show();
+
+                    contentTable = '<table id="concepts_results_id" class="widefat"><thead><th>Extracted concept</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
@@ -313,10 +277,10 @@ function kontxtAnalyze( dimension ) {
             }
 
             if( data.length > 0 ) {
-                Plotly.newPlot('analyze_results_chart', data, layout);
+                Plotly.newPlot( dimension + '_results_chart', data, layout );
             }
 
-            jQuery('#analyze_results_table').html( contentTable ).show();
+            jQuery('#' + dimension + '_results_table').html( contentTable ).show();
 
             jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
         },
@@ -343,7 +307,6 @@ function kontxtExperimentFormPost(return_text) {
         return false;
     }
 
-    jQuery('#kontxt-results-status').hide();
     jQuery('#kontxt-results-success').show();
 
     // jQuery('#kontxt-text-to-analyze').val(return_text);
@@ -369,7 +332,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -406,7 +369,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -441,7 +404,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -475,7 +438,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -553,7 +516,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }

@@ -313,14 +313,139 @@ class Kontxt_Admin {
 	public function add_management_page()
 	{
 
-		$this->plugin_screen_hook_suffix = add_management_page(
-			__( 'KONTXT Analyze', 'kontxt' ),
-			__( 'KONTXT Analyze', 'kontxt' ),
+
+		$this->plugin_screen_hook_suffix = add_menu_page(
+			__( 'KONTXT', 'kontxt' ),
+			__( 'KONTXT', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name,
+			array( $this, 'display_analyze_page' ),
+			'dashicons-analytics',
+			30
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'Dashboard', 'kontxt' ),
+			__( 'Dashboard', 'kontxt' ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' )
 		);
 
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Sentiment', 'kontxt' ),
+			__( 'Sentiment', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_sentiment",
+			array( $this, 'display_sentiment_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Emotion', 'kontxt' ),
+			__( 'Emotion', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_emotion",
+			array( $this, 'display_emotion_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Intents', 'kontxt' ),
+			__( 'Intents', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_intents",
+			array( $this, 'display_intents_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT concepts', 'kontxt' ),
+			__( 'Concepts', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_concepts",
+			array( $this, 'display_concepts_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Keywords', 'kontxt' ),
+			__( 'Keywords', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_keywords",
+			array( $this, 'display_keywords_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Experiment', 'kontxt' ),
+			__( 'Experiment', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_experiment",
+			array( $this, 'display_experiment_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Settings', 'kontxt' ),
+			__( 'Settings', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_settings",
+			array( $this, 'display_options_page' )
+		);
+
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_sentiment_page()
+	{
+		include_once 'partials/kontxt-sentiment-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_emotion_page()
+	{
+		include_once 'partials/kontxt-emotion-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_intents_page()
+	{
+		include_once 'partials/kontxt-intents-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_concepts_page()
+	{
+		include_once 'partials/kontxt-concepts-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_keywords_page()
+	{
+		include_once 'partials/kontxt-keywords-display.php';
 	}
 
 	/**
@@ -333,23 +458,15 @@ class Kontxt_Admin {
 		include_once 'partials/kontxt-analyze-display.php';
 	}
 
-    /**
-     * Add an options page under the Settings submenu
-     *
-     * @since  1.0.0
-     */
-    public function add_options_page()
-    {
-
-        $this->plugin_screen_hook_suffix = add_options_page(
-            __( 'KONTXT Settings', 'kontxt' ),
-            __( 'KONTXT', 'kontxt' ),
-            'manage_options',
-            $this->plugin_name,
-            array( $this, 'display_options_page' )
-        );
-
-    }
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_experiment_page()
+	{
+		include_once 'partials/kontxt-experiment-display.php';
+	}
 
     /**
      * Render the options page for plugin
