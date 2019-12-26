@@ -1,24 +1,15 @@
 jQuery(function($) {
 
-    $.datepicker.setDefaults({
-        showOn: "both",
-        buttonImageOnly: true,
-        buttonImage: "/wp-content/plugins/kontxt-for-wordpress/admin/css/images/calendar.gif",
-        buttonText: "Calendar"
-    });
-
-    $( "#date_range" ).datepicker();
-
+    $( "#date_from" ).datepicker();
+    $( "#date_to" ).datepicker();
 
     // Experiments UI
-
     document.addEventListener('visibilitychange', () => {
         console.log(document.visibilityState);
         window.dispatchEvent(new Event('resize'));
     });
 
     // capture KONTXT form post and pass to handler
-
     jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
 
@@ -27,12 +18,25 @@ jQuery(function($) {
         var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val();
 
         kontxtExperimentFormPost( textToAnalyze )
+    });
+
+    // capture date range redraw
+    jQuery( '#kontxt-events-date' ).click( function( e ) {
+        e.preventDefault();
+
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
+
+        var dimension =  jQuery( '#dimension' ).val();
+        var date_from =  jQuery( '#date_from' ).val();
+        var date_to =  jQuery( '#date_to' ).val();
+
+        kontxtAnalyze( dimension, date_from, date_to )
 
     });
 
 });
 
-function kontxtAnalyze( dimension ) {
+function kontxtAnalyze( dimension, date_from, date_to) {
 
     jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
 
@@ -43,7 +47,9 @@ function kontxtAnalyze( dimension ) {
     var data = jQuery.param({
         'action':       'kontxt_analyze_results',
         'apikey':       kontxtAjaxObject.apikey,
-        'dimension':    dimension
+        'dimension':    dimension,
+        'from_date':    date_from,
+        'to_date':      date_to
     });
 
     var security = kontxtAjaxObject.security;
@@ -272,6 +278,24 @@ function kontxtAnalyze( dimension ) {
 
                     }
                     contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'latestActivity':
+
+                    jQuery('#activity-results-success').show();
+
+                    contentTable = '<table id="activity_results_id" class="widefat"><thead><th>Event type</th><th>Event key</th><th>Event value</th><th>Timestamp</th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_type']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_key']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['created'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    console.log(contentTable);
 
                     break;
             }

@@ -16,6 +16,26 @@
 
     <div id="sentiment" class="inside">
 
+        <div id="kontxt-results-box" class="wrap">
+
+            <h4>Enter some content and let KONTXT analyze it for you</h4>
+
+            <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
+                <input id="dimension" name="dimension" type="hidden" value="sentiment" />
+
+                <div id="kontxt-input-text">
+
+                    Date From: <input type="text" style="" name="date_from" id="date_from" value="" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+                    Date To: <input type="text" style="" name="date_to" id="date_to" value="" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+
+                    <input id="kontxt-events-date" class="button-primary" type="submit" value="Get " />
+
+                </div>
+
+            </form>
+
+        </div>
+
         <div id="sentiment-results-box" class="wrap">
 
             <div id="sentiment-results-success" class="hidden">
@@ -25,19 +45,6 @@
                     <div id="poststuff">
 
                         <div class="postbox">
-
-                            <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
-
-                                <div id="kontxt-input-text">
-
-                                    Date Range: <input type="text" style="" name="date_range" id="date_range" value="" placeholder="YYYY-MM-DD - YYYY-MM-DD" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]) - [0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])">
-
-                                    <input id="kontxt-experiment-input-button" class="button-primary" type="submit" value="Get " />
-
-                                </div>
-
-                            </form>
-
 
                             <div class="inside">
 

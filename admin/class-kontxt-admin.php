@@ -126,7 +126,7 @@ class Kontxt_Admin {
 	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
 
 		    //header('Content-type: application/json');
-		    echo $this->kontxt_get_results( $_POST['dimension'] );
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'] );
 
 	    }
 
@@ -134,7 +134,8 @@ class Kontxt_Admin {
     }
 
 
-	public function kontxt_get_results( $dimension ) {
+	public function kontxt_get_results( $dimension, $from_date, $to_date ) {
+
 
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
@@ -154,7 +155,7 @@ class Kontxt_Admin {
 
 		if ( isset( $dimension ) && $dimension !== '' ) {
 
-		    $dimension = sanitize_text_field( $dimension );
+			$dimension = sanitize_text_field( $dimension );
 
 			// get current user info, if no user, set as session
 
@@ -176,13 +177,18 @@ class Kontxt_Admin {
                 'event_type'                => $dimension,
                 'current_user_username'     => $current_user_username,
                 'current_session_id'        => $current_session,
-                'user_class'                => 'admin'
+                'user_class'                => 'admin',
+                'from_date'                 => $from_date,
+                'to_date'                   => $to_date
             );
 
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
+
+			error_log(print_r($requestBody,true));
+
 
 			$response = wp_remote_get($this->api_host, $opts);
 
@@ -275,6 +281,8 @@ class Kontxt_Admin {
                     'silent'                    => $silent
             );
 
+            error_log(print_f($requestBody, true));
+
             $opts = array(
                 'body'      => $requestBody,
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
@@ -326,8 +334,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'Dashboard', 'kontxt' ),
-			__( 'Dashboard', 'kontxt' ),
+			__( 'Latest Activity', 'kontxt' ),
+			__( 'Latest Activity', 'kontxt' ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' )
