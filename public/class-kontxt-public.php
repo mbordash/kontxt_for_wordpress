@@ -88,7 +88,18 @@ class Kontxt_Public {
 		 * class.
 		 */
 
-		// wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+
+		$kontxt_ajax_info = array(
+			'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+			'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
+			'action' => 'kontxt_send_event'
+		);
+
+		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
+		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
+		
+		wp_enqueue_script( $this->plugin_name);
 
 	}
 
@@ -213,6 +224,7 @@ class Kontxt_Public {
 				$kontxt_user_session['cart_data'] = $cartDataArray;
 			}
 
+			// let's get the current user ID and inspect completed orders
 			$currentUserId = get_current_user_id();
 			if( $currentUserId ) {
 
@@ -229,20 +241,25 @@ class Kontxt_Public {
 
 		}
 
-		$this->kontxt_send_event( $kontxt_user_session, 'public_event', true );
+		// $this->kontxt_send_event( $kontxt_user_session, 'public_event', true );
+
+		return $kontxt_user_session;
 
 	}
 
 	/**
 	 * @param $eventData
-	 * @param $services
+	 * @param string $service
 	 * @param bool $silent
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_send_event( $eventData, $service, $silent = true ) {
+	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
 
-		//error_log(print_r($eventData, true));
+		if( $_POST['eventData'] ) {
+			check_ajax_referer( 'kontxt-ajax-string', 'security', false );
+			$eventData = json_decode( html_entity_decode( stripslashes( $_POST['eventData'] ) ) );
+		}
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
@@ -251,17 +268,13 @@ class Kontxt_Public {
 		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
-
             error_log( "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first." );
             return;
-
         }
 
 		if( !isset( $current_session ) ) {
-
 			$current_session = $this->genKey();
 			setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
-
 		}
 
 		if( !isset( $requestId ) ) {

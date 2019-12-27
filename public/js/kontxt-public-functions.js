@@ -3,27 +3,22 @@ jQuery(function($) {
     // check for events (viewProductID, pageID, searchText, reviewTextPresent,  )
     // loop through API calls to cognitive
 
-    var data = jQuery.param({
-        'action': 'kontxt_send_event',
-        'apikey': kontxtAjaxObject.apikey,
-        'request_id': makeid(20)
-    });
-
-    var security = kontxtAjaxObject.security;
+    var security = kontxtAjaxObject['security'];
+    var postUrl =  kontxtAjaxObject['ajaxurl'];
 
     jQuery.ajax({
         type: 'post',
-        url: kontxtAjaxObject.ajaxurl,
+        url: postUrl,
         security: security,
-        data: data + '&service=intents',
+        data: 'action=kontxt_send_event&eventData=' + encodeURIComponent(JSON.stringify(kontxtUserObject)),
         action: 'kontxt_send_event',
         cache: false,
         success: function (response) {
 
         }
-    })
+    });
 
-})
+});
 
 
 function makeid(length) {
