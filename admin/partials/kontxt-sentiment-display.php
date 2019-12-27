@@ -18,8 +18,6 @@
 
         <div id="kontxt-results-box" class="wrap">
 
-            <h4>Enter some content and let KONTXT analyze it for you</h4>
-
             <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
                 <input id="dimension" name="dimension" type="hidden" value="sentiment" />
 

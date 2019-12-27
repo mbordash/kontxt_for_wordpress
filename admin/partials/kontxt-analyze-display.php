@@ -43,4 +43,8 @@
         });
     </script>
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+    <div id="kontxt-analyze-results-status" class="wrap"></div>
+
 </div>
