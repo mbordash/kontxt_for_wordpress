@@ -136,7 +136,6 @@ class Kontxt_Admin {
 
 	public function kontxt_get_results( $dimension, $from_date, $to_date ) {
 
-
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
@@ -186,9 +185,6 @@ class Kontxt_Admin {
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
-
-			error_log(print_r($requestBody,true));
-
 
 			$response = wp_remote_get($this->api_host, $opts);
 

@@ -116,7 +116,7 @@ class Kontxt_Public {
 			}
 		}
 
-		// send directly to backend
+		// send directly to backend, don't bother with js async
 		$this->kontxt_send_event( $kontxt_comment_arr, 'public_event', true );
 
 	}

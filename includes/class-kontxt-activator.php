@@ -35,7 +35,7 @@ class Kontxt_Activator {
 		$apiKey = get_option( $option_name . '_apikey' );
 		$apiUid = get_option( $option_name . '_apiuid' );
 
-		if( !isset($apiKey) || $apiKey === '' ) {
+		if( !isset($apiKey) || $apiKey === '' || $apiKey === false) {
 
 			// install site and get a key from kontxt
 
