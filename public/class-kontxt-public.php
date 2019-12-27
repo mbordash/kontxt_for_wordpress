@@ -300,7 +300,7 @@ class Kontxt_Public {
 			        'kontxt_text_to_analyze' => [$eventData],
 			        'service'                => $service,
 			        'request_id'             => $requestId,
-			        'current_user_username'  => crypt($current_user_username),
+			        'current_user_username'  => hash('SHA256', $current_user_username),
 			        'current_session_id'     => $current_session,
 			        'user_class'             => 'public',
 			        'silent'                 => $silent
