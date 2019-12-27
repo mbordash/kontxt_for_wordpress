@@ -98,7 +98,7 @@ class Kontxt_Public {
 
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
 		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
-		
+
 		wp_enqueue_script( $this->plugin_name);
 
 	}
@@ -300,7 +300,7 @@ class Kontxt_Public {
 			        'kontxt_text_to_analyze' => [$eventData],
 			        'service'                => $service,
 			        'request_id'             => $requestId,
-			        'current_user_username'  => $current_user_username,
+			        'current_user_username'  => crypt($current_user_username),
 			        'current_session_id'     => $current_session,
 			        'user_class'             => 'public',
 			        'silent'                 => $silent
