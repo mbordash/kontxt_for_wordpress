@@ -30,11 +30,146 @@ jQuery(function($) {
         var date_from =  jQuery( '#date_from' ).val();
         var date_to =  jQuery( '#date_to' ).val();
 
-        kontxtAnalyze( dimension, date_from, date_to )
+        kontxtAnalyze( dimension, date_from, date_to );
+    });
 
+    // capture intent redraw
+    jQuery( '#kontxt-intent-overlay' ).click( function( e ) {
+        e.preventDefault();
+
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
+
+        var overlay =  jQuery( '#overlay' ).val();
+
+        if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
+            var date_from =  jQuery( '#date_from' ).val();
+        }
+        if ( Date.parse( jQuery( '#date_to' ).val() ) ) {
+            var date_to =  jQuery( '#date_to' ).val();
+        }
+
+        kontxtOverlay( overlay, date_from, date_to );
+    });
+
+    // capture intent filter
+    jQuery( '#kontxt-intent-filter' ).click( function( e ) {
+        e.preventDefault();
+
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
+
+        var filter =  jQuery( '#filter' ).val();
+
+        if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
+            var date_from =  jQuery( '#date_from' ).val();
+        }
+        if ( Date.parse( jQuery( '#date_to' ).val() ) ) {
+            var date_to =  jQuery( '#date_to' ).val();
+        }
+
+        kontxtFilter( filter, date_from, date_to );
     });
 
 });
+
+function kontxtFilter( filter, date_from, date_to ) {
+
+    var data = jQuery.param({
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    'sentimentByIntent',
+        'filter':       filter,
+        'from_date':    date_from,
+        'to_date':      date_to
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    console.log(data);
+
+}
+
+function kontxtOverlay( overlay, date_from, date_to ) {
+
+    var data = jQuery.param({
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    overlay,
+        'from_date':    date_from,
+        'to_date':      date_to
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    console.log(data);
+
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data,
+        cache: false,
+        success: function (response) {
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
+            var eventDates = jsonResponse.map(function (e) {
+                return Date.parse(e.event_date);
+            });
+
+            var eventValues = jsonResponse.map(function (e) {
+                return e.event_value;
+            });
+
+            var groupBy = function (xs, key) {
+                return xs.reduce(function (rv, x) {
+                    (rv[x[key]] = rv[x[key]] || []).push(x);
+                    return rv;
+                }, {});
+            };
+
+            let data2 = [];
+
+            var groupByIntent = groupBy(jsonResponse, 'event_value_name');
+
+            for (var elem in groupByIntent) {
+
+                var eventValueDate = groupByIntent[elem].map(function (e) {
+                    return Date.parse(e.event_date);
+                });
+
+                var eventValueCount = groupByIntent[elem].map(function (e) {
+                    return e.event_value_count;
+                });
+
+                data2.push({
+                    x: eventValueDate,
+                    y: eventValueCount,
+                    name: elem,
+                    stackgroup: 'one',
+                    yaxis: 'y2',
+                });
+
+            }
+
+            console.log(data2);
+
+            Plotly.addTraces(
+                'sentiment_results_chart',
+                data2
+            )
+            Plotly.relayout(
+                'sentiment_results_chart',
+                {
+                    ['yaxis2']: {
+                        overlaying: 'y1',
+                        side: 'right'
+                    }
+                }
+            );
+        }
+    });
+}
 
 function kontxtAnalyze( dimension, date_from, date_to) {
 
@@ -96,7 +231,8 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                         type: 'scatter',
                         fill: 'tozeroy',
                         y: eventValues,
-                        x: eventDates
+                        x: eventDates,
+                        name: 'Sentiment'
                     }];
 
                     layout = {
@@ -152,7 +288,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                             type: 'date'
                         },
                         yaxis: {
-                            title: 'Frequency'
+                            title: 'Frequency of top intent'
                         }
                     }
 
@@ -235,9 +371,8 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                             type: 'date'
                         },
                         yaxis: {
-                            title: 'Emotion distribution',
-                            tickformat: ',.0',
-                            range: [0,100]
+                            title: 'Weighted emotions',
+                            tickformat: ',.0'
                         }
                     }
 
@@ -363,11 +498,10 @@ function kontxtExperimentFormPost(return_text) {
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            var contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th><th>Accurate?</th></th></thead><tbody>';
+            var contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th></th></thead><tbody>';
             for( var elem in jsonResponse ) {
                 contentTable  += '<tr><td>' + jsonResponse[elem]['class_name'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td>';
-                contentTable  += '<td><a href="">Yes</a> | <a href="">No</a></td></tr>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td></tr>';
 
             }
             contentTable += '</tbody></table>';
