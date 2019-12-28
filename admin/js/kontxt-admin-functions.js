@@ -86,6 +86,77 @@ function kontxtFilter( filter, date_from, date_to ) {
 
     console.log(data);
 
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data,
+        cache: false,
+        success: function (response) {
+
+            if (response.status == 'error') {
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                return false;
+            }
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
+            var eventDates = jsonResponse.map(function (e) {
+                return Date.parse(e.event_date);
+            });
+
+            var eventValues = jsonResponse.map(function (e) {
+                return e.event_value;
+            });
+
+            let data2 = [];
+            let layout;
+            let contentTable;
+
+            data2 = [{
+                type: 'scatter',
+                fill: 'tozeroy',
+                y: eventValues,
+                x: eventDates,
+                name: 'Sentiment'
+            }];
+            console.log(data2);
+
+            layout2 = {
+                yaxis: {
+                    range: [-1, 1]
+                },
+                xaxis: {
+                    autorange: true,
+                    type: 'date'
+                }
+            }
+
+            jQuery('#sentiment-results-success').show();
+
+            contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
+            for (var elem in jsonResponse) {
+                contentTable += '<tr><td>' + jsonResponse[elem]['event_date'] + '</td>';
+                contentTable += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
+
+            }
+            contentTable += '</tbody></table>';
+
+            if (data2.length > 0) {
+                console.log('here');
+                Plotly.newPlot('sentiment_results_chart', data2, layout2);
+            }
+
+            jQuery('#sentiment_results_table').html(contentTable).show();
+
+            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+        },
+        error: function (response) {
+            jQuery('#kontxt-results-status').html(response.message);
+            return false;
+        }
+    });
 }
 
 function kontxtOverlay( overlay, date_from, date_to ) {

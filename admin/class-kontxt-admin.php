@@ -126,7 +126,7 @@ class Kontxt_Admin {
 	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
 
 		    //header('Content-type: application/json');
-		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'] );
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $_POST['filter'] );
 
 	    }
 
@@ -134,7 +134,7 @@ class Kontxt_Admin {
     }
 
 
-	public function kontxt_get_results( $dimension, $from_date, $to_date ) {
+	public function kontxt_get_results( $dimension, $from_date, $to_date, $filter = '' ) {
 
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
@@ -176,10 +176,24 @@ class Kontxt_Admin {
                 'event_type'                => $dimension,
                 'current_user_username'     => $current_user_username,
                 'current_session_id'        => $current_session,
-                'user_class'                => 'admin',
-                'from_date'                 => $from_date,
-                'to_date'                   => $to_date
+                'user_class'                => 'admin'
             );
+
+			if( $filter ) {
+				$filter                = sanitize_text_Field( $filter );
+				$requestBody['filter'] = $filter;
+			}
+
+			if( $from_date ) {
+				$from_date                = sanitize_text_Field( $from_date );
+				$requestBody['from_date'] = $from_date;
+			}
+
+			if( $to_date ) {
+				$to_date                = sanitize_text_Field( $to_date );
+				$requestBody['to_date'] = $to_date;
+			}
+
 
 			$opts = array(
 				'body'      => $requestBody,
