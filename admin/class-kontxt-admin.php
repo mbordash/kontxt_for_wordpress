@@ -342,8 +342,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'Latest Activity', 'kontxt' ),
-			__( 'Latest Activity', 'kontxt' ),
+			__( 'Dashboard', 'kontxt' ),
+			__( 'Dashboard', 'kontxt' ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' )
@@ -374,15 +374,6 @@ class Kontxt_Admin {
 			'manage_options',
 			$this->plugin_name . "_intents",
 			array( $this, 'display_intents_page' )
-		);
-
-		$this->plugin_screen_hook_suffix = add_submenu_page(
-			$this->plugin_name,
-			__( 'KONTXT concepts', 'kontxt' ),
-			__( 'Concepts', 'kontxt' ),
-			'manage_options',
-			$this->plugin_name . "_concepts",
-			array( $this, 'display_concepts_page' )
 		);
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
@@ -509,15 +500,6 @@ class Kontxt_Admin {
             $this->plugin_name
         );
 
-        add_settings_field(
-            $this->option_name . '_datasharing',
-            __( 'Opt-in to deep analytics and share usage data with KONTXT?', 'kontxt' ),
-            array( $this, $this->option_name . '_datasharing_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_datasharing' )
-        );
-
 	    add_settings_field(
 		    $this->option_name . '_apiuid',
 		    __( 'API User ID', 'kontxt' ),
@@ -546,7 +528,6 @@ class Kontxt_Admin {
 	    );
 
 
-        register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_text' ) );
@@ -627,34 +608,6 @@ class Kontxt_Admin {
 
 		<?php
 	}
-
-
-    /**
-     * Render the radio input field for datasharing option
-     *
-     * @since  1.0.0
-     */
-    public function kontxt_datasharing_cb()
-    {
-
-        $datasharing = get_option( $this->option_name . '_datasharing' );
-
-        ?>
-
-        <fieldset>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" id="<?php echo $this->option_name . '_datasharing' ?>" value="yes" <?php checked( $datasharing, 'yes' ); ?>>
-                <?php _e( 'Yes', 'kontxt' ); ?>
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" value="no" <?php checked( $datasharing, 'no' ); ?>>
-                <?php _e( 'No', 'kontxt' ); ?>
-            </label>
-        </fieldset>
-
-        <?php
-    }
 
 
     /**

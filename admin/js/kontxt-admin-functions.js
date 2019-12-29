@@ -84,8 +84,6 @@ function kontxtFilter( filter, date_from, date_to ) {
 
     var security = kontxtAjaxObject.security;
 
-    console.log(data);
-
     jQuery.ajax({
         type: 'post',
         url: ajaxurl,
@@ -121,7 +119,6 @@ function kontxtFilter( filter, date_from, date_to ) {
                 x: eventDates,
                 name: 'Sentiment'
             }];
-            console.log(data2);
 
             layout2 = {
                 yaxis: {
@@ -144,7 +141,6 @@ function kontxtFilter( filter, date_from, date_to ) {
             contentTable += '</tbody></table>';
 
             if (data2.length > 0) {
-                console.log('here');
                 Plotly.newPlot('sentiment_results_chart', data2, layout2);
             }
 
@@ -170,8 +166,6 @@ function kontxtOverlay( overlay, date_from, date_to ) {
     });
 
     var security = kontxtAjaxObject.security;
-
-    console.log(data);
 
     jQuery.ajax({
         type: 'post',
@@ -222,8 +216,6 @@ function kontxtOverlay( overlay, date_from, date_to ) {
                 });
 
             }
-
-            console.log(data2);
 
             Plotly.addTraces(
                 'sentiment_results_chart',
@@ -351,8 +343,6 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     }
 
-                    console.log(data);
-
                     layout = {
                         xaxis: {
                             title: 'Date',
@@ -463,13 +453,46 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#keywords-results-success').show();
 
+                    var keywords = [];
+                    var count = [];
+
                     contentTable = '<table id="keywords_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
                     for( var elem in jsonResponse ) {
+
+                        keywords.push( jsonResponse[elem]['keywords'] );
+                        count.push( jsonResponse[elem]['keywords_count'] );
+
                         contentTable  += '<tr><td>' + jsonResponse[elem]['keywords']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
 
                     }
                     contentTable += '</tbody></table>';
+
+                    data = [{
+                        type: 'bar',
+                        y: count,
+                        x: keywords,
+                        name: 'Keywords',
+                        text: count.map(String),
+                        textposition: 'auto',
+                        hoverinfo: 'none',
+                        marker: {
+                            color: 'rgb(158,202,225)',
+                            opacity: 0.6,
+                            line: {
+                                color: 'rgb(8,48,107)',
+                                width: 1.5
+                            }
+                        }
+                    }];
+
+                    layout = {
+                        yaxis: {
+                        },
+                        xaxis: {
+                            autorange: true
+                        }
+                    }
 
                     break;
 
@@ -501,7 +524,32 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                     }
                     contentTable += '</tbody></table>';
 
-                    console.log(contentTable);
+                    break;
+
+                case 'dashboard':
+
+                    data = [
+                        {
+                            domain: { x: [0, 1], y: [0, 1] },
+                            margin: 1,
+                            title: 'KONTXTscore',
+                            value: 100*jsonResponse[0]['event_value'],
+                            type: "indicator",
+                            mode: "gauge+number+delta",
+                            delta: { reference: 0 },
+                            gauge: {
+                                bar: { color: "black" },
+                                axis: { range: [-100, 100] },
+                                steps: [
+                                    { range: [-100, -10], color: "red" },
+                                    { range: [-10, 10], color: "gray" },
+                                    { range: [10, 100], color: "green" }
+                                ]
+                            }
+                        }
+                    ];
+
+                    layout = { width: 600, height: 350, margin: { t: 0, b: 0 } };
 
                     break;
             }

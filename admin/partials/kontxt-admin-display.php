@@ -14,12 +14,13 @@
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-    <p>By default, all KONTXT services DO NOT log requests for deep analytics. In order to enable our Analytics functions, KONTXT will need to log your
-        Wordpress customer and administrative behaviors.  This is only done to deliver and improve the machine learning functions that power our deep analytics.</p>
+    <p>KONTXT services log requests for deep semantic analytics. In order to enable our analytical functions and predictive insights, KONTXT will encrypt, log and process anonymous behaviors from your content and cmmerce customers.
+        This is only done to deliver and improve the machine learning functions that power our deep analytics and future product recommendations.
+        If you do not wish KONTXT to perform our services, please deactivate and delete this plugin. All site data is deleted within 7 days of the last recorded activity.</p>
 
-    <p>The logged data is encrypted, does not contain any personally identifiable information, and is not shared or made public.</p>
+    <p>The data we logis encrypted, does not contain any personally identifiable information, and is not shared, sold, or made public. Should you have any GDPR requests, please <a href="https://kontxt.com/more-information/">contact us</a>. </p>
 
-    <p>KONTXT is a service provided by RealNetworks. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
+    <p>KONTXT &copy; is a service provided by RealNetworks. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
 
     <form action="options.php" method="post">
 

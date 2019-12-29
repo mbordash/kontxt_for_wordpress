@@ -26,6 +26,39 @@
 
                         <div class="inside">
 
+                            <h3>KONTXTscore &copy; </h3>
+
+                            Your KONTXTscore is the overall analysis of your visitor sentiment.  Our proprietary algorithm considers all visitor text interaction with your site, including views, search, reviews, and other inbound
+                            text-based communication.
+
+                            <div style="text-align: center">
+                                <div style="display: inline-block">
+
+                                    <div id="dashboard_results_chart"></div>
+
+                                    Deep analytics:
+                                    <a href="<?php echo admin_url( 'admin.php?page=kontxt_sentiment' ); ?>">Sentiment</a> |
+                                    <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>">Emotion</a> |
+                                    <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>">Semantic Intents</a> |
+                                    <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>">Keywords</a> |
+                                    <a href="<?php echo admin_url( 'admin.php?page=kontxt_experiment' ); ?>">Experiment</a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <!-- .postbox -->
+                </div>
+
+                <div id="poststuff">
+
+                    <div class="postbox">
+
+                        <div class="inside">
+
+                            <h3>Latest Site Behaviors Detected</h3>
+
                             <div id="latestActivity_results_table"></div>
 
                         </div>
@@ -40,6 +73,7 @@
     <script>
         jQuery(function($) {
             kontxtAnalyze('latestActivity');
+            kontxtAnalyze('dashboard');
         });
     </script>
 
