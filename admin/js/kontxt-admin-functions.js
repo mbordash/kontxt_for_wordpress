@@ -533,10 +533,10 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                             domain: { x: [0, 1], y: [0, 1] },
                             margin: 1,
                             title: 'KONTXTscore',
-                            value: 100*jsonResponse[0]['event_value'],
+                            value: 100 * JSON.parse(jsonResponse[0]['event_value'])['kontxt_score'],
                             type: "indicator",
                             mode: "gauge+number+delta",
-                            delta: { reference: 0 },
+                            delta: { reference: 100 * JSON.parse(jsonResponse[1]['event_value'])['kontxt_score'] },
                             gauge: {
                                 bar: { color: "black" },
                                 axis: { range: [-100, 100] },

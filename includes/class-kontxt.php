@@ -49,11 +49,8 @@ class Kontxt {
 		$this->plugin_name      = 'kontxt';
 		$this->version          = '1.2.0';
 		$this->option_name      = 'KONTXT';
-		$this->api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-		$this->api_host_only    = 'localhost'; // api.kontxt.cloud
-		$this->api_host_uri     = '/wp-json/kontxt/v1/analyze';
-		$this->api_host_proto   = 'http://';
-		$this->api_host_port    = 80;
+		//$this->api_host         = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
+		$this->api_host         = 'http://localhost/wp-json/kontxt/v1/analyze';
 
 		$this->load_dependencies();
 		$this->set_locale();
