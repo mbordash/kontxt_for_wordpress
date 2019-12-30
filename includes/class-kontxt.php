@@ -49,7 +49,6 @@ class Kontxt {
 		$this->option_name      = 'KONTXT';
 		$this->kontxt_ini       = $kontxt_ini;
 		$this->api_host         = $kontxt_ini['api_host'];
-		error_log( $this->api_host);
 
 		$this->load_dependencies();
 		$this->set_locale();

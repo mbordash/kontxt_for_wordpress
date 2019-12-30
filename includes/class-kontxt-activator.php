@@ -23,8 +23,6 @@ class Kontxt_Activator {
 	 */
 	public function activate() {
 
-		error_log( 'Beginning Activation');
-
 		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . '../app.ini.php' );
 
 		$option_name    = 'KONTXT';
@@ -55,16 +53,12 @@ class Kontxt_Activator {
 				'service'                   => $service
 			);
 
-			error_log( 'Request Body:: ' . print_r($requestBody, TRUE));
-
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
 			$response = wp_remote_get($api_host, $opts);
-
-			error_log( 'Response Body:: ' . print_r($response, true) );
 
 			if( $response['response']['code'] === 200 ) {
 

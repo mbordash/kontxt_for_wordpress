@@ -290,14 +290,7 @@ class Kontxt_Admin {
 
                 return $response['body'];
 
-                // error_log($response['body']);
-                // error_log( print_r($_POST,true) );
-
             } else {
-
-	            // error_log("Non-200 response");
-	            // error_log( print_r($response, true) );
-	            // error_log( print_r($_POST,true) );
 
                 $response_array['status'] = "error";
                 $response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
@@ -633,8 +626,6 @@ class Kontxt_Admin {
 	public function genKey() {
 
 		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
-
-		//error_log( "uniq id site key: " . $api_key);
 
 		return $api_key;
 

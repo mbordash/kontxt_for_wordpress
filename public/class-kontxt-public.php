@@ -202,7 +202,7 @@ class Kontxt_Public {
 
 				$cartDataArray[] = array();
 
-				foreach ( $cartData as $cart_item_key => $cart_item ) {
+				foreach( $cartData as $cart_item_key => $cart_item ) {
 
 					$cartDataArray[] = array(
 						'cart_product_id'   => $cart_item['product_id'],
@@ -223,8 +223,38 @@ class Kontxt_Public {
 					'post_status' => [ 'wc-completed' ],
 					'numberposts' => -1
 				) );
+
+
 				if ($customerOrdersArray ) {
-					$kontxt_user_session['completed_orders'] = $customerOrdersArray;
+
+					$orderCapture[] = array();
+
+					foreach( $customerOrdersArray as $orderKey => $orderItem ) {
+
+						$dateObj = get_object_vars( $orderItem->date_created );
+
+						$order = wc_get_order( $orderItem->id );
+						$orderItems = $order->get_items();
+
+						$orderLines = array();
+
+						foreach ( $orderItems as $item ) {
+							$orderLines[] = array(
+								'product_name'          => $item->get_name(),
+								'product_id'            => $item->get_product_id(),
+								'product_variation_id'  => $item->get_variation_id()
+							);
+						}
+
+						$orderCapture[] = array(
+							'order_id'          => $orderItem->id,
+							'order_date'        => $dateObj['date'],
+							'order_line_items'  => $orderLines
+						);
+
+					}
+
+					$kontxt_user_session['completed_orders'] = $orderCapture;
 				}
 			}
 
@@ -303,18 +333,6 @@ class Kontxt_Public {
                     'method'    => 'GET',
                     'sslverify' => false
 		        );
-
-//		        if( $this->fp ) {
-//					error_log('posting via socket' . $this->fp );
-//
-//					$out =  "GET " . $this->api_host_uri . "?" . http_build_query( $requestBody ) . " HTTP/1.1\r\n";
-//					$out .= "Host: " . $this->api_host_only . "\r\n";
-//					$out .= "Content-type: application/x-www-form-urlencoded\r\n";
-//
-//					error_log( $out );
-//
-//			        @fwrite( $this->fp, $out );
-//		        }
 
 		        wp_remote_request( $this->api_host, $args );
 
