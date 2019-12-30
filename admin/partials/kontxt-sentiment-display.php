@@ -29,7 +29,8 @@
                     <input id="kontxt-events-date" class="button-primary" type="submit" value="Get " />
 
                     <select id="filter" name="filter" style="vertical-align: top;">
-                        <option selected value="BuyNow">Buy Now</option>
+                        <option selected value="">All intents</option>
+                        <option value="BuyNow">Buy Now</option>
                         <option value="ResearchCompare">Research & Compare</option>
                         <option value="SolveProblem">Solve a Problem</option>
                         <option value="Discovery">Discovery</option>
@@ -39,7 +40,7 @@
                     <input id="kontxt-intent-filter" class="button-primary" type="submit" value="Filter " />
 
                     <select id="overlay" name="overlay" style="vertical-align: top;">
-                        <option selected value="intents">Intent</option>
+                        <option selected value="intents">By all intents</option>
                     </select>
 
                     <input id="kontxt-intent-overlay" class="button-primary" type="submit" value="Overlay " />

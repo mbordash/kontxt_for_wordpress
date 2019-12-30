@@ -58,6 +58,7 @@ jQuery(function($) {
         jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
         var filter =  jQuery( '#filter' ).val();
+        var dimension =  jQuery( '#dimension' ).val();
 
         if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
             var date_from =  jQuery( '#date_from' ).val();
@@ -66,7 +67,11 @@ jQuery(function($) {
             var date_to =  jQuery( '#date_to' ).val();
         }
 
-        kontxtFilter( filter, date_from, date_to );
+        if( filter ) {
+            kontxtFilter(filter, date_from, date_to);
+        } else {
+            kontxtAnalyze( dimension, date_from, date_to);
+        }
     });
 
 });
