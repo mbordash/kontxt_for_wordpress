@@ -1,7 +1,8 @@
 jQuery(function($) {
 
-    $( "#date_from" ).datepicker();
-    $( "#date_to" ).datepicker();
+    $( "#date_from" ).datepicker({ dateFormat: "yy-mm-dd" }).datepicker("setDate", "-7d");
+
+    $( "#date_to" ).datepicker({dateFormat: "yy-mm-dd"}).datepicker('setDate', new Date());
 
     // Experiments UI
     document.addEventListener('visibilitychange', () => {
@@ -40,6 +41,7 @@ jQuery(function($) {
         jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
         var overlay =  jQuery( '#overlay' ).val();
+        var dimension =  jQuery( '#dimension' ).val();
 
         if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
             var date_from =  jQuery( '#date_from' ).val();
@@ -48,7 +50,11 @@ jQuery(function($) {
             var date_to =  jQuery( '#date_to' ).val();
         }
 
-        kontxtOverlay( overlay, date_from, date_to );
+        if( overlay ) {
+            kontxtOverlay( overlay, date_from, date_to );
+        } else {
+            kontxtAnalyze( dimension, date_from, date_to);
+        }
     });
 
     // capture intent filter
