@@ -25,9 +25,10 @@ class Kontxt_Activator {
 
 		error_log( 'Beginning Activation');
 
+		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . 'app.ini.php' );
+
 		$option_name    = 'KONTXT';
-		//$api_host       = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-		$api_host       = 'http://localhost/wp-json/kontxt/v1/analyze';
+		$api_host       = $kontxt_ini['api_host'];
 
 
 		// first check to make sure the KONTXT settings are already set in wordpress options

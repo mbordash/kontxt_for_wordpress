@@ -51,6 +51,7 @@ register_deactivation_hook( __FILE__, 'deactivate_kontxt' );
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-kontxt.php';
 
+
 /**
  * Begins execution of the plugin.
  *
@@ -62,7 +63,12 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-kontxt.php';
  */
 function run_kontxt() {
 
-	$plugin = new Kontxt();
+	/**
+	 *  The app ini file to set installation parameters for development or production
+	 */
+	$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . 'app.ini.php' );
+
+	$plugin = new Kontxt($kontxt_ini);
 	$plugin->run();
 
 }

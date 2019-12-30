@@ -31,6 +31,14 @@ class Kontxt_Deactivator {
 	 */
 	public static function deactivate() {
 
+		// TODO: post deactive site event to our home saas
+
+		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . 'app.ini.php' );
+
+		$option_name    = 'KONTXT';
+		$api_host       = $kontxt_ini['api_host'];
+
+
 	}
 
 }

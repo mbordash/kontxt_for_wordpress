@@ -30,10 +30,8 @@ class Kontxt {
 	protected $version;
 	protected $option_name;
 	protected $api_host;
-	protected $api_host_only;
-	protected $api_host_uri;
-	protected $api_host_proto;
-	protected $api_host_port;
+	protected $kontxt_ini;
+
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -44,13 +42,14 @@ class Kontxt {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
+	public function __construct($kontxt_ini) {
 
 		$this->plugin_name      = 'kontxt';
 		$this->version          = '1.2.0';
 		$this->option_name      = 'KONTXT';
-		//$this->api_host         = 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-		$this->api_host         = 'http://localhost/wp-json/kontxt/v1/analyze';
+		$this->kontxt_ini       = $kontxt_ini;
+		$this->api_host         = $kontxt_ini['api_host'];
+		error_log( $this->api_host);
 
 		$this->load_dependencies();
 		$this->set_locale();
