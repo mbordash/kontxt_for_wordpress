@@ -25,11 +25,10 @@ class Kontxt_Activator {
 
 		error_log( 'Beginning Activation');
 
-		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . 'app.ini.php' );
+		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . '../app.ini.php' );
 
 		$option_name    = 'KONTXT';
 		$api_host       = $kontxt_ini['api_host'];
-
 
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
@@ -67,7 +66,6 @@ class Kontxt_Activator {
 
 			error_log( 'Response Body:: ' . print_r($response, true) );
 
-
 			if( $response['response']['code'] === 200 ) {
 
 				$apiKey = str_replace( '"', '', $response['body']);
@@ -83,9 +81,6 @@ class Kontxt_Activator {
 				return json_encode($response_array);
 
 			}
-
 		}
-
 	}
-
 }

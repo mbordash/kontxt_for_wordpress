@@ -12,10 +12,6 @@
  */
 class Kontxt_Public {
 
-	private $api_host_only;
-	private $api_host_uri;
-	private $api_host_proto;
-	private $api_host_port;
 	private $plugin_name;
 	private $version;
 	private $option_name;
@@ -23,27 +19,20 @@ class Kontxt_Public {
 
 	/**
 	 * Kontxt_Public constructor.
+	 * Kontxt_Public construct
 	 *
 	 * @param $plugin_name
 	 * @param $version
 	 * @param $option_name
 	 * @param $api_host
-	 * @param $api_host_only
-	 * @param $api_host_uri
-	 * @param $api_host_proto
-	 * @param $api_host_port
 	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
+	public function __construct( $plugin_name, $version, $option_name, $api_host )
 	{
 
 		$this->plugin_name      = $plugin_name;
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
-		$this->api_host_only    = $api_host_only;
-		$this->api_host_uri     = $api_host_uri;
-		$this->api_host_proto   = $api_host_proto;
-		$this->api_host_port    = $api_host_port;
 
 	}
 
