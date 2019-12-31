@@ -158,7 +158,8 @@ class Kontxt_Public {
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 		global $wp_query, $category;
 
-		$kontxt_user_session = [];
+		$kontxt_user_session    = [];
+		$pageName               = null;
 
 		// capture text input
 		$searchQuery = get_search_query();
@@ -335,6 +336,8 @@ class Kontxt_Public {
 		        wp_remote_request( $this->api_host, $args );
 
         }
+
+        return false;
     }
 
 
@@ -356,11 +359,9 @@ class Kontxt_Public {
 	 */
 	public function genKey() {
 
-		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
-
 		//error_log( "uniq id site key: " . $api_key);
 
-		return $api_key;
+		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 
 	}
 
