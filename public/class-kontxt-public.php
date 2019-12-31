@@ -141,7 +141,11 @@ class Kontxt_Public {
 		if( is_category() ) {
 			$kontxt_user_session['blog_page'] = $category;
 		} else {
-			$pageName = $wp_query->queried_object->post_name;
+			if ( $wp_query instanceof WP_Query ) {
+				if ( $object = $wp_query->get_queried_object() ) {
+					$pageName = isset( $object->name ) ? $object->name : '';
+				}
+			}
 			if ( $pageName ) {
 				$kontxt_user_session['blog_page'] = $pageName;
 			} elseif( is_front_page() || is_home() ) {
@@ -162,7 +166,8 @@ class Kontxt_Public {
 
 				$kontxt_user_session['shop_page'] = "Shop home";
 
-			} elseif( get_queried_object()->term_id ) {
+			} elseif( isset( get_queried_object()->term_id) ) {
+
 				$categoryId   = get_queried_object()->term_id;
 				$categoryName = get_the_category_by_ID( get_queried_object( )->term_id);
 
