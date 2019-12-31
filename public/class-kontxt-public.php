@@ -94,7 +94,7 @@ class Kontxt_Public {
 
 	public function kontxt_comment_post( $commentId ) {
 
-		$kontxt_comment_arr = [];
+		$kontxtCommentArr = [];
 
 		// capture comment content
 		if ( $commentId ) {
@@ -108,22 +108,50 @@ class Kontxt_Public {
 
 			if ( ! empty( $comment_text ) ) {
 
-				$kontxt_comment_arr['comment_text'] = $comment_text;
-				$kontxt_comment_arr['comment_rating'] = $comment_rating;
-				$kontxt_comment_arr['comment_product_id'] = $comment_product_id;
-				$kontxt_comment_arr['comment_product_name'] = $comment_product_name;
+				$kontxtCommentArr['comment_capture'] = [
+					'comment_text' => $comment_text,
+					'comment_rating' => $comment_rating,
+					'comment_product_id' => $comment_product_id,
+					'comment_product_name' => $comment_product_name
+				];
 
 			}
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxt_comment_arr, 'public_event', true );
+		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', true );
+
+	}
+
+	public function kontxt_cart_capture( ) {
+
+		$kontxtCartArr = [];
+
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			$cartData = WC()->cart->get_cart_contents();
+
+			$cartDataArray[] = array();
+
+			foreach( $cartData as $cart_item_key => $cart_item ) {
+
+				$cartDataArray[] = array(
+					'cart_product_id'   => $cart_item['product_id'],
+					'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
+				);
+
+			}
+			$kontxtCartArr['cart_add'] = $cartDataArray;
+		}
+
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtCartArr, 'public_event', true );
 
 	}
 
 	public function kontxt_order_post( $order_id ) {
 
-		$orderCapture[] = array();
+		$orderCapture[] = [];
 
 		if( $order_id ) {
 
@@ -233,24 +261,6 @@ class Kontxt_Public {
 					$kontxt_user_session['shop_page'] = 'product';
 					$kontxt_user_session['product_data'] = $productDataArray;
 				}
-			}
-
-			// current cart data-- should be setup as callback via in-cart hook
-			if( is_object( WC()->cart ) ) {
-
-				$cartData = WC()->cart->get_cart_contents();
-
-				$cartDataArray[] = array();
-
-				foreach( $cartData as $cart_item_key => $cart_item ) {
-
-					$cartDataArray[] = array(
-						'cart_product_id'   => $cart_item['product_id'],
-						'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
-					);
-
-				}
-				$kontxt_user_session['cart_data'] = $cartDataArray;
 			}
 
 		}
@@ -364,8 +374,6 @@ class Kontxt_Public {
 		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 
 	}
-
-
 
 	/**
 	 * Initialize the class and set its properties.
