@@ -113,8 +113,13 @@ class Kontxt_Admin {
 
 	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
 
-		    //header('Content-type: application/json');
-		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $_POST['filter'] );
+	        if( isset( $_POST['filter'] ) && $_POST['filter'] !== '' && $_POST['filter'] !== false ) {
+	        	$filter =  $_POST['filter'];
+	        } else {
+	        	$filter = null;
+	        }
+
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $filter );
 
 	    }
 
@@ -122,7 +127,7 @@ class Kontxt_Admin {
     }
 
 
-	public function kontxt_get_results( $dimension, $from_date, $to_date, $filter = '' ) {
+	public function kontxt_get_results( $dimension, $from_date, $to_date, $filter ) {
 
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
@@ -234,7 +239,6 @@ class Kontxt_Admin {
     public function kontxt_cognitive( $textToAnalyze, $service, $requestId, $silent = false )
     {
 
-	    error_log( "request id: " . $requestId );
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );

@@ -121,6 +121,40 @@ class Kontxt_Public {
 
 	}
 
+	public function kontxt_order_post( $order_id ) {
+
+		$orderCapture[] = array();
+
+		if( $order_id ) {
+
+			$orderProducts[] = null;
+
+			$order = wc_get_order( $order_id );
+			foreach( $order->get_items() as $item_id => $item ){
+
+				$orderProducts['product_id']    = $item['product_id']; // Get the product ID
+				$orderProducts['variation_id']  = $item['variation_id']; // Get the variation ID
+				$orderProducts['product_name']  = $item['name']; // The product name
+				$orderProducts['item_qty']      = $item['quantity']; // The quantity
+				$orderProducts['line_subtotal'] = $item['line_subtotal'];  // The line subtotal
+				$orderProducts['line_total']    = $item['line_total'];  // The line subtotal
+
+			}
+
+			$orderCapture['order_capture'] = [
+				'order_id'      => $order_id,
+				'order_date'    => $order->get_date_created(),
+				'order_total'   => $order->get_total(),
+				'products'      => $orderProducts
+			];
+
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $orderCapture, 'public_event', true );
+
+	}
+
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 		global $wp_query, $category;
 
@@ -200,7 +234,7 @@ class Kontxt_Public {
 				}
 			}
 
-			// current cart data
+			// current cart data-- should be setup as callback via in-cart hook
 			if( is_object( WC()->cart ) ) {
 
 				$cartData = WC()->cart->get_cart_contents();
@@ -218,54 +252,7 @@ class Kontxt_Public {
 				$kontxt_user_session['cart_data'] = $cartDataArray;
 			}
 
-			// let's get the current user ID and inspect completed orders
-			$currentUserId = get_current_user_id();
-			if( $currentUserId ) {
-
-				$customerOrdersArray = wc_get_orders( array(
-					'meta_key' => '_customer_user',
-					'meta_value' => $currentUserId,
-					'post_status' => [ 'wc-completed' ],
-					'numberposts' => -1
-				) );
-
-
-				if ($customerOrdersArray ) {
-
-					$orderCapture[] = array();
-
-					foreach( $customerOrdersArray as $orderKey => $orderItem ) {
-
-						$dateObj = get_object_vars( $orderItem->date_created );
-
-						$order = wc_get_order( $orderItem->id );
-						$orderItems = $order->get_items();
-
-						$orderLines = array();
-
-						foreach ( $orderItems as $item ) {
-							$orderLines[] = array(
-								'product_name'          => $item->get_name(),
-								'product_id'            => $item->get_product_id(),
-								'product_variation_id'  => $item->get_variation_id()
-							);
-						}
-
-						$orderCapture[] = array(
-							'order_id'          => $orderItem->id,
-							'order_date'        => $dateObj['date'],
-							'order_line_items'  => $orderLines
-						);
-
-					}
-
-					$kontxt_user_session['completed_orders'] = $orderCapture;
-				}
-			}
-
 		}
-
-		// $this->kontxt_send_event( $kontxt_user_session, 'public_event', true );
 
 		return $kontxt_user_session;
 
@@ -280,7 +267,13 @@ class Kontxt_Public {
 	 */
 	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
 
-		if( $_POST['eventData'] ) {
+		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
+			$eventDataPost =  $_POST['eventData'];
+		} else {
+			$eventDataPost = null;
+		}
+
+		if( $eventDataPost ) {
 			check_ajax_referer( 'kontxt-ajax-string', 'security', false );
 			$eventData = json_decode( html_entity_decode( stripslashes( $_POST['eventData'] ) ) );
 		}
