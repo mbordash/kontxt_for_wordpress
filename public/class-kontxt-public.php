@@ -123,6 +123,25 @@ class Kontxt_Public {
 
 	}
 
+	public function kontxt_contact_form_capture( $data ) {
+
+		$kontxtContactFormArr = [];
+
+		// capture contact us content
+		if ( $data ) {
+
+			$kontxtContactFormArr['contact_form_capture'] = [
+				'contact_form_subject' => $data['your-subject'],
+				'contact_form_message' => $data['your-message']
+			];
+
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtContactFormArr, 'public_event', true );
+
+	}
+
 	public function kontxt_cart_capture( ) {
 
 		$kontxtCartArr = [];

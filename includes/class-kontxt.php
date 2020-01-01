@@ -154,10 +154,21 @@ class Kontxt {
 		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		// capture page/product view events
 		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+
+		// capture sentiment on comment post
 		$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post');
+
+		// capture woo commerce checkout confirmed
 		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'kontxt_order_post');
+
+		// capture woo commerce add to cart
 		$this->loader->add_action( 'woocommerce_add_to_cart', $plugin_public, 'kontxt_cart_capture');
+
+		// capture contact form 7 mail sent
+		$this->loader->add_action( 'wpcf7_posted_data', $plugin_public, 'kontxt_contact_form_capture');
 
 
 		// capture all page state information from site user
