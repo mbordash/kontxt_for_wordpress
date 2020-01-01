@@ -19,6 +19,7 @@
         <div id="kontxt-results-box" class="wrap">
 
             <h4>Enter some content and let KONTXT analyze it for you</h4>
+            <p>Experiment with product descriptions, email marketing content and blog article content to understand how your audience might react to your tone.</p>
 
             <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
 

@@ -530,7 +530,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                     try {
                         var prevScore = JSON.parse(jsonResponse[1]['event_value'])['kontxt_score'] * 100;
                     } catch (e) {
-                        prevScore = JSON.parse(jsonResponse[0]['event_value'])['kontxt_score'] * 100
+                        var prevScore = JSON.parse(jsonResponse[0]['event_value'])['kontxt_score'] * 100
                     }
                         
                     data = [
@@ -543,12 +543,13 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                             mode: "gauge+number+delta",
                             delta: { reference: prevScore },
                             gauge: {
-                                bar: { color: "black" },
+                                bar: { color: "Black" },
+                                borderwidth: 2,
                                 axis: { range: [-100, 100] },
                                 steps: [
-                                    { range: [-100, -10], color: "red" },
-                                    { range: [-10, 10], color: "gray" },
-                                    { range: [10, 100], color: "green" }
+                                    { range: [-100, -10], color: "#ff533d" },
+                                    { range: [-10, 10], color: "LightGrey" },
+                                    { range: [10, 100], color: "#66AB8C" }
                                 ]
                             }
                         }
