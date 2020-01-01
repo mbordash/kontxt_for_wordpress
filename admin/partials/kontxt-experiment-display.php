@@ -75,16 +75,12 @@
                                     <div class="postbox">
 
                                         <h2><span><?php esc_attr_e(
-                                                    'Keywords & Concepts', 'WpAdminStyle'
+                                                    'Keywords', 'WpAdminStyle'
                                                 ); ?></span></h2>
 
                                         <div class="inside">
                                             <div id="keywords_chart">
                                                 <table id="kontxt_keywords"></table>
-                                            </div>
-                                            <br />
-                                            <div id="concepts_chart">
-                                                <table id="kontxt_concepts"></table>
                                             </div>
                                         </div>
                                         <!-- .inside -->

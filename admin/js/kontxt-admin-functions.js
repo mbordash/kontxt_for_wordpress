@@ -507,20 +507,6 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     break;
 
-                case 'concepts':
-
-                    jQuery('#concepts-results-success').show();
-
-                    contentTable = '<table id="concepts_results_id" class="widefat"><thead><th><strong>Extracted concept</strong></th><th><strong>Count</strong></th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-
                 case 'latestActivity':
 
                     jQuery('#activity-results-success').show();
@@ -645,41 +631,6 @@ function kontxtExperimentFormPost(return_text) {
             contentTable += '</tbody></table>';
 
             jQuery('#intents_chart').html( contentTable ).show();
-
-            jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
-        },
-        error: function(response) {
-            jQuery('#kontxt-results-status').html(response.message);
-            return false;
-        }
-
-    });
-
-    jQuery.ajax({
-        type: 'post',
-        url: ajaxurl,
-        security: security,
-        data: data + '&service=concepts',
-        action: 'kontxt_analyze',
-        cache: false,
-        success: function(response) {
-
-            if( response.status == 'error' ) {
-                jQuery('#kontxt-analyze-results-status').html(response.message).show();
-                jQuery('#kontxt-results-success').hide();
-                return false;
-            }
-
-            var jsonResponse = jQuery.parseJSON(response);
-
-            var contentTable = '<table id="kontxt_concepts" class="widefat"><thead><th>Concept</th><th>Relevance</th></thead><tbody>';
-            for( var elem in jsonResponse ) {
-                contentTable  += '<tr><td>' + jsonResponse[elem]['text'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['relevance'] * 100 )) + '%</td></tr>';
-            }
-            contentTable += '</tbody></table>';
-
-            jQuery('#concepts_chart').html( contentTable ).show();
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         },

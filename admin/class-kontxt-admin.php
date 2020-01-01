@@ -425,16 +425,6 @@ class Kontxt_Admin {
 	 *
 	 * @since  1.0.0
 	 */
-	public function display_concepts_page()
-	{
-		include_once 'partials/kontxt-concepts-display.php';
-	}
-
-	/**
-	 * Render the analyze page for plugin
-	 *
-	 * @since  1.0.0
-	 */
 	public function display_keywords_page()
 	{
 		include_once 'partials/kontxt-keywords-display.php';

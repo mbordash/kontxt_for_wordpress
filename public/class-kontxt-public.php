@@ -215,7 +215,7 @@ class Kontxt_Public {
 
 			// statistically interesting to see which search queries returned not results
 			if ( !have_posts() ) {
-				$kontxt_user_session['no_results'] =  true;
+				$kontxt_user_session['no_search_results'] =  true;
 			}
 		}
 
