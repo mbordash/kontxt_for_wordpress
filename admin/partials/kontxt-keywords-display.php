@@ -33,15 +33,36 @@
                                 <div id="keywords_results_chart"></div>
 
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="postbox">
 
                             <div class="inside">
 
-                                <div id="keywords_results_table"></div>
+                                <h3>About</h3>
 
+                                <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to extract and aggregate every meaningful keyword found within each interaction.
+
+                                    Use these keywords to optimize your SEO strategy by embedding them in your meta data, blog content, and product descriptions.
+
+                                    These keywords should also be used to optimize your advertising campaigns on external search platforms.
+
+                                </p>
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="inside">
+
+                            <div id="keywords_results_table"></div>
 
                         </div>
-                        <!-- .postbox -->
+
                     </div>
                 </div>
             </div>

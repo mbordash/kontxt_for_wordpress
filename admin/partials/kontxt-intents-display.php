@@ -52,16 +52,35 @@
                                 <div id="intents_results_chart"></div>
 
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="postbox">
 
                             <div class="inside">
 
-                                <div id="intents_results_table"></div>
+                                <h3>About</h3>
 
+                                <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to determine the semantic intent behind each interaction.
+                                    These intent insights show you what your customers are trying to do from your site.   You'll want to study the results for each intent to determine whether you're
+                                    missing content or product that your customer is looking for.
+
+                                    Providing search results that better match the customer's intent yield higher transaction rates and reduce dependency on Google for searching your own site -- this keeps customers on your site and creates
+                                    a stronger relationship with your brand.
+
+                                </p>
                             </div>
-
                         </div>
-                        <!-- .postbox -->
                     </div>
+
+                    <div id="poststuff">
+                        <div class="inside">
+                            <div id="intents_results_table"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

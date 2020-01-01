@@ -50,16 +50,37 @@
                                 <div id="emotion_results_chart"></div>
 
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="postbox">
 
                             <div class="inside">
 
-                                <div id="emotion_results_table"></div>
+                                <h3>About</h3>
 
+                                <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to determine the general emotional elements of all interactions each day.
+                                    These insights provide a signal for how your customers feel about your brand and its products over time. Generally, you'll want to isolate the negative emotions and study
+                                    why your brand is causing this reaction through the analytics we provide.
+
+                                    While "joy" is a positive indicator that predicts higher transaction rates, the negative emotions tend to predict higher attrition rates
+                                    and cause more damage to your brand than what can be countered by positive emotion.</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="inside">
+
+                            <div id="emotion_results_table"></div>
 
                         </div>
-                        <!-- .postbox -->
+
                     </div>
+                        <!-- .postbox -->
                 </div>
             </div>
         </div>

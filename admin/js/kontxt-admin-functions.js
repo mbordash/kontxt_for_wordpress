@@ -143,7 +143,7 @@ function kontxtFilter( filter, date_from, date_to ) {
 
             jQuery('#sentiment-results-success').show();
 
-            contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
+            contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Average</strong></th></thead><tbody>';
             for (var elem in jsonResponse) {
                 contentTable += '<tr><td>' + jsonResponse[elem]['event_date'] + '</td>';
                 contentTable += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
@@ -321,10 +321,10 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#sentiment-results-success').show();
 
-                    contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
+                    contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Average</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
+                        contentTable  += '<td>' + Math.round(jsonResponse[elem]['event_value'] * 100)/100 + '</td></tr>';
 
                     }
                     contentTable += '</tbody></table>';
@@ -366,7 +366,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#intents-results-success').show();
 
-                    contentTable = '<table id="intents_results_id" class="widefat"><thead><th>Date</th><th>Name</th><th>Count</th></thead><tbody>';
+                    contentTable = '<table id="intents_results_id" class="widefat"><thead><th><strong>Date</strong></th><th>Name</th><th><strong>Count</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td>';
@@ -450,7 +450,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#emotion-results-success').show();
 
-                    contentTable = '<table id="emotion_results_id" class="widefat"><thead><th>Date</th><th>Name/Average</th></thead><tbody>';
+                    contentTable = '<table id="emotion_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Name/Average</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
@@ -467,7 +467,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                     var keywords = [];
                     var count = [];
 
-                    contentTable = '<table id="keywords_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
+                    contentTable = '<table id="keywords_results_id" class="widefat"><thead><th><strong>Extracted keyword</strong></th><th><strong>Count</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
 
                         keywords.push( jsonResponse[elem]['keywords'] );
@@ -511,7 +511,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#concepts-results-success').show();
 
-                    contentTable = '<table id="concepts_results_id" class="widefat"><thead><th>Extracted concept</th><th>Count</th></thead><tbody>';
+                    contentTable = '<table id="concepts_results_id" class="widefat"><thead><th><strong>Extracted concept</strong></th><th><strong>Count</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
@@ -525,7 +525,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#activity-results-success').show();
 
-                    contentTable = '<table id="activity_results_id" class="widefat"><thead><th>Event type</th><th>Event key</th><th>Event value</th><th>Timestamp</th></thead><tbody>';
+                    contentTable = '<table id="activity_results_id" class="widefat"><thead><th><strong>Event type</strong></th><th><strong>Event key</strong></th><th><strong>Event value</strong></th><th><strong>Timestamp</strong></th></thead><tbody>';
                     for( var elem in jsonResponse ) {
                         contentTable  += '<tr><td>' + jsonResponse[elem]['event_type']  + '</td>';
                         contentTable  += '<td>' + jsonResponse[elem]['event_key']  + '</td>';

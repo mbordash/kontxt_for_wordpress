@@ -67,6 +67,25 @@
                                 <div id="sentiment_results_chart"></div>
 
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
+
+                        <div class="postbox">
+
+                            <div class="inside">
+
+                                <h3>About</h3>
+
+                                <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to determine the general sentiment of all interactions each day.
+                                    These insights provide a signal for how your customers feel about your brand and its products over time. A positive sentiment score
+                                    tends to yield higher attraction and transaction rates. Fixing your content and service problems early on should improve the effectiveness of your customer's journey.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="poststuff">
 
                             <div class="inside">
 
@@ -74,7 +93,6 @@
 
                             </div>
 
-                        </div>
                         <!-- .postbox -->
                     </div>
                 </div>
