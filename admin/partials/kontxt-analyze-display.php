@@ -12,7 +12,7 @@
 
 <div class="notice notice-info is-dismissible inline">
     <p>
-        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Analytics for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
+        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
         If you have any questions, comments, suggestions about our service, please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a>.
 		<?php
 		printf(

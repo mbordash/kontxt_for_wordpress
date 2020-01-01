@@ -10,6 +10,22 @@
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 
+<div class="notice notice-info is-dismissible inline">
+    <p>
+        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
+        If you have any questions, comments, suggestions about our service, please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a>.
+		<?php
+		printf(
+		// translators: Leave always a hint for translators to understand the placeholders.
+			esc_attr__( '', 'WpAdminStyle' ),
+			'<code>.notice-info</code>',
+			'<code>.is-dismissible</code>',
+			'<code>.inline</code>'
+		);
+		?>
+    </p>
+</div>
+
 <div class="wrap">
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
