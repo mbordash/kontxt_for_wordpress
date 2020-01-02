@@ -42,7 +42,7 @@
 
                         <div class="inside">
 
-                            <h3>KONTXTscore &copy; </h3>
+                            <h3>KONTXTscore&trade; </h3>
 
                             Your KONTXTscore is the overall analysis of your visitor sentiment.  Our proprietary algorithm considers all visitor text interaction with your site, including views, search, reviews, and other inbound
                             text-based communication.
@@ -74,7 +74,7 @@
 
                         <div class="inside">
 
-                            <h3>About KONTXT </h3>
+                            <h3>About KONTXT&trade;</h3>
 
                             <p>KONTXT helps you understand your relationship with your customers in real-time by analyzing how they interact with your
                                 site through both text and journey analytics.  These insights will help you craft better blog articles, product descriptions,
