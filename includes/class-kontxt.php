@@ -153,7 +153,12 @@ class Kontxt {
 
 		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		if( false === wp_doing_cron() ) {
+			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		}
+		
+		// capture all page state information from site user
+		//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
 		// capture page/product view events
 		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
@@ -169,10 +174,6 @@ class Kontxt {
 
 		// capture contact form 7 mail sent
 		$this->loader->add_action( 'wpcf7_posted_data', $plugin_public, 'kontxt_contact_form_capture');
-
-
-		// capture all page state information from site user
-		//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
 	}
 

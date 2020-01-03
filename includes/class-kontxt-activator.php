@@ -21,7 +21,7 @@ class Kontxt_Activator {
 	 * @return false|string
 	 * @since    1.0.0
 	 */
-	public function activate() {
+	public static function activate() {
 
 		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . '../app.ini.php' );
 
@@ -67,14 +67,44 @@ class Kontxt_Activator {
 				update_option( $option_name . '_apikey', $apiKey);
 				update_option( $option_name . '_apiuid', $apiUid);
 
+				return true;
+
 			} else {
 
 				$response_array['status'] = "error";
 				$response_array['message'] = "Plugin Install Error. Something went wrong with this request. Code received: " . $response['response']['code'];
 
 				return json_encode($response_array);
-
 			}
+
+		} else {
+
+			// update site
+
+			$siteName   = get_bloginfo( 'name' );
+			$siteDomain = get_bloginfo( 'url' );
+			$siteEmail  = get_bloginfo( 'admin_email' );
+			$service    = 'reactivate';
+
+			// register with KONTXT Site API endpoint
+			$requestBody = array(
+				'api_uid'       => $apiUid,
+				'api_key'       => $apiKey,
+				'site_name'     => $siteName,
+				'site_domain'   => $siteDomain,
+				'site_email'    => $siteEmail,
+				'service'       => $service
+			);
+
+			$opts = array(
+				'body'      => $requestBody,
+				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			wp_remote_get($api_host, $opts);
+
+			return true;
+
 		}
 	}
 }
