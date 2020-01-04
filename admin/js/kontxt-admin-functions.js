@@ -929,6 +929,8 @@ function kontxtJourney( ) {
                     var data = {
                         type: "sankey",
                         arrangement: "snap",
+                        valueformat: ".0f",
+                        valuesuffix: " sessions",
                         orientation: "h",
                         node: {
                             pad: 15,

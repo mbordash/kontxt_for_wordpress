@@ -132,7 +132,7 @@ class Kontxt_Admin {
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
-		$current_session    = $_COOKIE['kontxt_anon_session'];
+		$current_session    = $_COOKIE['kontxt_session'];
 		$current_user       = wp_get_current_user();
 
 
@@ -159,7 +159,7 @@ class Kontxt_Admin {
 
 			if( !isset( $current_session ) ) {
 				$current_session = 'anon_' . $this->genKey();
-				setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+				setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
 			}
 
 			$requestBody = array (
@@ -242,7 +242,7 @@ class Kontxt_Admin {
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = $_COOKIE['kontxt_anon_session'];
+	    $current_session    = $_COOKIE['kontxt_session'];
 	    $current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -262,7 +262,7 @@ class Kontxt_Admin {
 
 	    if( !isset( $current_session ) ) {
 		    $current_session = 'anon_' . $this->genKey();
-		    setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+		    setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
 	    }
 
 	    if ( isset( $textToAnalyze ) && $textToAnalyze !== '' ) {
