@@ -85,6 +85,7 @@ class Kontxt_Public {
 			'action' => 'kontxt_send_event'
 		);
 
+		error_log('here');
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
 		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
 
@@ -108,7 +109,7 @@ class Kontxt_Public {
 
 			if ( ! empty( $comment_text ) ) {
 
-				$kontxtCommentArr['comment_capture'] = [
+				$kontxtCommentArr['comment_submitted'] = [
 					'comment_text' => $comment_text,
 					'comment_rating' => $comment_rating,
 					'comment_product_id' => $comment_product_id,
@@ -123,6 +124,22 @@ class Kontxt_Public {
 
 	}
 
+	public function kontxt_user_register( $user_id ) {
+
+		if( $user_id ) {
+			$kontxtUserRegArr['user_register'] = [
+				'user_id' => $user_id
+			];
+
+			// send directly to backend, don't bother with js async
+			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event', true );
+
+		}
+	}
+
+
+
+
 	public function kontxt_contact_form_capture( $data ) {
 
 		$kontxtContactFormArr = [];
@@ -130,7 +147,7 @@ class Kontxt_Public {
 		// capture contact us content
 		if ( $data ) {
 
-			$kontxtContactFormArr['contact_form_capture'] = [
+			$kontxtContactFormArr['contact_form_submitted'] = [
 				'contact_form_subject' => $data['your-subject'],
 				'contact_form_message' => $data['your-message']
 			];
@@ -162,7 +179,6 @@ class Kontxt_Public {
 			$kontxtCartArr['cart_add'] = $cartDataArray;
 		}
 
-
 		// send directly to backend, don't bother with js async
 		$this->kontxt_send_event( $kontxtCartArr, 'public_event', true );
 
@@ -188,7 +204,7 @@ class Kontxt_Public {
 
 			}
 
-			$orderCapture['order_capture'] = [
+			$orderCapture['order_received'] = [
 				'order_id'      => $order_id,
 				'order_date'    => $order->get_date_created(),
 				'order_total'   => $order->get_total(),
@@ -231,7 +247,7 @@ class Kontxt_Public {
 			if ( $pageName ) {
 				$kontxt_user_session['blog_page'] = $pageName;
 			} elseif( is_front_page() || is_home() ) {
-				$kontxt_user_session['blog_page'] = 'Site home';
+				$kontxt_user_session['site_home'] = 'Site home';
 			}
 		}
 
@@ -242,11 +258,11 @@ class Kontxt_Public {
 			// override page as shop home
 			if ( $searchQuery ) {
 
-				$kontxt_user_session['shop_page'] = "Search results";
+				// $kontxt_user_session['shop_page_search'] = "Search results";
 
 			} elseif( is_shop() ) {
 
-				$kontxt_user_session['shop_page'] = "Shop home";
+				$kontxt_user_session['shop_page_home'] = "Shop home";
 
 			} elseif( isset( get_queried_object()->term_id) ) {
 
@@ -260,8 +276,7 @@ class Kontxt_Public {
 
 				);
 
-				$kontxt_user_session['shop_page'] = "category";
-				$kontxt_user_session['category_data'] = $categoryDataArray;
+				$kontxt_user_session['shop_page_category'] = $categoryDataArray;
 
 			} else {
 
@@ -277,8 +292,7 @@ class Kontxt_Public {
 						'view_product_name' => $productName
 
 					);
-					$kontxt_user_session['shop_page'] = 'product';
-					$kontxt_user_session['product_data'] = $productDataArray;
+					$kontxt_user_session['shop_page_product'] = $productDataArray;
 				}
 			}
 
@@ -297,6 +311,7 @@ class Kontxt_Public {
 	 */
 	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
 
+		error_log( 'kontxt_send_event' );
 		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
 			$eventDataPost =  $_POST['eventData'];
 		} else {
@@ -311,7 +326,7 @@ class Kontxt_Public {
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
 	    $apiUid             = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = $_COOKIE['kontxt_session'];
+	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? $_COOKIE['kontxt_session'] : '';
 		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -332,7 +347,7 @@ class Kontxt_Public {
         if( 0 == $current_user->ID ) {
 	        $current_user_username = $current_session;
         } else {
-	        $current_user_username = $current_user->user_login;
+	        $current_user_username = hash( 'SHA256', $current_user->user_login );
         }
 
         if ( isset( $eventData ) && $eventData !== '' ) {
@@ -347,11 +362,13 @@ class Kontxt_Public {
 			        'kontxt_text_to_analyze' => [$eventData],
 			        'service'                => $service,
 			        'request_id'             => $requestId,
-			        'current_user_username'  => hash('SHA256', $current_user_username),
+			        'current_user_username'  => $current_user_username,
 			        'current_session_id'     => $current_session,
 			        'user_class'             => 'public',
 			        'silent'                 => $silent
 		        );
+
+		        error_log( print_r( $requestBody, true) );
 
 		        $args = array(
 			        'timeout'   => '1',

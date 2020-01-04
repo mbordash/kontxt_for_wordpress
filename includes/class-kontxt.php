@@ -156,9 +156,12 @@ class Kontxt {
 		if( false === wp_doing_cron() ) {
 			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		}
-		
+
 		// capture all page state information from site user
 		//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
+
+		// capture page/product view events
+		$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register');
 
 		// capture page/product view events
 		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');

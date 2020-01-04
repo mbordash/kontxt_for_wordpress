@@ -32,19 +32,20 @@
                         <option selected value="">All intents</option>
                         <option value="BuyNow">Buy Now</option>
                         <option value="ResearchCompare">Research & Compare</option>
-                        <option value="SolveProblem">Solve a Problem</option>
+                        <option value="SolveMyProblem">Solve My Problem</option>
                         <option value="Discovery">Discovery</option>
-                        <option value="Assistance">Shop Assistance</option>
+                        <option value="CustomerSupport">Customer Support</option>
                     </select>
 
                     <input id="kontxt-intent-filter" class="button-primary" type="submit" value="Filter " />
-
+                    <!--
                     <select id="overlay" name="overlay" style="vertical-align: top;">
                         <option selected value="">No overlay</option>
                         <option value="intents">Intents</option>
                     </select>
 
                     <input id="kontxt-intent-overlay" class="button-primary" type="submit" value="Overlay " />
+                    -->
 
                 </div>
 

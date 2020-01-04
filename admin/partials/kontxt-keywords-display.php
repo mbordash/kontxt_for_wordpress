@@ -26,20 +26,6 @@
 
                         <div class="postbox">
 
-                            <h2 id="keywords_results_title"></h2>
-
-                            <div class="inside">
-
-                                <div id="keywords_results_chart"></div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="poststuff">
-
-                        <div class="postbox">
-
                             <div class="inside">
 
                                 <h3>About</h3>

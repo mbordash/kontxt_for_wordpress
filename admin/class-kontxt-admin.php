@@ -119,7 +119,7 @@ class Kontxt_Admin {
 	        	$filter = null;
 	        }
 
-		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $filter );
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'] = '' , $_POST['to_date'] = '' , $filter );
 
 	    }
 
@@ -372,6 +372,15 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
+			__( 'KONTXT Journey Analytics', 'kontxt' ),
+			__( 'Journey', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "journey",
+			array( $this, 'display_journey_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
 			__( 'KONTXT Experiment', 'kontxt' ),
 			__( 'Experiment', 'kontxt' ),
 			'manage_options',
@@ -389,6 +398,19 @@ class Kontxt_Admin {
 		);
 
 	}
+
+
+	/**
+	 * Render the journey page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_journey_page()
+	{
+		include_once 'partials/kontxt-journey-display.php';
+	}
+
+
 
 	/**
 	 * Render the analyze page for plugin
