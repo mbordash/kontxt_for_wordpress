@@ -137,8 +137,6 @@ class Kontxt_Public {
 	}
 
 
-
-
 	public function kontxt_contact_form_capture( $data ) {
 
 		$kontxtContactFormArr = [];

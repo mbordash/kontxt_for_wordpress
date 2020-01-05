@@ -937,10 +937,9 @@ function kontxtJourney( ) {
                             thickness: 30,
                             line: {
                                 color: "black",
-                                width: 0.5
+                                width: 1
                             },
-                            label: eventLabels,
-                            pad:10
+                            label: eventLabels
                         },
 
                         link: {
