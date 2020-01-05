@@ -85,7 +85,6 @@ class Kontxt_Public {
 			'action' => 'kontxt_send_event'
 		);
 
-		error_log('here');
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
 		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
 
@@ -311,7 +310,6 @@ class Kontxt_Public {
 	 */
 	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
 
-		error_log( 'kontxt_send_event' );
 		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
 			$eventDataPost =  $_POST['eventData'];
 		} else {
@@ -368,8 +366,6 @@ class Kontxt_Public {
 			        'silent'                 => $silent
 		        );
 
-		        error_log( print_r( $requestBody, true) );
-
 		        $args = array(
 			        'timeout'   => '1',
 		        	'body'      => $requestBody,
@@ -404,8 +400,6 @@ class Kontxt_Public {
 	 * @return string
 	 */
 	public function genKey() {
-
-		//error_log( "uniq id site key: " . $api_key);
 
 		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 
