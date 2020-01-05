@@ -7,10 +7,10 @@
  * @package           Kontxt
  *
  * @wordpress-plugin
- * Plugin Name:       KONTXT for Wordpress Intent Analyzer
+ * Plugin Name:       KONTXT Semantic Engine
  * Plugin URI:        http://www.kontxt.com
- * Description:       Plugin for discovering insights from your content. Helpful for editing and tagging your posts and pages.
- * Version:           1.3.2
+ * Description:       Kontxt™ Semantic Engine is an AI-backed content analyzer and recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
+ * Version:           1.0.0
  * Author:            Michael Bordash
  * Author URI:        https://github.com/mbordash
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
@@ -51,6 +51,7 @@ register_deactivation_hook( __FILE__, 'deactivate_kontxt' );
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-kontxt.php';
 
+
 /**
  * Begins execution of the plugin.
  *
@@ -62,7 +63,12 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-kontxt.php';
  */
 function run_kontxt() {
 
-	$plugin = new Kontxt();
+	/**
+	 *  The app ini file to set installation parameters for development or production
+	 */
+	$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . 'app.ini.php' );
+
+	$plugin = new Kontxt($kontxt_ini);
 	$plugin->run();
 
 }

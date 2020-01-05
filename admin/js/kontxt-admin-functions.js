@@ -1,70 +1,631 @@
 jQuery(function($) {
 
-    // Experiments UI
+    $( "#date_from" ).datepicker({ dateFormat: "yy-mm-dd" }).datepicker("setDate", "-7d");
 
+    $( "#date_to" ).datepicker({dateFormat: "yy-mm-dd"}).datepicker('setDate', new Date());
+
+    // Experiments UI
     document.addEventListener('visibilitychange', () => {
         console.log(document.visibilityState);
         window.dispatchEvent(new Event('resize'));
     });
 
     // capture KONTXT form post and pass to handler
-
     jQuery( '#kontxt-experiment-input-button' ).click( function( e ) {
         e.preventDefault();
+
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
         var textToAnalyze =  jQuery( '#kontxt-input-text-field' ).val();
 
         kontxtExperimentFormPost( textToAnalyze )
-
     });
 
-    jQuery( '#kontxt-analyze-input-button' ).click( function( e ) {
+    // capture date range redraw
+    jQuery( '#kontxt-events-date' ).click( function( e ) {
         e.preventDefault();
 
-        kontxtAnalyzeFormPost( );
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
+        var dimension =  jQuery( '#dimension' ).val();
+        var date_from =  jQuery( '#date_from' ).val();
+        var date_to =  jQuery( '#date_to' ).val();
+
+        kontxtAnalyze( dimension, date_from, date_to );
     });
 
-    // tab controller navigation
+    // capture intent redraw
+    jQuery( '#kontxt-intent-overlay' ).click( function( e ) {
+        e.preventDefault();
 
-    var navTabs = jQuery( '#kontxt-results-navigation' ).children( '.nav-tab-wrapper' ),
-        tabIndex = null;
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
-    navTabs.children().each(function() {
+        var overlay =  jQuery( '#overlay' ).val();
+        var dimension =  jQuery( '#dimension' ).val();
 
-        $(this).on('click', function (evt) {
+        if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
+            var date_from =  jQuery( '#date_from' ).val();
+        }
+        if ( Date.parse( jQuery( '#date_to' ).val() ) ) {
+            var date_to =  jQuery( '#date_to' ).val();
+        }
 
-            evt.preventDefault();
+        if( overlay ) {
+            kontxtOverlay( overlay, date_from, date_to );
+        } else {
+            kontxtAnalyze( dimension, date_from, date_to);
+        }
+    });
 
-            // If this tab is not active...
-            if (!$(this).hasClass('nav-tab-active')) {
+    // capture intent filter
+    jQuery( '#kontxt-intent-filter' ).click( function( e ) {
+        e.preventDefault();
 
-                // Unmark the current tab and mark the new one as active
-                $('.nav-tab-active').removeClass('nav-tab-active');
-                $(this).addClass('nav-tab-active');
+        jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
-                // Save the index of the tab that's just been marked as active. It will be 0 - 3.
-                tabIndex = jQuery(this).index();
+        var filter =  jQuery( '#filter' ).val();
+        var dimension =  jQuery( '#dimension' ).val();
 
-                // Hide the old active content
-                $('#kontxt-results-navigation')
-                    .children('div:not( .inside.hidden )')
-                    .addClass('hidden');
+        if ( Date.parse( jQuery( '#date_from' ).val() ) ) {
+            var date_from =  jQuery( '#date_from' ).val();
+        }
+        if ( Date.parse( jQuery( '#date_to' ).val() ) ) {
+            var date_to =  jQuery( '#date_to' ).val();
+        }
 
-                $('#kontxt-results-navigation')
-                    .children('div:nth-child(' + ( tabIndex ) + ')')
-                    .addClass('hidden');
+        if( filter ) {
+            kontxtFilter(filter, date_from, date_to);
+        } else {
+            kontxtAnalyze( dimension, date_from, date_to);
+        }
+    });
 
-                // And display the new content
-                $('#kontxt-results-navigation')
-                    .children('div:nth-child( ' + ( tabIndex + 2 ) + ')')
-                    .removeClass('hidden');
+});
 
+function kontxtFilter( filter, date_from, date_to ) {
+
+    var data = jQuery.param({
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    'sentimentByIntent',
+        'filter':       filter,
+        'from_date':    date_from,
+        'to_date':      date_to
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data,
+        cache: false,
+        success: function (response) {
+
+            if (response.status == 'error') {
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                return false;
+            }
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
+            var eventDates = jsonResponse.map(function (e) {
+                return Date.parse(e.event_date);
+            });
+
+            var eventValues = jsonResponse.map(function (e) {
+                return e.event_value;
+            });
+
+            let data2 = [];
+            let layout;
+            let contentTable;
+
+            data2 = [{
+                type: 'scatter',
+                fill: 'tozeroy',
+                y: eventValues,
+                x: eventDates,
+                name: 'Sentiment'
+            }];
+
+            layout2 = {
+                yaxis: {
+                    range: [-1, 1]
+                },
+                xaxis: {
+                    autorange: true,
+                    type: 'date'
+                }
+            }
+
+            jQuery('#sentiment-results-success').show();
+
+            contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Average</strong></th></thead><tbody>';
+            for (var elem in jsonResponse) {
+                contentTable += '<tr><td>' + jsonResponse[elem]['event_date'] + '</td>';
+                contentTable += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
 
             }
-        });
+            contentTable += '</tbody></table>';
+
+            if (data2.length > 0) {
+                Plotly.newPlot('sentiment_results_chart', data2, layout2);
+            }
+
+            jQuery('#sentiment_results_table').html(contentTable).show();
+
+            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+        },
+        error: function (response) {
+            jQuery('#kontxt-results-status').html(response.message);
+            return false;
+        }
     });
-});
+}
+
+function kontxtOverlay( overlay, date_from, date_to ) {
+
+    var data = jQuery.param({
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    overlay,
+        'from_date':    date_from,
+        'to_date':      date_to
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data,
+        cache: false,
+        success: function (response) {
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
+            var eventDates = jsonResponse.map(function (e) {
+                return Date.parse(e.event_date);
+            });
+
+            var eventValues = jsonResponse.map(function (e) {
+                return e.event_value;
+            });
+
+            var groupBy = function (xs, key) {
+                return xs.reduce(function (rv, x) {
+                    (rv[x[key]] = rv[x[key]] || []).push(x);
+                    return rv;
+                }, {});
+            };
+
+            let data2 = [];
+
+            var groupByIntent = groupBy(jsonResponse, 'event_value_name');
+
+            for (var elem in groupByIntent) {
+
+                var eventValueDate = groupByIntent[elem].map(function (e) {
+                    return Date.parse(e.event_date);
+                });
+
+                var eventValueCount = groupByIntent[elem].map(function (e) {
+                    return e.event_value_count;
+                });
+
+                data2.push({
+                    x: eventValueDate,
+                    y: eventValueCount,
+                    name: elem,
+                    stackgroup: 'one',
+                    yaxis: 'y2',
+                });
+
+            }
+
+            Plotly.addTraces(
+                'sentiment_results_chart',
+                data2
+            )
+            Plotly.relayout(
+                'sentiment_results_chart',
+                {
+                    ['yaxis2']: {
+                        overlaying: 'y1',
+                        side: 'right'
+                    }
+                }
+            );
+        }
+    });
+}
+
+function kontxtAnalyze( dimension, date_from, date_to) {
+
+    jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
+
+    jQuery('#kontxt-analyze-results-status').hide();
+
+    // prepare data for posting
+
+    var data = jQuery.param({
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'dimension':    dimension,
+        'from_date':    date_from,
+        'to_date':      date_to
+    });
+
+    var security = kontxtAjaxObject.security;
+
+    jQuery.ajax({
+        type: 'post',
+        url: ajaxurl,
+        security: security,
+        data: data,
+        cache: false,
+        success: function(response) {
+
+            if( response.status == 'error' ) {
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                return false;
+            }
+
+            var jsonResponse = jQuery.parseJSON(response);
+            // var jsonResponse = response;
+
+            var eventDates = jsonResponse.map(function(e) {
+                return Date.parse(e.event_date);
+            });
+
+            var eventValues = jsonResponse.map( function(e) {
+                return e.event_value;
+            });
+
+            var groupBy = function(xs, key) {
+                return xs.reduce(function(rv, x) {
+                    (rv[x[key]] = rv[x[key]] || []).push(x);
+                    return rv;
+                }, {});
+            };
+
+            let data = [];
+            let layout;
+            let contentTable;
+
+            switch( dimension ) {
+
+                case 'sentiment':
+                    data = [{
+                        type: 'scatter',
+                        fill: 'tozeroy',
+                        y: eventValues,
+                        x: eventDates,
+                        name: 'Sentiment'
+                    }];
+
+                    layout = {
+                        yaxis: {
+                            range: [-1, 1]
+                        },
+                        xaxis: {
+                            autorange: true,
+                            type: 'date'
+                        }
+                    }
+
+                    jQuery('#sentiment-results-success').show();
+
+                    contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Average</strong></th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + Math.round(jsonResponse[elem]['event_value'] * 100)/100 + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'intents':
+
+                    var groupByIntent = groupBy(jsonResponse, 'event_value_name' );
+
+                    for( var elem in groupByIntent ) {
+
+                        var eventValueDate = groupByIntent[elem].map( function(e) {
+                            return  Date.parse(e.event_date);
+                        });
+
+                        var eventValueCount = groupByIntent[elem].map( function(e) {
+                            return e.event_value_count;
+                        });
+
+                        data.push( {
+                            x: eventValueDate,
+                            y: eventValueCount,
+                            name: elem,
+                            stackgroup: 'one'
+                        } );
+
+                    }
+
+                    layout = {
+                        xaxis: {
+                            title: 'Date',
+                            type: 'date'
+                        },
+                        yaxis: {
+                            title: 'Frequency of top intent'
+                        }
+                    }
+
+                    jQuery('#intents-results-success').show();
+
+                    contentTable = '<table id="intents_results_id" class="widefat"><thead><th><strong>Date</strong></th><th>Name</th><th><strong>Count</strong></th></thead><tbody>';
+                    for( var elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_count'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'emotion':
+
+                    // there's a much cleaner way to do this that is not brute force, please have at it!
+                    // Mjb
+
+                    let joy = [];
+                    let fear = [];
+                    let anger = [];
+                    let disgust = [];
+                    let sadness = [];
+
+                    jsonResponse.forEach( function( element ) {
+
+                        emoJson = JSON.parse( element.event_value_name );
+
+                        joy.push( Math.round(emoJson['joy']*100 ) );
+                        fear.push( Math.round(emoJson['fear']*100 ) );
+                        anger.push( Math.round(emoJson['anger']*100 ) );
+                        disgust.push( Math.round(emoJson['disgust']*100 ) );
+                        sadness.push( Math.round(emoJson['sadness']*100 ) );
+
+                    } );
+
+                    joy = {
+                        x: eventDates,
+                        y: joy,
+                        name: 'joy',
+                        stackgroup: 'one'
+                    };
+
+                    fear = {
+                        x: eventDates,
+                        y: fear,
+                        name: 'fear',
+                        stackgroup: 'one'
+                    };
+
+                    anger = {
+                        x: eventDates,
+                        y: anger,
+                        name: 'anger',
+                        stackgroup: 'one'
+                    };
+
+                    disgust = {
+                        x: eventDates,
+                        y: disgust,
+                        name: 'disgust',
+                        stackgroup: 'one'
+                    };
+
+                    sadness = {
+                        x: eventDates,
+                        y: sadness,
+                        name: 'sadness',
+                        stackgroup: 'one'
+                    };
+
+                    data = [ joy, fear, anger, disgust, sadness ];
+
+                    layout = {
+                        xaxis: {
+                            title: 'Date',
+                            type: 'date'
+                        },
+                        yaxis: {
+                            title: 'Weighted emotions',
+                            tickformat: ',.0'
+                        }
+                    }
+
+                    jQuery('#emotion-results-success').show();
+
+                    contentTable = '<table id="emotion_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Name/Average</strong></th></thead><tbody>';
+                    for( let elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'keywords':
+
+                    jQuery('#keywords-results-success').show();
+
+                    let keywords = [];
+                    let count = [];
+
+                    contentTable = '<table id="keywords_results_id" class="widefat">' +
+                        '               <thead>' +
+                        '                   <th><strong>Extracted keyword</strong></th>' +
+                        '                   <th><strong>Relevance</strong></th>' +
+                        '                   <th><strong>Sentiment</strong></th>' +
+                        '                   <th><strong>Joy</strong></th>' +
+                        '                   <th><strong>Fear</strong></th>' +
+                        '                   <th><strong>Anger</strong></th>' +
+                        '                   <th><strong>Disgust</strong></th>' +
+                        '                   <th><strong>Sadness</strong></th>' +
+                        '                   <th><strong>Count</strong></th>' +
+                        '               </thead>' +
+                        '               <tbody>';
+                    for( let elem in jsonResponse ) {
+
+                        //keywords.push( jsonResponse[elem]['keywords'] );
+                        //count.push( jsonResponse[elem]['keywords_count'] );
+                        let keyword = JSON.parse(jsonResponse[elem]['keywords']);
+                        let sentimentLabel = '';
+                        let sentimentScore = '';
+                        let emotionLabel = '';
+                        let joyLabel = '';
+                        let fearLabel = '';
+                        let angerLabel = '';
+                        let disgustLabel = '';
+                        let sadnessLabel = '';
+
+                        if( typeof keyword['sentiment'] !== "undefined" ) {
+                           // sentiment = JSON.parse(keyword['sentiment']);
+                            //sentimentLabel = sentiment['label'];
+                            sentimentLabel = keyword['sentiment']['label'];
+                            sentimentScore = ' (' + Math.round(keyword['sentiment']['score'] * 100 ) + '%)';
+                        }
+
+                        if( typeof keyword['emotion'] !== "undefined" ) {
+                            // sentiment = JSON.parse(keyword['sentiment']);
+                            //sentimentLabel = sentiment['label'];
+                            joyLabel = Math.round(keyword['emotion']['joy']* 100 ) + '%';
+                            fearLabel = Math.round(keyword['emotion']['fear']* 100 )+ '%';
+                            angerLabel = Math.round(keyword['emotion']['anger']* 100 )+ '%';
+                            disgustLabel = Math.round(keyword['emotion']['disgust']* 100 )+ '%';
+                            sadnessLabel = Math.round(keyword['emotion']['sadness']* 100 )+ '%';
+                        }
+
+                        //let sentiment = JSON.parse(keyword['sentiment']);
+                        // console.log(keyword);
+                        //console.log(keyword);
+
+                        contentTable  += '<tr>  <td>' + keyword['text'] + '</td>';
+                        contentTable  += '      <td>' + ( Math.round(keyword['relevance'] * 100 )) + '%</td>';
+                        contentTable  += '      <td>' + sentimentLabel + sentimentScore + '</td>';
+                        contentTable  += '      <td>' + joyLabel + '</td>';
+                        contentTable  += '      <td>' + fearLabel + '</td>';
+                        contentTable  += '      <td>' + angerLabel + '</td>';
+                        contentTable  += '      <td>' + disgustLabel + '</td>';
+                        contentTable  += '      <td>' + sadnessLabel + '</td>';
+                        contentTable  += '      <td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    // data = [{
+                    //     type: 'bar',
+                    //     y: count,
+                    //     x: keywords,
+                    //     name: 'Keywords',
+                    //     text: count.map(String),
+                    //     textposition: 'auto',
+                    //     hoverinfo: 'none',
+                    //     marker: {
+                    //         color: 'rgb(158,202,225)',
+                    //         opacity: 0.6,
+                    //         line: {
+                    //             color: 'rgb(8,48,107)',
+                    //             width: 1.5
+                    //         }
+                    //     }
+                    // }];
+                    //
+                    // layout = {
+                    //     yaxis: {
+                    //     },
+                    //     xaxis: {
+                    //         autorange: true
+                    //     }
+                    // }
+
+                    break;
+
+                case 'latestActivity':
+
+                    jQuery('#activity-results-success').show();
+
+                    contentTable = '<table id="activity_results_id" class="widefat"><thead><th><strong>Event type</strong></th><th><strong>Event key</strong></th><th><strong>Event value</strong></th><th><strong>Timestamp</strong></th></thead><tbody>';
+                    for( let elem in jsonResponse ) {
+                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_type']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_key']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['event_value']  + '</td>';
+                        contentTable  += '<td>' + jsonResponse[elem]['created'] + '</td></tr>';
+
+                    }
+                    contentTable += '</tbody></table>';
+
+                    break;
+
+                case 'dashboard':
+
+                    var currentScore = JSON.parse(jsonResponse[0]['event_value'])['kontxt_score'] * 100;
+
+                    try {
+                        var prevScore = JSON.parse(jsonResponse[1]['event_value'])['kontxt_score'] * 100;
+                    } catch (e) {
+                        var prevScore = JSON.parse(jsonResponse[0]['event_value'])['kontxt_score'] * 100
+                    }
+                        
+                    data = [
+                        {
+                            domain: { x: [0, 1], y: [0, 1] },
+                            margin: 1,
+                            title: 'KONTXTscore',
+                            value: currentScore,
+                            type: "indicator",
+                            mode: "gauge+number+delta",
+                            delta: { reference: prevScore },
+                            gauge: {
+                                bar: { color: "Black" },
+                                borderwidth: 2,
+                                axis: { range: [-100, 100] },
+                                steps: [
+                                    { range: [-100, -10], color: "#ff533d" },
+                                    { range: [-10, 10], color: "LightGrey" },
+                                    { range: [10, 100], color: "#66AB8C" }
+                                ]
+                            }
+                        }
+                    ];
+
+                    layout = { width: 600, height: 350, margin: { t: 0, b: 0 } };
+
+                    break;
+            }
+
+            if( data.length > 0 ) {
+                Plotly.newPlot( dimension + '_results_chart', data, layout );
+            }
+
+            jQuery('#' + dimension + '_results_table').html( contentTable ).show();
+
+            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+        },
+        error: function(response) {
+            jQuery('#kontxt-results-status').html(response.message);
+            return false;
+        }
+
+    });
+
+    return false;
+};
 
 
 function kontxtExperimentFormPost(return_text) {
@@ -79,7 +640,6 @@ function kontxtExperimentFormPost(return_text) {
         return false;
     }
 
-    jQuery('#kontxt-results-status').hide();
     jQuery('#kontxt-results-success').show();
 
     // jQuery('#kontxt-text-to-analyze').val(return_text);
@@ -105,58 +665,22 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response) {
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
 
             var jsonResponse = jQuery.parseJSON(response);
 
-            var contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th><th>Accurate?</th></th></thead><tbody>';
+            var contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th></th></thead><tbody>';
             for( var elem in jsonResponse ) {
                 contentTable  += '<tr><td>' + jsonResponse[elem]['class_name'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td>';
-                contentTable  += '<td><a href="">Yes</a> | <a href="">No</a></td></tr>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td></tr>';
 
             }
             contentTable += '</tbody></table>';
 
             jQuery('#intents_chart').html( contentTable ).show();
-
-            jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
-        },
-        error: function(response) {
-            jQuery('#kontxt-results-status').html(response.message);
-            return false;
-        }
-
-    });
-
-    jQuery.ajax({
-        type: 'post',
-        url: ajaxurl,
-        security: security,
-        data: data + '&service=concepts',
-        action: 'kontxt_analyze',
-        cache: false,
-        success: function(response) {
-
-            if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
-                jQuery('#kontxt-results-success').hide();
-                return false;
-            }
-
-            var jsonResponse = jQuery.parseJSON(response);
-
-            var contentTable = '<table id="kontxt_concepts" class="widefat"><thead><th>Concept</th><th>Relevance</th></thead><tbody>';
-            for( var elem in jsonResponse ) {
-                contentTable  += '<tr><td>' + jsonResponse[elem]['text'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['relevance'] * 100 )) + '%</td></tr>';
-            }
-            contentTable += '</tbody></table>';
-
-            jQuery('#concepts_chart').html( contentTable ).show();
 
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         },
@@ -177,7 +701,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -211,7 +735,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -289,7 +813,7 @@ function kontxtExperimentFormPost(return_text) {
         success: function(response){
 
             if( response.status == 'error' ) {
-                jQuery('#kontxt-results-status').html(response.message).show();
+                jQuery('#kontxt-analyze-results-status').html(response.message).show();
                 jQuery('#kontxt-results-success').hide();
                 return false;
             }
@@ -317,7 +841,6 @@ function kontxtExperimentFormPost(return_text) {
                 fill: 'toself',
                 name: 'Emotions detected'
             }];
-
 
             var layout = {
                 width: 'auto',
@@ -348,267 +871,106 @@ function kontxtExperimentFormPost(return_text) {
     return false;
 };
 
-function kontxtAnalyzeFormPost( ) {
+
+function kontxtJourney( ) {
 
     jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
 
     jQuery('#kontxt-analyze-results-status').hide();
-    jQuery('#kontxt-analyze-results-success').show();
-
-    var dimension = jQuery('#event_type').val();
 
     // prepare data for posting
 
-    var data = jQuery.param({
-        'action':       'kontxt_analyze_results',
-        'apikey':       kontxtAjaxObject.apikey,
-        'dimension':    dimension
+    let data = jQuery.param({
+        'action': 'kontxt_analyze_results',
+        'apikey': kontxtAjaxObject.apikey,
+        'service': 'events'
     });
 
-    var security = kontxtAjaxObject.security;
+    let security = kontxtAjaxObject.security;
+
+    let layout;
+    let contentTable;
 
     jQuery.ajax({
         type: 'post',
         url: ajaxurl,
         security: security,
-        data: data,
+        data: data + '&dimension=journeyLabels',
         cache: false,
-        success: function(response) {
+        success: function (response) {
 
-            if( response.status == 'error' ) {
+            if (response.status == 'error') {
                 jQuery('#kontxt-analyze-results-status').html(response.message).show();
-                jQuery('#kontxt-analyze-results-success').hide();
                 return false;
             }
 
-            Plotly.purge('analyze_results_chart');
+            let jsonResponseLabels = jQuery.parseJSON(response);
 
-            jQuery('#analyze_results_title').html(dimension + ' analytics ').css('text-transform', 'capitalize');
+            jQuery.ajax({
+                type: 'post',
+                url: ajaxurl,
+                security: security,
+                data: data + '&dimension=journeyEvents',
+                cache: false,
+                success: function (response) {
 
-            var jsonResponse = jQuery.parseJSON(response);
-            // var jsonResponse = response;
+                    if (response.status == 'error') {
+                        jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                        return false;
+                    }
 
-            var eventDates = jsonResponse.map(function(e) {
-                return Date.parse(e.event_date);
+                    let jsonResponseEvents = jQuery.parseJSON(response);
+
+                    let eventLabels     = Object.keys(jsonResponseLabels).map((key) => jsonResponseLabels[key]['event_key_label']) ;
+                    let eventSource     = Object.keys(jsonResponseEvents).map((key) => jsonResponseEvents[key]['event_source']);
+                    let eventTarget     = Object.keys(jsonResponseEvents).map((key) => jsonResponseEvents[key]['event_target']);
+                    let eventFlowValue  = Object.keys(jsonResponseEvents).map((key) => jsonResponseEvents[key]['flow_value']);
+
+                    var data = {
+                        type: "sankey",
+                        arrangement: "snap",
+                        valueformat: ".0f",
+                        valuesuffix: " sessions",
+                        orientation: "h",
+                        node: {
+                            pad: 15,
+                            thickness: 30,
+                            line: {
+                                color: "black",
+                                width: 1
+                            },
+                            label: eventLabels
+                        },
+
+                        link: {
+                            source: eventSource,
+                            target: eventTarget,
+                            value:  eventFlowValue
+                        }
+                    }
+
+                    var data = [data]
+
+                    var layout = {
+                        font: {
+                            size: 10
+                        }
+                    }
+
+                    Plotly.newPlot('journey_results_chart', data, layout);
+
+                    jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+
+                }
             });
 
-            var eventValues = jsonResponse.map( function(e) {
-                return e.event_value;
-            });
 
-            var groupBy = function(xs, key) {
-                return xs.reduce(function(rv, x) {
-                    (rv[x[key]] = rv[x[key]] || []).push(x);
-                    return rv;
-                }, {});
-            };
-
-            let data = [];
-            let layout;
-            let contentTable;
-
-            switch( dimension ) {
-
-                case 'sentiment':
-                    data = [{
-                        type: 'scatter',
-                        fill: 'tozeroy',
-                        y: eventValues,
-                        x: eventDates
-                    }];
-
-                    layout = {
-                        yaxis: {
-                            range: [-1, 1]
-                        },
-                        xaxis: {
-                            autorange: true,
-                            type: 'date'
-                        }
-                    }
-
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Average</th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-
-                case 'intents':
-
-                    var groupByIntent = groupBy(jsonResponse, 'event_value_name' );
-
-                    for( var elem in groupByIntent ) {
-
-                        var eventValueDate = groupByIntent[elem].map( function(e) {
-                            return  Date.parse(e.event_date);
-                        });
-
-                        var eventValueCount = groupByIntent[elem].map( function(e) {
-                            return e.event_value_count;
-                        });
-
-                        data.push( {
-                            x: eventValueDate,
-                            y: eventValueCount,
-                            name: elem,
-                            stackgroup: 'one'
-                        } );
-
-                    }
-
-                    console.log(data);
-
-                    layout = {
-                        xaxis: {
-                            title: 'Date',
-                            type: 'date'
-                        },
-                        yaxis: {
-                            title: 'Frequency'
-                        }
-                    }
-
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name</th><th>Count</th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value_count'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-
-                case 'emotion':
-
-                    // there's a much cleaner way to do this that is not brute force, please have at it!
-                    // Mjb
-
-                    let joy = [];
-                    let fear = [];
-                    let anger = [];
-                    let disgust = [];
-                    let sadness = [];
-
-                    jsonResponse.forEach( function( element ) {
-
-                        emoJson = JSON.parse( element.event_value_name );
-
-                        joy.push( Math.round(emoJson['joy']*100 ) );
-                        fear.push( Math.round(emoJson['fear']*100 ) );
-                        anger.push( Math.round(emoJson['anger']*100 ) );
-                        disgust.push( Math.round(emoJson['disgust']*100 ) );
-                        sadness.push( Math.round(emoJson['sadness']*100 ) );
-
-                    } );
-
-                    joy = {
-                        x: eventDates,
-                        y: joy,
-                        name: 'joy',
-                        stackgroup: 'one'
-                    };
-
-                    fear = {
-                        x: eventDates,
-                        y: fear,
-                        name: 'fear',
-                        stackgroup: 'one'
-                    };
-
-                    anger = {
-                        x: eventDates,
-                        y: anger,
-                        name: 'anger',
-                        stackgroup: 'one'
-                    };
-
-                    disgust = {
-                        x: eventDates,
-                        y: disgust,
-                        name: 'disgust',
-                        stackgroup: 'one'
-                    };
-
-                    sadness = {
-                        x: eventDates,
-                        y: sadness,
-                        name: 'sadness',
-                        stackgroup: 'one'
-                    };
-
-                    data = [ joy, fear, anger, disgust, sadness ];
-
-                    layout = {
-                        xaxis: {
-                            title: 'Date',
-                            type: 'date'
-                        },
-                        yaxis: {
-                            title: 'Emotion distribution',
-                            tickformat: ',.0',
-                            range: [0,100]
-                        }
-                    }
-
-                    console.log(data);
-
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Date</th><th>Name/Average</th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-
-                case 'keywords':
-
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted keyword</th><th>Count</th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['keywords']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-
-                case 'concepts':
-
-                    contentTable = '<table id="analyze_results_id" class="widefat"><thead><th>Extracted concept</th><th>Count</th></thead><tbody>';
-                    for( var elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['concepts']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['concepts_count'] + '</td></tr>';
-
-                    }
-                    contentTable += '</tbody></table>';
-
-                    break;
-            }
-
-            if( data.length > 0 ) {
-                Plotly.newPlot('analyze_results_chart', data, layout);
-            }
-
-            jQuery('#analyze_results_table').html( contentTable ).show();
-
-            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
-        },
-        error: function(response) {
-            jQuery('#kontxt-results-status').html(response.message);
-            return false;
         }
-
     });
 
-    return false;
-};
+
+}
+
 
 function makeid(length) {
     // from SO: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript

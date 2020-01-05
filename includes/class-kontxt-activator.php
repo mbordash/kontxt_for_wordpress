@@ -21,11 +21,12 @@ class Kontxt_Activator {
 	 * @return false|string
 	 * @since    1.0.0
 	 */
-	public function activate() {
+	public static function activate() {
 
-		$option_name      = 'KONTXT';
-		$api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
+		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . '../app.ini.php' );
 
+		$option_name    = 'KONTXT';
+		$api_host       = $kontxt_ini['api_host'];
 
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
@@ -33,7 +34,7 @@ class Kontxt_Activator {
 		$apiKey = get_option( $option_name . '_apikey' );
 		$apiUid = get_option( $option_name . '_apiuid' );
 
-		if( !isset($apiKey) || $apiKey === '' ) {
+		if( !isset($apiKey) || $apiKey === '' || $apiKey === false) {
 
 			// install site and get a key from kontxt
 
@@ -52,8 +53,6 @@ class Kontxt_Activator {
 				'service'                   => $service
 			);
 
-			// error_log(print_r($requestBody, TRUE));
-
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
@@ -68,17 +67,44 @@ class Kontxt_Activator {
 				update_option( $option_name . '_apikey', $apiKey);
 				update_option( $option_name . '_apiuid', $apiUid);
 
+				return true;
+
 			} else {
 
 				$response_array['status'] = "error";
 				$response_array['message'] = "Plugin Install Error. Something went wrong with this request. Code received: " . $response['response']['code'];
 
 				return json_encode($response_array);
-
 			}
 
+		} else {
+
+			// update site
+
+			$siteName   = get_bloginfo( 'name' );
+			$siteDomain = get_bloginfo( 'url' );
+			$siteEmail  = get_bloginfo( 'admin_email' );
+			$service    = 'reactivate';
+
+			// register with KONTXT Site API endpoint
+			$requestBody = array(
+				'api_uid'       => $apiUid,
+				'api_key'       => $apiKey,
+				'site_name'     => $siteName,
+				'site_domain'   => $siteDomain,
+				'site_email'    => $siteEmail,
+				'service'       => $service
+			);
+
+			$opts = array(
+				'body'      => $requestBody,
+				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			wp_remote_get($api_host, $opts);
+
+			return true;
+
 		}
-
 	}
-
 }

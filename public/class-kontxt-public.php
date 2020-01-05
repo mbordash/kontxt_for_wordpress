@@ -12,10 +12,6 @@
  */
 class Kontxt_Public {
 
-	private $api_host_only;
-	private $api_host_uri;
-	private $api_host_proto;
-	private $api_host_port;
 	private $plugin_name;
 	private $version;
 	private $option_name;
@@ -23,27 +19,20 @@ class Kontxt_Public {
 
 	/**
 	 * Kontxt_Public constructor.
+	 * Kontxt_Public construct
 	 *
 	 * @param $plugin_name
 	 * @param $version
 	 * @param $option_name
 	 * @param $api_host
-	 * @param $api_host_only
-	 * @param $api_host_uri
-	 * @param $api_host_proto
-	 * @param $api_host_port
 	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
+	public function __construct( $plugin_name, $version, $option_name, $api_host )
 	{
 
 		$this->plugin_name      = $plugin_name;
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
-		$this->api_host_only    = $api_host_only;
-		$this->api_host_uri     = $api_host_uri;
-		$this->api_host_proto   = $api_host_proto;
-		$this->api_host_port    = $api_host_port;
 
 	}
 
@@ -88,13 +77,24 @@ class Kontxt_Public {
 		 * class.
 		 */
 
-		// wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
+
+		$kontxt_ajax_info = array(
+			'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+			'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
+			'action' => 'kontxt_send_event'
+		);
+
+		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
+		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
+
+		wp_enqueue_script( $this->plugin_name);
 
 	}
 
 	public function kontxt_comment_post( $commentId ) {
 
-		$kontxt_comment_arr = [];
+		$kontxtCommentArr = [];
 
 		// capture comment content
 		if ( $commentId ) {
@@ -108,23 +108,118 @@ class Kontxt_Public {
 
 			if ( ! empty( $comment_text ) ) {
 
-				$kontxt_comment_arr['comment_text'] = $comment_text;
-				$kontxt_comment_arr['comment_rating'] = $comment_rating;
-				$kontxt_comment_arr['comment_product_id'] = $comment_product_id;
-				$kontxt_comment_arr['comment_product_name'] = $comment_product_name;
+				$kontxtCommentArr['comment_submitted'] = [
+					'comment_text' => $comment_text,
+					'comment_rating' => $comment_rating,
+					'comment_product_id' => $comment_product_id,
+					'comment_product_name' => $comment_product_name
+				];
 
 			}
 		}
 
-		// send directly to backend
-		$this->kontxt_send_event( $kontxt_comment_arr, 'public_event', true );
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', true );
+
+	}
+
+	public function kontxt_user_register( $user_id ) {
+
+		if( $user_id ) {
+			$kontxtUserRegArr['user_register'] = [
+				'user_id' => $user_id
+			];
+
+			// send directly to backend, don't bother with js async
+			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event', true );
+
+		}
+	}
+
+
+	public function kontxt_contact_form_capture( $data ) {
+
+		$kontxtContactFormArr = [];
+
+		// capture contact us content
+		if ( $data ) {
+
+			$kontxtContactFormArr['contact_form_submitted'] = [
+				'contact_form_subject' => $data['your-subject'],
+				'contact_form_message' => $data['your-message']
+			];
+
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtContactFormArr, 'public_event', true );
+
+	}
+
+	public function kontxt_cart_capture( ) {
+
+		$kontxtCartArr = [];
+
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			$cartData = WC()->cart->get_cart_contents();
+
+			$cartDataArray[] = array();
+
+			foreach( $cartData as $cart_item_key => $cart_item ) {
+
+				$cartDataArray[] = array(
+					'cart_product_id'   => $cart_item['product_id'],
+					'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
+				);
+
+			}
+			$kontxtCartArr['cart_add'] = $cartDataArray;
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtCartArr, 'public_event', true );
+
+	}
+
+	public function kontxt_order_post( $order_id ) {
+
+		$orderCapture[] = [];
+
+		if( $order_id ) {
+
+			$orderProducts[] = null;
+
+			$order = wc_get_order( $order_id );
+			foreach( $order->get_items() as $item_id => $item ){
+
+				$orderProducts['product_id']    = $item['product_id']; // Get the product ID
+				$orderProducts['variation_id']  = $item['variation_id']; // Get the variation ID
+				$orderProducts['product_name']  = $item['name']; // The product name
+				$orderProducts['item_qty']      = $item['quantity']; // The quantity
+				$orderProducts['line_subtotal'] = $item['line_subtotal'];  // The line subtotal
+				$orderProducts['line_total']    = $item['line_total'];  // The line subtotal
+
+			}
+
+			$orderCapture['order_received'] = [
+				'order_id'      => $order_id,
+				'order_date'    => $order->get_date_created(),
+				'order_total'   => $order->get_total(),
+				'products'      => $orderProducts
+			];
+
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $orderCapture, 'public_event', true );
 
 	}
 
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 		global $wp_query, $category;
 
-		$kontxt_user_session = [];
+		$kontxt_user_session    = [];
+		$pageName               = null;
 
 		// capture text input
 		$searchQuery = get_search_query();
@@ -133,7 +228,7 @@ class Kontxt_Public {
 
 			// statistically interesting to see which search queries returned not results
 			if ( !have_posts() ) {
-				$kontxt_user_session['no_results'] =  true;
+				$kontxt_user_session['no_search_results'] =  true;
 			}
 		}
 
@@ -141,28 +236,33 @@ class Kontxt_Public {
 		if( is_category() ) {
 			$kontxt_user_session['blog_page'] = $category;
 		} else {
-			$pageName = $wp_query->queried_object->post_name;
+			if ( $wp_query instanceof WP_Query ) {
+				if ( $object = $wp_query->get_queried_object() ) {
+					$pageName = isset( $object->name ) ? $object->name : '';
+				}
+			}
 			if ( $pageName ) {
 				$kontxt_user_session['blog_page'] = $pageName;
 			} elseif( is_front_page() || is_home() ) {
-				$kontxt_user_session['blog_page'] = 'Site home';
+				$kontxt_user_session['site_home'] = 'Site home';
 			}
 		}
 
 
 		// get commerce related major actions
-		if ( class_exists( 'woocommerce' ) ) {
+		if ( class_exists( 'WooCommerce', false )  ) {
 
 			// override page as shop home
 			if ( $searchQuery ) {
 
-				$kontxt_user_session['shop_page'] = "Search results";
+				// $kontxt_user_session['shop_page_search'] = "Search results";
 
 			} elseif( is_shop() ) {
 
-				$kontxt_user_session['shop_page'] = "Shop home";
+				$kontxt_user_session['shop_page_home'] = "Shop home";
 
-			} elseif( get_queried_object()->term_id ) {
+			} elseif( isset( get_queried_object()->term_id) ) {
+
 				$categoryId   = get_queried_object()->term_id;
 				$categoryName = get_the_category_by_ID( get_queried_object( )->term_id);
 
@@ -173,8 +273,7 @@ class Kontxt_Public {
 
 				);
 
-				$kontxt_user_session['shop_page'] = "category";
-				$kontxt_user_session['category_data'] = $categoryDataArray;
+				$kontxt_user_session['shop_page_category'] = $categoryDataArray;
 
 			} else {
 
@@ -190,78 +289,50 @@ class Kontxt_Public {
 						'view_product_name' => $productName
 
 					);
-					$kontxt_user_session['shop_page'] = 'product';
-					$kontxt_user_session['product_data'] = $productDataArray;
-				}
-			}
-
-			// current cart data
-			if( WC()->cart->get_cart_contents_count() >= 1 ) {
-
-				$cartData = WC()->cart->get_cart_contents();
-
-				$cartDataArray[] = array();
-
-				foreach ( $cartData as $cart_item_key => $cart_item ) {
-
-					$cartDataArray[] = array(
-						'cart_product_id'   => $cart_item['product_id'],
-						'cart_product_name' => wc_get_product($cart_item['product_id'])->get_name()
-					);
-
-				}
-				$kontxt_user_session['cart_data'] = $cartDataArray;
-			}
-
-			$currentUserId = get_current_user_id();
-			if( $currentUserId ) {
-
-				$customerOrdersArray = wc_get_orders( array(
-					'meta_key' => '_customer_user',
-					'meta_value' => $currentUserId,
-					'post_status' => [ 'wc-completed' ],
-					'numberposts' => -1
-				) );
-				if ($customerOrdersArray ) {
-					$kontxt_user_session['completed_orders'] = $customerOrdersArray;
+					$kontxt_user_session['shop_page_product'] = $productDataArray;
 				}
 			}
 
 		}
 
-		$this->kontxt_send_event( $kontxt_user_session, 'public_event', true );
+		return $kontxt_user_session;
 
 	}
 
 	/**
 	 * @param $eventData
-	 * @param $services
+	 * @param string $service
 	 * @param bool $silent
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_send_event( $eventData, $service, $silent = true ) {
+	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
 
-		//error_log(print_r($eventData, true));
+		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
+			$eventDataPost =  $_POST['eventData'];
+		} else {
+			$eventDataPost = null;
+		}
+
+		if( $eventDataPost ) {
+			check_ajax_referer( 'kontxt-ajax-string', 'security', false );
+			$eventData = json_decode( html_entity_decode( stripslashes( $_POST['eventData'] ) ) );
+		}
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
 	    $apiUid             = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = $_COOKIE['kontxt_session'];
+	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? $_COOKIE['kontxt_session'] : '';
 		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
-
             error_log( "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first." );
             return;
-
         }
 
 		if( !isset( $current_session ) ) {
-
 			$current_session = $this->genKey();
 			setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
-
 		}
 
 		if( !isset( $requestId ) ) {
@@ -272,7 +343,7 @@ class Kontxt_Public {
         if( 0 == $current_user->ID ) {
 	        $current_user_username = $current_session;
         } else {
-	        $current_user_username = $current_user->user_login;
+	        $current_user_username = hash( 'SHA256', $current_user->user_login );
         }
 
         if ( isset( $eventData ) && $eventData !== '' ) {
@@ -302,21 +373,11 @@ class Kontxt_Public {
                     'sslverify' => false
 		        );
 
-//		        if( $this->fp ) {
-//					error_log('posting via socket' . $this->fp );
-//
-//					$out =  "GET " . $this->api_host_uri . "?" . http_build_query( $requestBody ) . " HTTP/1.1\r\n";
-//					$out .= "Host: " . $this->api_host_only . "\r\n";
-//					$out .= "Content-type: application/x-www-form-urlencoded\r\n";
-//
-//					error_log( $out );
-//
-//			        @fwrite( $this->fp, $out );
-//		        }
-
 		        wp_remote_request( $this->api_host, $args );
 
         }
+
+        return false;
     }
 
 
@@ -338,15 +399,9 @@ class Kontxt_Public {
 	 */
 	public function genKey() {
 
-		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
-
-		//error_log( "uniq id site key: " . $api_key);
-
-		return $api_key;
+		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 
 	}
-
-
 
 	/**
 	 * Initialize the class and set its properties.

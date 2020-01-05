@@ -12,10 +12,6 @@
  */
 class Kontxt_Admin {
 
-	private $api_host_only;
-	private $api_host_uri;
-	private $api_host_proto;
-	private $api_host_port;
 	private $plugin_name;
 	private $version;
 	private $option_name;
@@ -28,22 +24,14 @@ class Kontxt_Admin {
 	 * @param $version
 	 * @param $option_name
 	 * @param $api_host
-	 * @param $api_host_only
-	 * @param $api_host_uri
-	 * @param $api_host_proto
-	 * @param $api_host_port
 	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host, $api_host_only, $api_host_uri, $api_host_proto, $api_host_port )
+	public function __construct( $plugin_name, $version, $option_name, $api_host )
 	{
 
 		$this->plugin_name      = $plugin_name;
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
-		$this->api_host_only    = $api_host_only;
-		$this->api_host_uri     = $api_host_uri;
-		$this->api_host_proto   = $api_host_proto;
-		$this->api_host_port    = $api_host_port;
 
 	}
 
@@ -106,6 +94,7 @@ class Kontxt_Admin {
 
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_enqueue_script( 'jquery-ui-datepicker' );
 
 	}
 
@@ -124,8 +113,13 @@ class Kontxt_Admin {
 
 	    if ( isset( $_POST['dimension'] ) && $_POST['dimension'] !== '' ) {
 
-		    //header('Content-type: application/json');
-		    echo $this->kontxt_get_results( $_POST['dimension'] );
+	        if( isset( $_POST['filter'] ) && $_POST['filter'] !== '' && $_POST['filter'] !== false ) {
+	        	$filter =  $_POST['filter'];
+	        } else {
+	        	$filter = null;
+	        }
+
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'] = '' , $_POST['to_date'] = '' , $filter );
 
 	    }
 
@@ -133,12 +127,12 @@ class Kontxt_Admin {
     }
 
 
-	public function kontxt_get_results( $dimension ) {
+	public function kontxt_get_results( $dimension, $from_date, $to_date, $filter ) {
 
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
-		$current_session    = $_COOKIE['kontxt_anon_session'];
+		$current_session    = $_COOKIE['kontxt_session'];
 		$current_user       = wp_get_current_user();
 
 
@@ -153,7 +147,7 @@ class Kontxt_Admin {
 
 		if ( isset( $dimension ) && $dimension !== '' ) {
 
-		    $dimension = sanitize_text_field( $dimension );
+			$dimension = sanitize_text_field( $dimension );
 
 			// get current user info, if no user, set as session
 
@@ -165,7 +159,7 @@ class Kontxt_Admin {
 
 			if( !isset( $current_session ) ) {
 				$current_session = 'anon_' . $this->genKey();
-				setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+				setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
 			}
 
 			$requestBody = array (
@@ -177,6 +171,22 @@ class Kontxt_Admin {
                 'current_session_id'        => $current_session,
                 'user_class'                => 'admin'
             );
+
+			if( $filter ) {
+				$filter                = sanitize_text_Field( $filter );
+				$requestBody['filter'] = $filter;
+			}
+
+			if( $from_date ) {
+				$from_date                = sanitize_text_Field( $from_date );
+				$requestBody['from_date'] = $from_date;
+			}
+
+			if( $to_date ) {
+				$to_date                = sanitize_text_Field( $to_date );
+				$requestBody['to_date'] = $to_date;
+			}
+
 
 			$opts = array(
 				'body'      => $requestBody,
@@ -229,11 +239,10 @@ class Kontxt_Admin {
     public function kontxt_cognitive( $textToAnalyze, $service, $requestId, $silent = false )
     {
 
-	    error_log( "request id: " . $requestId );
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = $_COOKIE['kontxt_anon_session'];
+	    $current_session    = $_COOKIE['kontxt_session'];
 	    $current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -253,7 +262,7 @@ class Kontxt_Admin {
 
 	    if( !isset( $current_session ) ) {
 		    $current_session = 'anon_' . $this->genKey();
-		    setcookie('kontxt_anon_session', $current_session, strtotime( '+30 days' ) );
+		    setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
 	    }
 
 	    if ( isset( $textToAnalyze ) && $textToAnalyze !== '' ) {
@@ -285,14 +294,7 @@ class Kontxt_Admin {
 
                 return $response['body'];
 
-                // error_log($response['body']);
-                // error_log( print_r($_POST,true) );
-
             } else {
-
-	            // error_log("Non-200 response");
-	            // error_log( print_r($response, true) );
-	            // error_log( print_r($_POST,true) );
 
                 $response_array['status'] = "error";
                 $response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
@@ -312,14 +314,142 @@ class Kontxt_Admin {
 	public function add_management_page()
 	{
 
-		$this->plugin_screen_hook_suffix = add_management_page(
-			__( 'KONTXT Analyze', 'kontxt' ),
-			__( 'KONTXT Analyze', 'kontxt' ),
+
+		$this->plugin_screen_hook_suffix = add_menu_page(
+			__( 'KONTXT', 'kontxt' ),
+			__( 'KONTXT', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name,
+			array( $this, 'display_analyze_page' ),
+			'dashicons-analytics',
+			30
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'Dashboard', 'kontxt' ),
+			__( 'Dashboard', 'kontxt' ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' )
 		);
 
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Sentiment', 'kontxt' ),
+			__( 'Sentiment', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_sentiment",
+			array( $this, 'display_sentiment_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Emotion', 'kontxt' ),
+			__( 'Emotion', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_emotion",
+			array( $this, 'display_emotion_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Intents', 'kontxt' ),
+			__( 'Intents', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_intents",
+			array( $this, 'display_intents_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Keywords', 'kontxt' ),
+			__( 'Keywords', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_keywords",
+			array( $this, 'display_keywords_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Journey Analytics', 'kontxt' ),
+			__( 'Journey', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "journey",
+			array( $this, 'display_journey_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Experiment', 'kontxt' ),
+			__( 'Experiment', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_experiment",
+			array( $this, 'display_experiment_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
+			__( 'KONTXT Settings', 'kontxt' ),
+			__( 'Settings', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_settings",
+			array( $this, 'display_options_page' )
+		);
+
+	}
+
+
+	/**
+	 * Render the journey page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_journey_page()
+	{
+		include_once 'partials/kontxt-journey-display.php';
+	}
+
+
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_sentiment_page()
+	{
+		include_once 'partials/kontxt-sentiment-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_emotion_page()
+	{
+		include_once 'partials/kontxt-emotion-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_intents_page()
+	{
+		include_once 'partials/kontxt-intents-display.php';
+	}
+
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_keywords_page()
+	{
+		include_once 'partials/kontxt-keywords-display.php';
 	}
 
 	/**
@@ -332,23 +462,15 @@ class Kontxt_Admin {
 		include_once 'partials/kontxt-analyze-display.php';
 	}
 
-    /**
-     * Add an options page under the Settings submenu
-     *
-     * @since  1.0.0
-     */
-    public function add_options_page()
-    {
-
-        $this->plugin_screen_hook_suffix = add_options_page(
-            __( 'KONTXT Settings', 'kontxt' ),
-            __( 'KONTXT', 'kontxt' ),
-            'manage_options',
-            $this->plugin_name,
-            array( $this, 'display_options_page' )
-        );
-
-    }
+	/**
+	 * Render the analyze page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_experiment_page()
+	{
+		include_once 'partials/kontxt-experiment-display.php';
+	}
 
     /**
      * Render the options page for plugin
@@ -373,15 +495,6 @@ class Kontxt_Admin {
             __( 'General', 'kontxt' ),
             array( $this, $this->option_name . '_general_cb' ),
             $this->plugin_name
-        );
-
-        add_settings_field(
-            $this->option_name . '_datasharing',
-            __( 'Opt-in to deep analytics and share usage data with KONTXT?', 'kontxt' ),
-            array( $this, $this->option_name . '_datasharing_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_datasharing' )
         );
 
 	    add_settings_field(
@@ -412,7 +525,6 @@ class Kontxt_Admin {
 	    );
 
 
-        register_setting( $this->plugin_name, $this->option_name . '_datasharing', array( $this, $this->option_name . '_sanitize_option' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_text' ) );
@@ -496,34 +608,6 @@ class Kontxt_Admin {
 
 
     /**
-     * Render the radio input field for datasharing option
-     *
-     * @since  1.0.0
-     */
-    public function kontxt_datasharing_cb()
-    {
-
-        $datasharing = get_option( $this->option_name . '_datasharing' );
-
-        ?>
-
-        <fieldset>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" id="<?php echo $this->option_name . '_datasharing' ?>" value="yes" <?php checked( $datasharing, 'yes' ); ?>>
-                <?php _e( 'Yes', 'kontxt' ); ?>
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_datasharing' ?>" value="no" <?php checked( $datasharing, 'no' ); ?>>
-                <?php _e( 'No', 'kontxt' ); ?>
-            </label>
-        </fieldset>
-
-        <?php
-    }
-
-
-    /**
      * Sanitize the text value before being saved to database
      * TODO: replace with wordpress sanitize option function
      *
@@ -558,8 +642,6 @@ class Kontxt_Admin {
 	public function genKey() {
 
 		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
-
-		//error_log( "uniq id site key: " . $api_key);
 
 		return $api_key;
 
