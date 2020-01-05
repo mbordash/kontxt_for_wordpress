@@ -31,6 +31,34 @@ class Kontxt_Deactivator {
 	 */
 	public static function deactivate() {
 
+		$kontxt_ini = parse_ini_file( plugin_dir_path( __FILE__ ) . '../app.ini.php' );
+
+		$option_name = 'KONTXT';
+		$api_host    = $kontxt_ini['api_host'];
+
+		// first check to make sure the KONTXT settings are already set in wordpress options
+		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
+
+		$apiKey = get_option( $option_name . '_apikey' );
+		$apiUid = get_option( $option_name . '_apiuid' );
+
+		if ( $apiKey  ) {
+
+			// register with KONTXT Site API endpoint
+			$requestBody = array(
+				'api_key' => $apiKey,
+				'api_uid' => $apiUid,
+				'service' => 'uninstall'
+			);
+
+			$opts = array(
+				'body'    => $requestBody,
+				'headers' => 'Content-type: application/x-www-form-urlencoded'
+			);
+
+			$response = wp_remote_get( $api_host, $opts );
+
+		}
 	}
 
 }

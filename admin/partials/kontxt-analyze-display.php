@@ -10,218 +10,109 @@
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 
+<div class="notice notice-info is-dismissible inline">
+    <p>
+        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
+        If you have any questions, comments, suggestions about our service, please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a>.
+		<?php
+		printf(
+		// translators: Leave always a hint for translators to understand the placeholders.
+			esc_attr__( '', 'WpAdminStyle' ),
+			'<code>.notice-info</code>',
+			'<code>.is-dismissible</code>',
+			'<code>.inline</code>'
+		);
+		?>
+    </p>
+</div>
+
 <div class="wrap">
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-    <div id="kontxt-results-navigation">
+    <div id="activity-results-success" class="inside hidden">
 
-        <h2 class="nav-tab-wrapper current">
+        <div id="activity-results-box" class="wrap">
 
-            <a class="nav-tab nav-tab-active" href="javascript:;"><?php esc_attr_e( 'Experiment', 'wp_admin_style' ); ?></a>
-            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Analytics', 'wp_admin_style' ); ?></a>
-            <a class="nav-tab" href="javascript:;"><?php esc_attr_e( 'Deep Analytics', 'wp_admin_style' ); ?></a>
+            <div class="wrap">
 
+                <div id="poststuff">
 
-        </h2>
+                    <div class="postbox">
 
-        <div class="inside">
+                        <div class="inside">
 
-            <div id="kontxt-results-box" class="wrap">
+                            <h3>KONTXTscore&trade; </h3>
 
-                <h4>Enter some content and let KONTXT analyze it for you</h4>
+                            Your KONTXTscore is the overall analysis of your visitor sentiment.  Our proprietary algorithm considers all visitor text interaction with your site, including views, search, reviews, and other inbound
+                            text-based communication.
 
-                <form id="kontxt-input-form" action="" method="post" enctype="multipart/form-data">
+                            <div style="text-align: center">
+                                <div style="display: inline-block">
 
-                    <div id="kontxt-input-text">
+                                    <div id="dashboard_results_chart"></div>
 
-                        <textarea id="kontxt-input-text-field" name="kontxt-input-text-field" cols="80" rows="3" class="large-text">Fourscore and seven years ago our fathers brought forth, on this continent, a new nation, conceived in liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived, and so dedicated, can long endure. We are met on a great battle-field of that war. We have come to dedicate a portion of that field, as a final resting-place for those who here gave their lives, that that nation might live. It is altogether fitting and proper that we should do this. But, in a larger sense, we cannot dedicate, we cannot consecrate—we cannot hallow—this ground. The brave men, living and dead, who struggled here, have consecrated it far above our poor power to add or detract. The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so nobly advanced. It is rather for us to be here dedicated to the great task remaining before us—that from these honored dead we take increased devotion to that cause for which they here gave the last full measure of devotion—that we here highly resolve that these dead shall not have died in vain—that this nation, under God, shall have a new birth of freedom, and that government of the people, by the people, for the people, shall not perish from the earth.</textarea>
-
-                        <input id="kontxt-experiment-input-button" class="button-primary" type="submit" value="Analyze" />
-
-                    </div>
-
-                </form>
-
-
-                <div id="kontxt-results-status" class="wrap"></div>
-
-                <div id="kontxt-results-success" class="hidden">
-
-                    <div id="spinner" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
-
-                    <div class="wrap">
-
-                        <div id="icon-options-general" class="icon32"></div>
-
-                        <div id="poststuff">
-
-                            <div id="post-body" class="metabox-holder columns-2">
-
-                                <!-- main content -->
-                                <div id="post-body-content">
-
-                                    <div class="meta-box-sortables ui-sortable">
-
-
-                                        <div class="postbox">
-
-                                            <h2><span><?php esc_attr_e( 'Emotion', 'WpAdminStyle' ); ?></span></h2>
-
-                                            <div class="inside">
-                                                <div id="emotion_chart"></div>
-                                            </div>
-                                            <!-- .inside -->
-
-                                        </div>
-                                        <!-- .postbox -->
-
-                                        <div class="postbox">
-
-                                            <h2><span><?php esc_attr_e( 'Semantic Intents', 'WpAdminStyle' ); ?></span></h2>
-
-                                            <div class="inside">
-                                                <div id="intents_chart">
-                                                    <table id="kontxt_intents"></table>
-                                                </div>
-                                            </div>
-                                            <!-- .inside -->
-
-                                        </div>
-                                        <!-- .postbox -->
-
-                                        <div class="postbox">
-
-                                            <h2><span><?php esc_attr_e(
-					                                    'Keywords & Concepts', 'WpAdminStyle'
-				                                    ); ?></span></h2>
-
-                                            <div class="inside">
-                                                <div id="keywords_chart">
-                                                    <table id="kontxt_keywords"></table>
-                                                </div>
-                                                <br />
-                                                <div id="concepts_chart">
-                                                    <table id="kontxt_concepts"></table>
-                                                </div>
-                                            </div>
-                                            <!-- .inside -->
-
-                                        </div>
-                                        <!-- .postbox -->
-
-                                    </div>
-                                    <!-- .meta-box-sortables .ui-sortable -->
+                                    Deep analytics:
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_sentiment' ); ?>">Sentiment</a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>">Emotion</a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>">Semantic Intents</a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>">Keywords</a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_experiment' ); ?>">Experiment</a>
 
                                 </div>
-                                <!-- post-body-content -->
-
-                                <!-- sidebar -->
-                                <div id="postbox-container-1" class="postbox-container">
-
-                                    <div class="meta-box-sortables">
-
-                                        <div class="postbox">
-
-                                            <h2><span><?php esc_attr_e( 'Sentiment', 'WpAdminStyle' ); ?></span></h2>
-
-                                            <div class="inside">
-                                                <div id="overall_tone"></div>
-                                                <div id="sentiment_chart"></div>
-                                            </div>
-                                            <!-- .inside -->
-
-                                        </div>
-                                        <!-- .postbox -->
-
-
-                                    </div>
-                                    <!-- .meta-box-sortables -->
-
-                                </div>
-                                <!-- #postbox-container-1 .postbox-container -->
-
                             </div>
-                            <!-- #post-body .metabox-holder .columns-2 -->
 
-                            <br class="clear">
                         </div>
-                        <!-- #poststuff -->
-
-                    </div> <!-- .wrap -->
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="inside hidden">
-            <h3>Analytics</h3>
-
-            <div id="kontxt-results-box" class="wrap">
-
-                <form id="kontxt-analyze-input-form" action="" method="post" enctype="multipart/form-data">
-
-                    <div id="kontxt-analyze-input">
-
-                        <select id="event_type" name="event_type">
-                            <option value="sentiment">Sentiment</option>
-                            <option value="emotion">Emotion</option>
-                            <option value="keywords">Keywords</option>
-                            <option value="concepts">Concepts</option>
-                            <option value="intents">Intents</option>
-                        </select>
-
-                        <input id="kontxt-analyze-input-button" class="button-primary" type="submit" value="Get Recent">
 
                     </div>
+                    <!-- .postbox -->
+                </div>
 
-                </form>
+                <div id="poststuff">
 
-                <div id="kontxt-analyze-results-status" class="wrap"></div>
+                    <div class="postbox">
 
-                <div id="kontxt-analyze-results-success" class="hidden">
+                        <div class="inside">
 
-                    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+                            <h3>About KONTXT&trade;</h3>
 
-                    <div class="wrap">
+                            <p>KONTXT helps you understand your relationship with your customers in real-time by analyzing how they interact with your
+                                site through both text and journey analytics.  These insights will help you craft better blog articles, product descriptions,
+                                customer care interaction, and keywords used for SEO and external search advertising.</p>
 
-                        <div id="icon-options-general" class="icon32"></div>
-
-                        <div id="poststuff">
-
-                                <div class="postbox">
-
-                                    <h2 id="analyze_results_title"></h2>
-
-                                    <div class="inside">
-
-                                        <div id="analyze_results_chart"></div>
-
-                                    </div>
-
-                                    <div class="inside">
-
-                                        <div id="analyze_results_table"></div>
-
-                                    </div>
-
-                                </div>
-                                <!-- .postbox -->
+                            <p>COMINGS SOON: product & content recommendations using our proprietary machine learning science.</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="inside hidden">
-            <h3>Deep Analytics</h3>
 
-            <div id="kontxt-results-box" class="wrap">
+                <div id="poststuff">
 
-                <h4>Coming Soon! KONTXT Deep Analytics will provide customer journey analytics, trend forecasting and other intelligence based on our unique machine learning models.</h4>
+                    <div class="postbox">
 
+                        <div class="inside">
+
+                            <h3>Latest Site Behaviors Detected</h3>
+
+                            <div id="latestActivity_results_table"></div>
+
+                        </div>
+
+                    </div>
+                    <!-- .postbox -->
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        jQuery(function($) {
+            kontxtAnalyze('latestActivity');
+            kontxtAnalyze('dashboard');
+        });
+    </script>
+
+    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
+
+    <div id="kontxt-analyze-results-status" class="wrap"></div>
+
 </div>

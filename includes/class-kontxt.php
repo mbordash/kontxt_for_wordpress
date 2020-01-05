@@ -30,10 +30,8 @@ class Kontxt {
 	protected $version;
 	protected $option_name;
 	protected $api_host;
-	protected $api_host_only;
-	protected $api_host_uri;
-	protected $api_host_proto;
-	protected $api_host_port;
+	protected $kontxt_ini;
+
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -44,16 +42,13 @@ class Kontxt {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
+	public function __construct($kontxt_ini) {
 
 		$this->plugin_name      = 'kontxt';
 		$this->version          = '1.2.0';
 		$this->option_name      = 'KONTXT';
-		$this->api_host         = 'http://localhost/wp-json/kontxt/v1/analyze'; // 'http://api.kontxt.cloud/wp-json/kontxt/v1/analyze';
-		$this->api_host_only    = 'localhost'; // api.kontxt.cloud
-		$this->api_host_uri     = '/wp-json/kontxt/v1/analyze';
-		$this->api_host_proto   = 'http://';
-		$this->api_host_port    = 80;
+		$this->kontxt_ini       = $kontxt_ini;
+		$this->api_host         = $kontxt_ini['api_host'];
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -132,7 +127,7 @@ class Kontxt {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->api_host_only, $this->api_host_uri, $this->api_host_proto, $this->api_host_port );
+		$plugin_admin = new Kontxt_Admin( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -141,8 +136,8 @@ class Kontxt {
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze_results', $plugin_admin, 'kontxt_analyze_results');
 		$this->loader->add_action( 'wp_ajax_kontxt_analyze', $plugin_admin, 'kontxt_process_text');
 
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
+
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
     }
@@ -156,17 +151,32 @@ class Kontxt {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->api_host_only, $this->api_host_uri, $this->api_host_proto, $this->api_host_port );
+		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host );
 
-		//$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
-		// $this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+		if( false === wp_doing_cron() ) {
+			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		}
 
 		// capture all page state information from site user
-		$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
+		//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
-		// capture post review content
+		// capture page/product view events
+		$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register');
+
+		// capture page/product view events
+		$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event');
+
+		// capture sentiment on comment post
 		$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post');
+
+		// capture woo commerce checkout confirmed
+		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'kontxt_order_post');
+
+		// capture woo commerce add to cart
+		$this->loader->add_action( 'woocommerce_add_to_cart', $plugin_public, 'kontxt_cart_capture');
+
+		// capture contact form 7 mail sent
+		$this->loader->add_action( 'wpcf7_posted_data', $plugin_public, 'kontxt_contact_form_capture');
 
 	}
 

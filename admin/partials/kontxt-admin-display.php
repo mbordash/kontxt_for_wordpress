@@ -10,16 +10,33 @@
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 
+<div class="notice notice-info is-dismissible inline">
+    <p>
+        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
+        If you have any questions, comments, suggestions about our service, please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a>.
+		<?php
+		printf(
+		// translators: Leave always a hint for translators to understand the placeholders.
+			esc_attr__( '', 'WpAdminStyle' ),
+			'<code>.notice-info</code>',
+			'<code>.is-dismissible</code>',
+			'<code>.inline</code>'
+		);
+		?>
+    </p>
+</div>
+
 <div class="wrap">
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-    <p>By default, all KONTXT services DO NOT log requests for deep analytics. In order to enable our Analytics functions, KONTXT will need to log your
-        Wordpress customer and administrative behaviors.  This is only done to deliver and improve the machine learning functions that power our deep analytics.</p>
+    <p>KONTXT services log requests for deep semantic analytics. In order to enable our analytical functions and predictive insights, KONTXT will encrypt, log and process anonymous behaviors from your content and cmmerce customers.
+        This is only done to deliver and improve the machine learning functions that power our deep analytics and future product recommendations.
+        If you do not wish KONTXT to perform our services, please deactivate and delete this plugin. All site data is deleted within 7 days of the last recorded activity.</p>
 
-    <p>The logged data is encrypted, does not contain any personally identifiable information, and is not shared or made public.</p>
+    <p>The data we use is encrypted, does not contain any personally identifiable information, and is not shared, sold, or made public. Should you have any GDPR requests, please <a href="https://kontxt.com/more-information/">contact us</a>. </p>
 
-    <p>KONTXT is a service provided by RealNetworks. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
+    <p>KONTXT &copy; is a service provided by RealNetworks. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
 
     <form action="options.php" method="post">
 
@@ -32,6 +49,18 @@
         ?>
 
     </form>
+
+    <p>KONTXT provides semantic and journey analysis for the following core functions and plugins:</p>
+
+    <ul>
+        <li> &middot; Wordpress: view events: home, search, categories, articles, pages, comments</li>
+        <li> &middot; Woo Commerce view events: shop home, search, categories, products, account, reviews</li>
+        <li> &middot; Woo Commerce actions: product added to cart, transaction completed</li>
+        <li> &middot; Contact Form 7: comment sent</li>
+    </ul>
+
+    <p>If you use a plugin not listed here that could benefit from KONTXT machine learning, please <a href="https://kontxt.com/more-information/">contact us</a>.</p>
+
 
     <p>&copy;2019 RealNetworks, Inc.</p>
 
