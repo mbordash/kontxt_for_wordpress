@@ -64,7 +64,6 @@ class Kontxt_Public {
 	 */
 	public function enqueue_scripts()
 	{
-		global $comment, $wp_query, $category;
 
 		/**
 		 *
@@ -142,11 +141,16 @@ class Kontxt_Public {
 		$kontxtContactFormArr = [];
 
 		// capture contact us content
-		if ( $data ) {
+		if ( isset( $data['your-message'] ) ) {
 
 			$kontxtContactFormArr['contact_form_submitted'] = [
 				'contact_form_subject' => $data['your-subject'],
 				'contact_form_message' => $data['your-message']
+			];
+		} else if( function_exists( 'rgar' ) ) {
+
+			$kontxtContactFormArr['contact_form_submitted'] = [
+				'contact_form_message' => rgar( $data, '3' )
 			];
 
 		}
@@ -218,8 +222,7 @@ class Kontxt_Public {
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 		global $wp_query, $category;
 
-		$kontxt_user_session    = [];
-		$pageName               = null;
+		$pageName = null;
 
 		// capture text input
 		$searchQuery = get_search_query();
@@ -252,12 +255,7 @@ class Kontxt_Public {
 		// get commerce related major actions
 		if ( class_exists( 'WooCommerce', false )  ) {
 
-			// override page as shop home
-			if ( $searchQuery ) {
-
-				// $kontxt_user_session['shop_page_search'] = "Search results";
-
-			} elseif( is_shop() ) {
+			if( is_shop() ) {
 
 				$kontxt_user_session['shop_page_home'] = "Shop home";
 
@@ -327,7 +325,7 @@ class Kontxt_Public {
 
         if ( !isset($apiKey) || $apiKey === '' ) {
             error_log( "Your License Key for Kontxt is not set. Please go to Settings > KONTXT to make sure you have a key first." );
-            return;
+            return false;
         }
 
 		if( !isset( $current_session ) ) {
@@ -380,20 +378,6 @@ class Kontxt_Public {
         return false;
     }
 
-
-    /**
-     * Sanitize the text value before being saved to database
-     *
-     * @param  string $text $_POST value
-     * @since  1.3.2
-     * @return string           Sanitized value
-     */
-    public function kontxt_sanitize_text( $text ) {
-
-        return sanitize_text_field( $text );
-
-    }
-
 	/**
 	 * @return string
 	 */
@@ -410,7 +394,6 @@ class Kontxt_Public {
 	 */
 	public function __destruct( ) {
 
-		// fclose($this->fp);
 
 	}
 
