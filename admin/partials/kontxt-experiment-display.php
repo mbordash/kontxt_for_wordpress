@@ -6,6 +6,9 @@
  * Time: 11:04 PM
  */
 
+
+include_once 'kontxt-banner.php';
+
 ?>
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
