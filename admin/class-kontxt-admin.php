@@ -209,6 +209,8 @@ class Kontxt_Admin {
 			}
 		}
 
+		return false;
+
 	}
 
 
@@ -233,7 +235,7 @@ class Kontxt_Admin {
 
         }
 
-        exit;
+        return false;
     }
 
     public function kontxt_cognitive( $textToAnalyze, $service, $requestId, $silent = false )
@@ -304,6 +306,8 @@ class Kontxt_Admin {
             }
         }
 
+	    return false;
+
     }
 
 	/**
@@ -313,7 +317,6 @@ class Kontxt_Admin {
 	 */
 	public function add_management_page()
 	{
-
 
 		$this->plugin_screen_hook_suffix = add_menu_page(
 			__( 'KONTXT', 'kontxt' ),
@@ -498,6 +501,15 @@ class Kontxt_Admin {
         );
 
 	    add_settings_field(
+		    $this->option_name . '_optin',
+		    __( 'Opt-in to site traffic analysis from KONTXT?', 'kontxt' ),
+		    array( $this, $this->option_name . '_optin_cb' ),
+		    $this->plugin_name,
+		    $this->option_name . '_general',
+		    array( 'label_for' => $this->option_name . '_optin' )
+	    );
+
+	    add_settings_field(
 		    $this->option_name . '_apiuid',
 		    __( 'API User ID', 'kontxt' ),
 		    array( $this, $this->option_name . '_apiuid_cb' ),
@@ -528,6 +540,8 @@ class Kontxt_Admin {
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_optin', array( $this, $this->option_name . '_sanitize_option' ) );
+
 
     }
 
@@ -540,6 +554,32 @@ class Kontxt_Admin {
     {
 
     }
+
+	/**
+	 * Render the radio input field for emotion option
+	 *
+	 * @since  1.0.0
+	 */
+	public function kontxt_optin_cb() {
+
+		$optin = get_option( $this->option_name . '_optin' );
+
+		?>
+
+        <fieldset>
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_optin' ?>" id="<?php echo $this->option_name . '_optin' ?>" value="yes" <?php checked( $optin, 'yes' ); ?>>
+				<?php _e( 'Yes', 'kontxt' ); ?>
+            </label>
+            <br />
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_optin' ?>" value="no" <?php checked( $optin, 'no' ); ?>>
+				<?php _e( 'No', 'kontxt' ); ?>
+            </label>
+        </fieldset>
+
+		<?php
+	}
 
 	/**
 	 * Render the text input field for email option
@@ -641,9 +681,7 @@ class Kontxt_Admin {
 	 */
 	public function genKey() {
 
-		$api_key = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
-
-		return $api_key;
+		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 
 	}
 

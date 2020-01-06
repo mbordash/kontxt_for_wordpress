@@ -30,13 +30,25 @@
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-    <p>KONTXT services log requests for deep semantic analytics. In order to enable our analytical functions and predictive insights, KONTXT will encrypt, log and process anonymous behaviors from your content and cmmerce customers.
-        This is only done to deliver and improve the machine learning functions that power our deep analytics and future product recommendations.
-        If you do not wish KONTXT to perform our services, please deactivate and delete this plugin. All site data is deleted within 7 days of the last recorded activity.</p>
+    <div id="poststuff">
 
-    <p>The data we use is encrypted, does not contain any personally identifiable information, and is not shared, sold, or made public. Should you have any GDPR requests, please <a href="https://kontxt.com/more-information/">contact us</a>. </p>
+        <div class="postbox">
 
-    <p>KONTXT &copy; is a service provided by RealNetworks. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
+            <div class="inside">
+
+                <h3>Opt-in for KONTXT Semantic Analytics</h3>
+
+                <p>In order for KONTXT to work properly, you must opt-in using the form below. If you do not wish KONTXT to perform our services, please deactivate and delete this plugin. All site data is deleted within 7 days of the last recorded activity automatically.</p>
+
+                <p>KONTXT services log requests for deep semantic analytics. In order to enable our analytical functions and predictive insights, KONTXT will encrypt, log and process anonymous site activity.
+                    This is only done to deliver and improve the machine learning functions that power our deep analytics and future product recommendations. The data we use <strong>does not contain any personally identifiable information</strong>, and is not shared, sold, or made public. Should you have any GDPR requests, please <a href="https://kontxt.com/more-information/">contact us</a>. </p>
+
+            </div>
+        </div>
+    </div>
+
+
+
 
     <form action="options.php" method="post">
 
@@ -62,7 +74,7 @@
     <p>If you use a plugin not listed here that could benefit from KONTXT machine learning, please <a href="https://kontxt.com/more-information/">contact us</a>.</p>
 
 
-    <p>&copy;2019 RealNetworks, Inc.</p>
+    <p>KONTXT&trade; is a service provided by &copy;RealNetworks, Inc. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
 
 
 </div>
