@@ -3,8 +3,8 @@ jQuery(function($) {
     // check for events (viewProductID, pageID, searchText, reviewTextPresent,  )
     // loop through API calls to cognitive
 
-    var security = kontxtAjaxObject['security'];
-    var postUrl =  kontxtAjaxObject['ajaxurl'];
+    const security = kontxtAjaxObject['security'];
+    const postUrl = kontxtAjaxObject['ajaxurl'];
 
     jQuery.ajax({
         type: 'post',

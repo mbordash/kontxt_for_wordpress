@@ -91,6 +91,9 @@ class Kontxt_Public {
 
 	}
 
+	/**
+	 * @param $commentId
+	 */
 	public function kontxt_comment_post( $commentId ) {
 
 		$kontxtCommentArr = [];
@@ -100,9 +103,11 @@ class Kontxt_Public {
 
 			$comment = get_comment( intval( $commentId ) );
 
-			$comment_text   = $comment->comment_content;
+			$comment_text   = sanitize_text_field( $comment->comment_content );
 			$comment_product_id = $comment->comment_post_ID;
-			$comment_product_name = wc_get_product( $comment_product_id )->get_name();
+			if( function_exists('wc_get_product' ) ) {
+				$comment_product_name = wc_get_product( $comment_product_id )->get_name();
+			}
 			$comment_rating = get_comment_meta( $commentId, 'rating', true);
 
 			if ( ! empty( $comment_text ) ) {
@@ -118,10 +123,13 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', true );
+		$this->kontxt_send_event( $kontxtCommentArr, 'public_event' );
 
 	}
 
+	/**
+	 * @param $user_id
+	 */
 	public function kontxt_user_register( $user_id ) {
 
 		if( $user_id ) {
@@ -130,12 +138,15 @@ class Kontxt_Public {
 			];
 
 			// send directly to backend, don't bother with js async
-			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event', true );
+			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event' );
 
 		}
 	}
 
 
+	/**
+	 * @param $data
+	 */
 	public function kontxt_contact_form_capture( $data ) {
 
 		$kontxtContactFormArr = [];
@@ -144,19 +155,19 @@ class Kontxt_Public {
 		if ( isset( $data['your-message'] ) ) {
 
 			$kontxtContactFormArr['contact_form_submitted'] = [
-				'contact_form_subject' => $data['your-subject'],
-				'contact_form_message' => $data['your-message']
+				'contact_form_subject' => sanitize_text_field( $data['your-subject'] ),
+				'contact_form_message' => sanitize_text_field( $data['your-message'] )
 			];
 		} else if( function_exists( 'rgar' ) ) {
 
 			$kontxtContactFormArr['contact_form_submitted'] = [
-				'contact_form_message' => rgar( $data, '3' )
+				'contact_form_message' => sanitize_text_field( rgar( $data, '3' ) )
 			];
 
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtContactFormArr, 'public_event', true );
+		$this->kontxt_send_event( $kontxtContactFormArr, 'public_event' );
 
 	}
 
@@ -181,10 +192,13 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtCartArr, 'public_event', true );
+		$this->kontxt_send_event( $kontxtCartArr, 'public_event' );
 
 	}
 
+	/**
+	 * @param $order_id
+	 */
 	public function kontxt_order_post( $order_id ) {
 
 		$orderCapture[] = [];
@@ -215,42 +229,39 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $orderCapture, 'public_event', true );
+		$this->kontxt_send_event( $orderCapture, 'public_event' );
 
 	}
 
+	/**
+	 * @param array $kontxt_user_session
+	 *
+	 * @return array
+	 */
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
-		global $wp_query, $category;
 
 		$pageName = null;
 
 		// capture text input
 		$searchQuery = get_search_query();
+
 		if( $searchQuery ) {
 			$kontxt_user_session['search_query'] =  $searchQuery;
 
 			// statistically interesting to see which search queries returned not results
 			if ( !have_posts() ) {
-				$kontxt_user_session['no_search_results'] =  true;
+				$kontxt_user_session['no_search_results'] =  $searchQuery;
 			}
 		}
 
-		// current blog category or page name
-		if( is_category() ) {
-			$kontxt_user_session['blog_page'] = $category;
-		} else {
-			if ( $wp_query instanceof WP_Query ) {
-				if ( $object = $wp_query->get_queried_object() ) {
-					$pageName = isset( $object->name ) ? $object->name : '';
-				}
-			}
-			if ( $pageName ) {
-				$kontxt_user_session['blog_page'] = $pageName;
-			} elseif( is_front_page() || is_home() ) {
-				$kontxt_user_session['site_home'] = 'Site home';
-			}
+		// determine non-shopping page presence
+		if( is_front_page() || is_home() ) {
+			$kontxt_user_session['site_home'] = 'Site home';
+		} elseif( get_post_type() === 'post' ) {
+			$kontxt_user_session['blog_post'] = get_the_title();
+		} elseif( get_post_type() === 'page' ) {
+			$kontxt_user_session['site_page'] = get_the_title();
 		}
-
 
 		// get commerce related major actions
 		if ( class_exists( 'WooCommerce', false )  ) {
@@ -300,27 +311,32 @@ class Kontxt_Public {
 	/**
 	 * @param $eventData
 	 * @param string $service
-	 * @param bool $silent
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_send_event( $eventData, $service = 'public_event', $silent = true ) {
+	public function kontxt_send_event( $eventData, $service = 'public_event' ) {
 
+
+		//check to see if event data is passed to us via a function or if we have event data in the request object from a direct call
 		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
-			$eventDataPost =  $_POST['eventData'];
-		} else {
-			$eventDataPost = null;
-		}
 
-		if( $eventDataPost ) {
 			check_ajax_referer( 'kontxt-ajax-string', 'security', false );
-			$eventData = json_decode( html_entity_decode( stripslashes( $_POST['eventData'] ) ) );
+			// each element of the following event is sanitized by the backend receiver
+			// no need to do this here
+			$eventData = json_decode( stripslashes( $_POST['eventData'] ) );
+
+		} else {
+
+			// each element of the following event is sanitized by the backend receiver
+			// no need to do this here
+			$eventData = $eventData;
+
 		}
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
 	    $apiUid             = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? $_COOKIE['kontxt_session'] : '';
+	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? sanitize_text_field( $_COOKIE['kontxt_session']) : '';
 		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -359,7 +375,7 @@ class Kontxt_Public {
 			        'current_user_username'  => $current_user_username,
 			        'current_session_id'     => $current_session,
 			        'user_class'             => 'public',
-			        'silent'                 => $silent
+			        'silent'                 => true
 		        );
 
 		        $args = array(

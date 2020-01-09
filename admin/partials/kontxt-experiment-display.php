@@ -15,6 +15,9 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
+
     <h2>Experiment</h2>
 
     <div class="inside">
@@ -78,9 +81,7 @@ include_once 'kontxt-banner.php';
 
                                     <div class="postbox">
 
-                                        <h2><span><?php esc_attr_e(
-                                                    'Keywords', 'WpAdminStyle'
-                                                ); ?></span></h2>
+                                        <h2><span><?php esc_attr_e('Keywords', 'WpAdminStyle' ); ?></span></h2>
 
                                         <div class="inside">
                                             <div id="keywords_chart">
@@ -137,8 +138,6 @@ include_once 'kontxt-banner.php';
         </div>
 
     </div>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 

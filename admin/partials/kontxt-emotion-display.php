@@ -14,6 +14,8 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
     <h2>Emotion Analytics</h2>
 
     <div id="emotion" class="inside">
@@ -53,9 +55,7 @@ include_once 'kontxt-banner.php';
 
                             </div>
                         </div>
-                    </div>
 
-                    <div id="poststuff">
 
                         <div class="postbox">
 
@@ -71,13 +71,13 @@ include_once 'kontxt-banner.php';
                                     and cause more damage to your brand than what can be countered by positive emotion.</p>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="poststuff">
+                        <div class="postbox">
+                            <div class="inside">
 
-                        <div class="inside">
+                                <div id="emotion_results_table"></div>
 
-                            <div id="emotion_results_table"></div>
+                            </div>
 
                         </div>
 
@@ -88,8 +88,6 @@ include_once 'kontxt-banner.php';
         </div>
 
     </div>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 

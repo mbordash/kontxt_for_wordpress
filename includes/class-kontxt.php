@@ -191,7 +191,6 @@ class Kontxt {
 
 	}
 
-
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *

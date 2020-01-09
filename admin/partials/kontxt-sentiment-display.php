@@ -14,6 +14,8 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
     <h2>Sentiment Analytics</h2>
 
     <div id="sentiment" class="inside">
@@ -71,9 +73,6 @@ include_once 'kontxt-banner.php';
 
                             </div>
                         </div>
-                    </div>
-
-                    <div id="poststuff">
 
                         <div class="postbox">
 
@@ -88,7 +87,7 @@ include_once 'kontxt-banner.php';
                         </div>
                     </div>
 
-                    <div id="poststuff">
+                    <div id="postbox">
 
                             <div class="inside">
 
@@ -102,8 +101,6 @@ include_once 'kontxt-banner.php';
             </div>
         </div>
     </div>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 

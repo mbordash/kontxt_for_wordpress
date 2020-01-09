@@ -62,17 +62,7 @@
 
     </form>
 
-    <p>KONTXT provides semantic and journey analysis for the following core functions and plugins:</p>
-
-    <ul>
-        <li> &middot; Wordpress: view events: home, search, categories, articles, pages, comments</li>
-        <li> &middot; Woo Commerce view events: shop home, search, categories, products, account, reviews</li>
-        <li> &middot; Woo Commerce actions: product added to cart, transaction completed</li>
-        <li> &middot; Contact Form 7: comment sent</li>
-    </ul>
-
-    <p>If you use a plugin not listed here that could benefit from KONTXT machine learning, please <a href="https://kontxt.com/more-information/">contact us</a>.</p>
-
+    <p>KONTXT provides semantic and journey analysis for Wordpress core, WooCommerce, Contact Form 7, and Gravity Forms.  If you use a plugin not listed here that could benefit from KONTXT machine learning, please <a href="https://kontxt.com/more-information/">contact us</a>.</p>
 
     <p>KONTXT&trade; is a service provided by &copy;RealNetworks, Inc. For more information on our terms of use and data usage, please visit https://www.realnetworks.com.</p>
 
