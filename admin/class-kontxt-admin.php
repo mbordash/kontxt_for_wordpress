@@ -119,20 +119,27 @@ class Kontxt_Admin {
 	        	$filter = null;
 	        }
 
-		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'] = '' , $_POST['to_date'] = '' , $filter );
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $filter );
 
 	    }
 
 	    exit;
     }
 
-
+	/**
+	 * @param $dimension
+	 * @param $from_date
+	 * @param $to_date
+	 * @param $filter
+	 *
+	 * @return bool|false|string
+	 */
 	public function kontxt_get_results( $dimension, $from_date, $to_date, $filter ) {
 
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
-		$current_session    = $_COOKIE['kontxt_session'];
+		$current_session    = sanitize_text_field( $_COOKIE['kontxt_session'] );
 		$current_user       = wp_get_current_user();
 
 
@@ -151,7 +158,7 @@ class Kontxt_Admin {
 
 			// get current user info, if no user, set as session
 
-			if( 0 == $current_user->ID ) {
+			if( 0 === $current_user->ID ) {
 				$current_user_username = $current_session;
 			} else {
 				$current_user_username = $current_user->user_login;
@@ -197,7 +204,7 @@ class Kontxt_Admin {
 
 			if( $response['response']['code'] === 200 ) {
 
-				return $response['body'];
+				return sanitize_text_field( $response['body'] );
 
 			} else {
 
@@ -209,10 +216,9 @@ class Kontxt_Admin {
 			}
 		}
 
-		return false;
+		return true;
 
 	}
-
 
     /**
      * Handle ajax request for text processing and display
@@ -231,11 +237,14 @@ class Kontxt_Admin {
         if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
 
             //header('Content-type: application/json');
-            echo $this->kontxt_cognitive( $_POST['kontxt_text_to_analyze'], $_POST['service'], $_POST['request_id'] );
-
+            echo $this->kontxt_cognitive(
+	            sanitize_text_field( $_POST['kontxt_text_to_analyze'] ),
+	            sanitize_text_field( $_POST['service'] ),
+	            sanitize_text_field( $_POST['request_id'] )
+            );
         }
 
-        return false;
+	    exit;
     }
 
     public function kontxt_cognitive( $textToAnalyze, $service, $requestId, $silent = false )
@@ -244,7 +253,7 @@ class Kontxt_Admin {
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = $_COOKIE['kontxt_session'];
+	    $current_session    = sanitize_text_field( $_COOKIE['kontxt_session'] );
 	    $current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -256,7 +265,7 @@ class Kontxt_Admin {
 
         }
 
-	    if( 0 == $current_user->ID ) {
+	    if( 0 === $current_user->ID ) {
 		    $current_user_username = $current_session;
 	    } else {
 		    $current_user_username = $current_user->user_login;
@@ -272,6 +281,7 @@ class Kontxt_Admin {
             $textToAnalyze  = urlencode( sanitize_text_field( $textToAnalyze ) );
             $service        = sanitize_text_field( $service );
             $requestId      = sanitize_text_field( $requestId );
+            $silent         = sanitize_text_field( $silent );
 
             $requestBody = array(
                     'api_uid'                   => $apiUid,
@@ -294,7 +304,7 @@ class Kontxt_Admin {
 
             if( $response['response']['code'] === 200 ) {
 
-                return $response['body'];
+                return sanitize_text_field( $response['body'] );
 
             } else {
 
@@ -306,8 +316,7 @@ class Kontxt_Admin {
             }
         }
 
-	    return false;
-
+	    return true;
     }
 
 	/**
@@ -378,7 +387,7 @@ class Kontxt_Admin {
 			__( 'KONTXT Journey Analytics', 'kontxt' ),
 			__( 'Journey', 'kontxt' ),
 			'manage_options',
-			$this->plugin_name . "journey",
+			$this->plugin_name . "_journey",
 			array( $this, 'display_journey_page' )
 		);
 
@@ -402,7 +411,6 @@ class Kontxt_Admin {
 
 	}
 
-
 	/**
 	 * Render the journey page for plugin
 	 *
@@ -412,8 +420,6 @@ class Kontxt_Admin {
 	{
 		include_once 'partials/kontxt-journey-display.php';
 	}
-
-
 
 	/**
 	 * Render the analyze page for plugin
@@ -539,7 +545,7 @@ class Kontxt_Admin {
 
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
-	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_email' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_optin', array( $this, $this->option_name . '_sanitize_option' ) );
 
 
@@ -675,6 +681,21 @@ class Kontxt_Admin {
         return sanitize_text_field( $text );
 
     }
+
+	/**
+	 * Sanitize the email value before being saved to database
+	 *
+	 * @param  string $text $_POST value
+	 * @since  1.3.2
+	 * @return string           Sanitized value
+	 */
+	public function kontxt_sanitize_email( $text )
+	{
+
+		return sanitize_email( $text );
+
+	}
+
 
 	/**
 	 * @return string

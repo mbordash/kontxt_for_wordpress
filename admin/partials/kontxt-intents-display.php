@@ -14,10 +14,11 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
     <h2>Intents Analytics</h2>
 
     <div id="intents" class="inside">
-
 
         <div id="kontxt-results-box" class="wrap">
 
@@ -37,7 +38,7 @@ include_once 'kontxt-banner.php';
 
         </div>
 
-        <div id="intenst-results-box" class="wrap">
+        <div id="intents-results-box" class="wrap">
 
             <div id="intents-results-success">
 
@@ -55,9 +56,6 @@ include_once 'kontxt-banner.php';
 
                             </div>
                         </div>
-                    </div>
-
-                    <div id="poststuff">
 
                         <div class="postbox">
 
@@ -71,10 +69,11 @@ include_once 'kontxt-banner.php';
                                 </p>
                                 <p>
                                     Providing search results that better match the customer's intent yield higher transaction rates and reduce dependency on Google for searching your own site -- this keeps customers on your site and creates
-                                    a stronger relationship with your brand.
+                                    a stronger relationship with your brand.  We've trained our classifier on general retail scenarios.  We offer secondary classifiers that are industry and domain specific. We can also custom train a classifier that is very specific to your brand.
+                                    Our classifiers are also available for use within chat bot systems via our API. Please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a> for details.
                                 </p>
 
-                                <p>Macro intents supported:</p>
+                                <h3>Macro intents supported:</h3>
 
                                 <dl>
 
@@ -95,18 +94,13 @@ include_once 'kontxt-banner.php';
 
                                 </dl>
 
-                                <p>
-                                    We've trained our classifier on general retail scenarios.  We offer secondary classifiers that are industry and domain specific. We can also custom train a classifier that is very specific to your brand.
-                                    Our classifiers are also available for use within chat bot systems via our API. Please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a> for details.
-                                </p>
-
                             </div>
                         </div>
-                    </div>
 
-                    <div id="poststuff">
-                        <div class="inside">
-                            <div id="intents_results_table"></div>
+                        <div id="postbox">
+                            <div class="inside">
+                                <div id="intents_results_table"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -114,8 +108,6 @@ include_once 'kontxt-banner.php';
             </div>
         </div>
     </div>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 

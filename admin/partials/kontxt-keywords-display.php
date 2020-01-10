@@ -14,7 +14,9 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
-    <h2>Keywords</h2>
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
+    <h2>Keywords Extracted</h2>
 
     <div id="keywords" class="inside">
 
@@ -25,6 +27,15 @@ include_once 'kontxt-banner.php';
                 <div class="wrap">
 
                     <div id="poststuff">
+
+                        <div class="postbox">
+
+                            <div class="inside">
+
+                                <div id="keywords_results_table"></div>
+
+                            </div>
+                        </div>
 
                         <div class="postbox">
 
@@ -43,21 +54,10 @@ include_once 'kontxt-banner.php';
                         </div>
                     </div>
 
-                    <div id="poststuff">
-
-                        <div class="inside">
-
-                            <div id="keywords_results_table"></div>
-
-                        </div>
-
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 
