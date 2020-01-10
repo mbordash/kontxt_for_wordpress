@@ -27,11 +27,15 @@ jQuery(function($) {
 
         jQuery('#spinner').removeClass('is-inactive').addClass('is-active');
 
-        var dimension =  jQuery( '#dimension' ).val();
-        var date_from =  jQuery( '#date_from' ).val();
-        var date_to =  jQuery( '#date_to' ).val();
+        let dimension =  jQuery( '#dimension' ).val();
+        let date_from =  jQuery( '#date_from' ).val();
+        let date_to =  jQuery( '#date_to' ).val();
 
-        kontxtAnalyze( dimension, date_from, date_to );
+        if( dimension === 'journey' ) {
+            kontxtJourney(date_from, date_to);
+        } else {
+            kontxtAnalyze(dimension, date_from, date_to);
+        }
     });
 
     // capture intent redraw
@@ -57,6 +61,7 @@ jQuery(function($) {
         } else {
             kontxtAnalyze( dimension, date_from, date_to);
         }
+
     });
 
     // capture intent filter
@@ -150,7 +155,6 @@ function kontxtFilter( filter, date_from, date_to ) {
             for ( let elem in jsonResponse ) {
                 contentTable += '<tr><td>' + jsonResponse[elem]['event_date'] + '</td>';
                 contentTable += '<td>' + jsonResponse[elem]['event_value'] + '</td></tr>';
-
             }
             contentTable += '</tbody></table>';
 
@@ -278,18 +282,18 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                 return false;
             }
 
-            var jsonResponse = jQuery.parseJSON(response);
+            let jsonResponse = JSON.parse(response);
             // var jsonResponse = response;
 
-            var eventDates = jsonResponse.map(function(e) {
+            let eventDates = jsonResponse.map(function(e) {
                 return Date.parse(e.event_date);
             });
 
-            var eventValues = jsonResponse.map( function(e) {
+            let eventValues = jsonResponse.map( function(e) {
                 return e.event_value;
             });
 
-            var groupBy = function(xs, key) {
+            let groupBy = function(xs, key) {
                 return xs.reduce(function(rv, x) {
                     (rv[x[key]] = rv[x[key]] || []).push(x);
                     return rv;
@@ -472,6 +476,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                     contentTable = '<table id="keywords_results_id" class="widefat">' +
                         '               <thead>' +
                         '                   <th><strong>Extracted keyword</strong></th>' +
+                        '                   <th><strong>Count</strong></th>' +
                         '                   <th><strong>Relevance</strong></th>' +
                         '                   <th><strong>Sentiment</strong></th>' +
                         '                   <th><strong>Joy</strong></th>' +
@@ -479,17 +484,13 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                         '                   <th><strong>Anger</strong></th>' +
                         '                   <th><strong>Disgust</strong></th>' +
                         '                   <th><strong>Sadness</strong></th>' +
-                        '                   <th><strong>Count</strong></th>' +
                         '               </thead>' +
                         '               <tbody>';
                     for( let elem in jsonResponse ) {
 
-                        //keywords.push( jsonResponse[elem]['keywords'] );
-                        //count.push( jsonResponse[elem]['keywords_count'] );
                         let keyword = JSON.parse(jsonResponse[elem]['keywords']);
                         let sentimentLabel = '';
                         let sentimentScore = '';
-                        let emotionLabel = '';
                         let joyLabel = '';
                         let fearLabel = '';
                         let angerLabel = '';
@@ -497,64 +498,34 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                         let sadnessLabel = '';
 
                         if( typeof keyword['sentiment'] !== "undefined" ) {
-                           // sentiment = JSON.parse(keyword['sentiment']);
-                            //sentimentLabel = sentiment['label'];
+
                             sentimentLabel = keyword['sentiment']['label'];
                             sentimentScore = ' (' + Math.round(keyword['sentiment']['score'] * 100 ) + '%)';
+
                         }
 
                         if( typeof keyword['emotion'] !== "undefined" ) {
-                            // sentiment = JSON.parse(keyword['sentiment']);
-                            //sentimentLabel = sentiment['label'];
-                            joyLabel = Math.round(keyword['emotion']['joy']* 100 ) + '%';
-                            fearLabel = Math.round(keyword['emotion']['fear']* 100 )+ '%';
-                            angerLabel = Math.round(keyword['emotion']['anger']* 100 )+ '%';
-                            disgustLabel = Math.round(keyword['emotion']['disgust']* 100 )+ '%';
-                            sadnessLabel = Math.round(keyword['emotion']['sadness']* 100 )+ '%';
+
+                            joyLabel        = Math.round(keyword['emotion']['joy']* 100 ) + '%';
+                            fearLabel       = Math.round(keyword['emotion']['fear']* 100 )+ '%';
+                            angerLabel      = Math.round(keyword['emotion']['anger']* 100 )+ '%';
+                            disgustLabel    = Math.round(keyword['emotion']['disgust']* 100 )+ '%';
+                            sadnessLabel    = Math.round(keyword['emotion']['sadness']* 100 )+ '%';
+
                         }
 
-                        //let sentiment = JSON.parse(keyword['sentiment']);
-                        // console.log(keyword);
-                        //console.log(keyword);
-
                         contentTable  += '<tr>  <td>' + keyword['text'] + '</td>';
-                        contentTable  += '      <td>' + ( Math.round(keyword['relevance'] * 100 )) + '%</td>';
+                        contentTable  += '      <td>' + jsonResponse[elem]['keywords_count'] + '</td>';
                         contentTable  += '      <td>' + sentimentLabel + sentimentScore + '</td>';
                         contentTable  += '      <td>' + joyLabel + '</td>';
                         contentTable  += '      <td>' + fearLabel + '</td>';
                         contentTable  += '      <td>' + angerLabel + '</td>';
                         contentTable  += '      <td>' + disgustLabel + '</td>';
                         contentTable  += '      <td>' + sadnessLabel + '</td>';
-                        contentTable  += '      <td>' + jsonResponse[elem]['keywords_count'] + '</td></tr>';
+                        contentTable  += '      <td>' + ( Math.round(keyword['relevance'] * 100 )) + '%</td></tr>';
 
                     }
                     contentTable += '</tbody></table>';
-
-                    // data = [{
-                    //     type: 'bar',
-                    //     y: count,
-                    //     x: keywords,
-                    //     name: 'Keywords',
-                    //     text: count.map(String),
-                    //     textposition: 'auto',
-                    //     hoverinfo: 'none',
-                    //     marker: {
-                    //         color: 'rgb(158,202,225)',
-                    //         opacity: 0.6,
-                    //         line: {
-                    //             color: 'rgb(8,48,107)',
-                    //             width: 1.5
-                    //         }
-                    //     }
-                    // }];
-                    //
-                    // layout = {
-                    //     yaxis: {
-                    //     },
-                    //     xaxis: {
-                    //         autorange: true
-                    //     }
-                    // }
 
                     break;
 
@@ -689,7 +660,7 @@ function kontxtExperimentFormPost(return_text) {
             return false;
         }
 
-    }).then();
+    });
 
     jQuery.ajax({
         type: 'post',
@@ -722,7 +693,7 @@ function kontxtExperimentFormPost(return_text) {
         error: function(response) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
-    }).then();
+    });
 
     jQuery.ajax({
         type: 'post',
@@ -741,7 +712,7 @@ function kontxtExperimentFormPost(return_text) {
 
             let jsonResponse = JSON.parse(response);
 
-            let arraySize = jQuery(jsonResponse).length();
+            let arraySize = jQuery(jsonResponse).length;
             let sentimentText;
             let sentimentScore;
 
@@ -799,7 +770,7 @@ function kontxtExperimentFormPost(return_text) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
 
-    }) .then();
+    });
 
     jQuery.ajax({
         type: 'post',
@@ -855,19 +826,19 @@ function kontxtExperimentFormPost(return_text) {
                 }
             };
 
-            Plotly.newPlot('emotion_chart', data, layout, {displayModeBar: false}).trim();
+            Plotly.newPlot('emotion_chart', data, layout, {displayModeBar: false}).then();
 
         },
         error: function(response) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
-    }).then();
+    });
 
     return false;
 }
 
 
-function kontxtJourney( ) {
+function kontxtJourney( date_from, date_to ) {
 
     jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
 
@@ -876,9 +847,11 @@ function kontxtJourney( ) {
     // prepare data for posting
 
     let data = jQuery.param({
-        'action': 'kontxt_analyze_results',
-        'apikey': kontxtAjaxObject.apikey,
-        'service': 'events'
+        'action':       'kontxt_analyze_results',
+        'apikey':       kontxtAjaxObject.apikey,
+        'service':      'events',
+        'from_date':    date_from,
+        'to_date':      date_to
     });
 
     const security = kontxtAjaxObject.security;
@@ -922,7 +895,7 @@ function kontxtJourney( ) {
 
                     let data = [{
                         type: "sankey",
-                        arrangement: "snap",
+                        arrangement: "fixed",
                         valueformat: ".0f",
                         valuesuffix: " sessions",
                         orientation: "h",
@@ -946,16 +919,81 @@ function kontxtJourney( ) {
                     const layout = {
                         font: {
                             size: 10
-                        }
+                        },
+                        hovermode: false
                     };
 
                     Plotly.newPlot('journey_results_chart', data, layout).then();
 
                     jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+
+                    document.getElementById('journey_results_chart').on('plotly_click', function(data) {
+
+                        jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
+
+                        jQuery( '#journey_node_details_table' ).html( '' );
+
+                        let nodeLabel = data["points"][0]["label"];
+                        let dateFrom    =  jQuery( '#date_from' ).val();
+                        let dateTo      =  jQuery( '#date_to' ).val();
+
+                        if( nodeLabel ) {
+
+                            jQuery('#journey_node_details_box').show();
+                            jQuery('#journey_node_details_header').html('Node details for ' + nodeLabel );
+
+                            let data = jQuery.param({
+                                'action': 'kontxt_analyze_results',
+                                'apikey': kontxtAjaxObject.apikey,
+                                'dimension': 'journeyNode',
+                                'filter': nodeLabel,
+                                'from_date': dateFrom,
+                                'to_date': dateTo
+                            });
+
+                            jQuery.ajax({
+                                type: 'post',
+                                url: kontxtAjaxObject.ajaxurl,
+                                security: security,
+                                data: data,
+                                cache: false,
+                                success: function (response) {
+
+                                    if (response.status === 'error') {
+                                        jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                                        return false;
+                                    }
+
+                                    let jsonResponse = JSON.parse( response );
+
+                                    contentTable = '<table id="journey_node_results" class="widefat"><thead><th><strong>Event Value</strong></th><th><strong>Count</strong></th></thead><tbody>';
+
+                                    for ( let elem in jsonResponse ) {
+
+                                        contentTable += '<tr><td>' + jsonResponse[elem]['event_value'] + '</td>';
+                                        contentTable += '<td>' + jsonResponse[elem]['event_count'] + '</td></tr>';
+
+                                    }
+
+                                    contentTable += '</tbody></table>';
+
+                                    jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+
+                                    jQuery( '#journey_node_details_table' ).html( contentTable );
+
+                                    console.log( JSON.parse( response) );
+
+                                }
+
+                            });
+
+                        }
+
+                    });
                 }
-            }).then();
+            });
         }
-    }).then();
+    });
  }
 
 

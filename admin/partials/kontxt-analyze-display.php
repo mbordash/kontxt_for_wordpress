@@ -14,6 +14,8 @@ include_once 'kontxt-banner.php';
 
 <div class="wrap">
 
+    <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
+
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
     <div id="activity-results-success" class="inside hidden">
@@ -43,6 +45,7 @@ include_once 'kontxt-banner.php';
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>">Emotion</a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>">Semantic Intents</a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>">Keywords</a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>">Journey</a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_experiment' ); ?>">Experiment</a>
 
                                 </div>
@@ -77,7 +80,7 @@ include_once 'kontxt-banner.php';
 
                         <div class="inside">
 
-                            <h3>Latest Site Behaviors Detected</h3>
+                            <h3>Latest Site Behaviors Detected (for debugging)</h3>
 
                             <div id="latestActivity_results_table"></div>
 
@@ -96,8 +99,6 @@ include_once 'kontxt-banner.php';
             kontxtAnalyze('dashboard');
         });
     </script>
-
-    <div id="spinner-analyze" class="spinner is-inactive" style="float:none; width:100%; height: auto; padding:10px 0 10px 50px; background-position: center center;"></div>
 
     <div id="kontxt-analyze-results-status" class="wrap"></div>
 
