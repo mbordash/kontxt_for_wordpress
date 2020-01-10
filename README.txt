@@ -1,9 +1,10 @@
 === KONTXT Semantic Engine ===
-Contributors: mbordash
+Contributors: mbordash, imijic
 Tags: woocommerce, commerce, journey, search, seo, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, analytics, recommendations
 Requires at least: 4.0
 Tested up to: 5.3.2
-Stable tag: 1.0.0
+Requires PHP: 5.6
+Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -67,12 +68,14 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 1. KONTXTscore&trade; :: your real-time brand sentiment metric.
 
-
 2. Sentiment Analytics :: deep insights on how your brand connects with your visitors
 
+3. Experiment :: test your content in real-time
 
 
 == Changelog ==
 
 = 1.0 =
 Initial release
+
+== Upgrade Notice ==
