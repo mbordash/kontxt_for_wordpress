@@ -41,7 +41,7 @@ class Kontxt_Activator {
 			$siteName   = get_bloginfo( 'name' );
 			$siteDomain = get_bloginfo( 'url' );
 			$siteEmail  = get_bloginfo( 'admin_email' );
-			$apiUid     = md5( $siteName . $siteDomain );
+			$apiUid     = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 			$service    = 'install';
 
 			// register with KONTXT Site API endpoint

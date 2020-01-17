@@ -139,7 +139,7 @@ class Kontxt_Admin {
 		//get and check API key exists, pass key along server side request
 		$apiKey = get_option( $this->option_name . '_apikey' );
 		$apiUid = get_option( $this->option_name . '_apiuid' );
-		$current_session    = sanitize_text_field( $_COOKIE['kontxt_session'] );
+		$current_session    = isset( $_COOKIE['kontxt_session'] ) ? sanitize_text_field( $_COOKIE['kontxt_session']) : '';
 		$current_user       = wp_get_current_user();
 
 
@@ -253,7 +253,7 @@ class Kontxt_Admin {
         //get and check API key exists, pass key along server side request
 	    $apiKey = get_option( $this->option_name . '_apikey' );
 	    $apiUid = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = sanitize_text_field( $_COOKIE['kontxt_session'] );
+	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? sanitize_text_field( $_COOKIE['kontxt_session']) : '';
 	    $current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -521,7 +521,7 @@ class Kontxt_Admin {
 		    array( $this, $this->option_name . '_apiuid_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
-		    array( 'label_for' => $this->option_name . '_apiuid' )
+		    array('label_for' => $this->option_name . '_apiuid')
 	    );
 
         add_settings_field(
@@ -601,7 +601,7 @@ class Kontxt_Admin {
 
         <fieldset>
             <label>
-                <input type="text" name="<?php echo $this->option_name . '_email' ?>" id="<?php echo $this->option_name . '_email' ?>" value="<?php echo $email; ?>">
+                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_email' ?>" id="<?php echo $this->option_name . '_email' ?>" value="<?php echo $email; ?>">
             </label>
         </fieldset>
 
@@ -623,7 +623,7 @@ class Kontxt_Admin {
 
         <fieldset>
             <label>
-                <input type="text" name="<?php echo $this->option_name . '_apikey' ?>" id="<?php echo $this->option_name . '_apikey' ?>" value="<?php echo $apikey; ?>">
+                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_apikey' ?>" id="<?php echo $this->option_name . '_apikey' ?>" value="<?php echo $apikey; ?>" readonly>
             </label>
         </fieldset>
 
@@ -645,7 +645,7 @@ class Kontxt_Admin {
 
         <fieldset>
             <label>
-                <input type="text" name="<?php echo $this->option_name . '_apiuid' ?>" id="<?php echo $this->option_name . '_apiuid' ?>" value="<?php echo $apiuid; ?>">
+                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_apiuid' ?>" id="<?php echo $this->option_name . '_apiuid' ?>" value="<?php echo $apiuid; ?>" readonly>
             </label>
         </fieldset>
 
