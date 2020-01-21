@@ -18,7 +18,7 @@ include_once 'kontxt-banner.php';
 
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-    <div id="activity-results-success" class="inside hidden">
+    <div id="activity-results-success" class="inside">
 
         <div id="activity-results-box" class="wrap">
 
@@ -46,7 +46,7 @@ include_once 'kontxt-banner.php';
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>">Semantic Intents</a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>">Keywords</a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>">Journey</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_experiment' ); ?>">Experiment</a>
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_settings' ); ?>">Experiment</a>
 
                                 </div>
                             </div>
@@ -74,28 +74,12 @@ include_once 'kontxt-banner.php';
                     </div>
                 </div>
 
-                <div id="poststuff">
-
-                    <div class="postbox">
-
-                        <div class="inside">
-
-                            <h3>Latest Site Behaviors Detected (for debugging)</h3>
-
-                            <div id="latestActivity_results_table"></div>
-
-                        </div>
-
-                    </div>
-                    <!-- .postbox -->
-                </div>
             </div>
         </div>
     </div>
 
     <script>
         jQuery(function($) {
-            kontxtAnalyze('latestActivity');
             kontxtAnalyze('dashboard');
         });
     </script>

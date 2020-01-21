@@ -4,7 +4,7 @@ Tags: woocommerce, commerce, analytics, reports, journey, search, seo, cognitive
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.2
+Stable tag: 1.0.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -74,7 +74,7 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 == Changelog ==
 
-= 1.0.2 =
+= 1.0.4 =
 Bug fix & improvement release; improved journey analysis UI, fixed keyword labeling; introduced ALBERT model for intent classification
 
 = 1.0 =

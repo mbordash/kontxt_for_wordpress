@@ -159,6 +159,13 @@ class Kontxt {
 
 		if( $optin === 'yes' ) {
 
+			// fix for empty user object using wpcf7 plugin
+			if( in_array( 'contact-form-7/wp-contact-form-7.php', apply_filters( 'active_plugins', get_option( 'active_plugins') ) ) ) {
+
+				add_filter( 'wpcf7_verify_nonce', '__return_true' );
+
+			}
+
 			if ( false === wp_doing_cron() ) {
 				$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 			}
@@ -167,25 +174,29 @@ class Kontxt {
 			//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
 			// capture page/product view events
-			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register' );
+			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );
 
 			// capture page/product view events
-			$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event' );
+			$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
+
+			// capture page/product view events
+			$this->loader->add_action( 'wp_ajax_nopriv_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
 
 			// capture sentiment on comment post
-			$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post' );
+			$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post', 15 );
 
 			// capture woo commerce checkout confirmed
-			$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'kontxt_order_post' );
+			$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'kontxt_order_post', 15 );
 
 			// capture woo commerce add to cart
-			$this->loader->add_action( 'woocommerce_add_to_cart', $plugin_public, 'kontxt_cart_capture' );
+			$this->loader->add_action( 'woocommerce_add_to_cart', $plugin_public, 'kontxt_cart_capture', 15 );
 
 			// capture contact form 7 mail sent
-			$this->loader->add_action( 'wpcf7_posted_data', $plugin_public, 'kontxt_contact_form_capture' );
+			$this->loader->add_action( 'wpcf7_posted_data', $plugin_public, 'kontxt_contact_form_capture', 15 );
 
 			// capture gravity form submission
-			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture' );
+			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture', 15 );
+
 
 		}
 

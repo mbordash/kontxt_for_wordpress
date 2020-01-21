@@ -1,5 +1,46 @@
 jQuery(function($) {
 
+    let navTabs = jQuery('#kontxt-settings-navigation').children('.nav-tab-wrapper'),
+        tabIndex = null;
+
+    navTabs.children().each(function() {
+
+        $(this).on('click', function (evt) {
+
+            evt.preventDefault();
+
+            // If this tab is not active...
+            if (!$(this).hasClass('nav-tab-active')) {
+
+                // Unmark the current tab and mark the new one as active
+                $('.nav-tab-active').removeClass('nav-tab-active');
+                $(this).addClass('nav-tab-active');
+
+                // Save the index of the tab that's just been marked as active. It will be 0 - 2.
+                tabIndex = jQuery(this).index();
+
+                // Hide the old active content
+                $('#kontxt-settings-navigation')
+                    .children('div:not( .inside.hidden )')
+                    .addClass('hidden');
+
+                $('#kontxt-settings-navigation')
+                    .children('div:nth-child(' + ( tabIndex ) + ')')
+                    .addClass('hidden');
+
+                // And display the new content
+                $('#kontxt-settings-navigation')
+                    .children('div:nth-child( ' + ( tabIndex + 2 ) + ')')
+                    .removeClass('hidden');
+
+                window.dispatchEvent(new Event('resize'));
+
+            }
+
+        });
+    });
+
+
     $( "#date_from" ).datepicker({ dateFormat: "yy-mm-dd" }).datepicker("setDate", "-7d");
 
     $( "#date_to" ).datepicker({dateFormat: "yy-mm-dd"}).datepicker('setDate', new Date());

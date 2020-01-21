@@ -84,10 +84,11 @@ class Kontxt_Public {
 			'action' => 'kontxt_send_event'
 		);
 
+
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
 		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
 
-		wp_enqueue_script( $this->plugin_name);
+		wp_enqueue_script( $this->plugin_name );
 
 	}
 
@@ -256,11 +257,22 @@ class Kontxt_Public {
 
 		// determine non-shopping page presence
 		if( is_front_page() || is_home() ) {
-			$kontxt_user_session['site_home'] = 'Site home';
+			$kontxt_user_session['site_home'] = [
+				'page_name'     => 'site home',
+				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
+			];
 		} elseif( get_post_type() === 'post' ) {
-			$kontxt_user_session['blog_post'] = get_the_title();
+			$kontxt_user_session['blog_post'] = [
+				'title' => get_the_title(),
+				'id'    => get_the_ID(),
+				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
+			];
 		} elseif( get_post_type() === 'page' ) {
-			$kontxt_user_session['site_page'] = get_the_title();
+			$kontxt_user_session['site_page'] = [
+				'title' => get_the_title(),
+				'id'    => get_the_ID(),
+				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
+			];
 		}
 
 		// get commerce related major actions
@@ -268,7 +280,10 @@ class Kontxt_Public {
 
 			if( is_shop() ) {
 
-				$kontxt_user_session['shop_page_home'] = "Shop home";
+				$kontxt_user_session['shop_page_home'] = [
+					'page_name' => 'shop home',
+					'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
+				];
 
 			} elseif( isset( get_queried_object()->term_id) ) {
 
@@ -278,7 +293,8 @@ class Kontxt_Public {
 				$categoryDataArray = array(
 
 					'view_category_id'   => $categoryId,
-					'view_category_name' => $categoryName
+					'view_category_name' => $categoryName,
+					'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 
 				);
 
@@ -295,7 +311,8 @@ class Kontxt_Public {
 					$productDataArray = array(
 
 						'view_product_id'   => $productId,
-						'view_product_name' => $productName
+						'view_product_name' => $productName,
+						'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 
 					);
 					$kontxt_user_session['shop_page_product'] = $productDataArray;
@@ -316,7 +333,6 @@ class Kontxt_Public {
 	 */
 	public function kontxt_send_event( $eventData, $service = 'public_event' ) {
 
-
 		//check to see if event data is passed to us via a function or if we have event data in the request object from a direct call
 		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
 
@@ -325,18 +341,12 @@ class Kontxt_Public {
 			// no need to do this here
 			$eventData = json_decode( stripslashes( $_POST['eventData'] ) );
 
-		} else {
-
-			// each element of the following event is sanitized by the backend receiver
-			// no need to do this here
-			$eventData = $eventData;
-
 		}
+
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
 	    $apiUid             = get_option( $this->option_name . '_apiuid' );
-	    $current_session    = isset( $_COOKIE['kontxt_session'] ) ? sanitize_text_field( $_COOKIE['kontxt_session']) : '';
 		$current_user       = wp_get_current_user();
 
         if ( !isset($apiKey) || $apiKey === '' ) {
@@ -344,9 +354,11 @@ class Kontxt_Public {
             return false;
         }
 
-		if( !isset( $current_session ) ) {
+		if( !isset( $_COOKIE['kontxt_session'] ) ) {
 			$current_session = $this->genKey();
-			setcookie('kontxt_session', $current_session, strtotime( '+30 days' ) );
+			setcookie('kontxt_session', $current_session, strtotime( '+30 days' ), COOKIEPATH, COOKIE_DOMAIN);
+		} else {
+			$current_session = $_COOKIE['kontxt_session'];
 		}
 
 		if( !isset( $requestId ) ) {

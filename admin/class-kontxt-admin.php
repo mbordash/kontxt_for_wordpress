@@ -391,14 +391,6 @@ class Kontxt_Admin {
 			array( $this, 'display_journey_page' )
 		);
 
-		$this->plugin_screen_hook_suffix = add_submenu_page(
-			$this->plugin_name,
-			__( 'KONTXT Experiment', 'kontxt' ),
-			__( 'Experiment', 'kontxt' ),
-			'manage_options',
-			$this->plugin_name . "_experiment",
-			array( $this, 'display_experiment_page' )
-		);
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
@@ -501,7 +493,7 @@ class Kontxt_Admin {
 
         add_settings_section(
             $this->option_name . '_general',
-            __( 'General', 'kontxt' ),
+            __( '', 'kontxt' ),
             array( $this, $this->option_name . '_general_cb' ),
             $this->plugin_name
         );
