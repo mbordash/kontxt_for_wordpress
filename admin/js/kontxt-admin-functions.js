@@ -1,5 +1,46 @@
 jQuery(function($) {
 
+    let navTabs = jQuery('#kontxt-settings-navigation').children('.nav-tab-wrapper'),
+        tabIndex = null;
+
+    navTabs.children().each(function() {
+
+        $(this).on('click', function (evt) {
+
+            evt.preventDefault();
+
+            // If this tab is not active...
+            if (!$(this).hasClass('nav-tab-active')) {
+
+                // Unmark the current tab and mark the new one as active
+                $('.nav-tab-active').removeClass('nav-tab-active');
+                $(this).addClass('nav-tab-active');
+
+                // Save the index of the tab that's just been marked as active. It will be 0 - 2.
+                tabIndex = jQuery(this).index();
+
+                // Hide the old active content
+                $('#kontxt-settings-navigation')
+                    .children('div:not( .inside.hidden )')
+                    .addClass('hidden');
+
+                $('#kontxt-settings-navigation')
+                    .children('div:nth-child(' + ( tabIndex ) + ')')
+                    .addClass('hidden');
+
+                // And display the new content
+                $('#kontxt-settings-navigation')
+                    .children('div:nth-child( ' + ( tabIndex + 2 ) + ')')
+                    .removeClass('hidden');
+
+                window.dispatchEvent(new Event('resize'));
+
+            }
+
+        });
+    });
+
+
     $( "#date_from" ).datepicker({ dateFormat: "yy-mm-dd" }).datepicker("setDate", "-7d");
 
     $( "#date_to" ).datepicker({dateFormat: "yy-mm-dd"}).datepicker('setDate', new Date());
@@ -516,13 +557,13 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                         contentTable  += '<tr>  <td>' + keyword['text'] + '</td>';
                         contentTable  += '      <td>' + jsonResponse[elem]['keywords_count'] + '</td>';
+                        contentTable  += '      <td>' + ( Math.round(keyword['relevance'] * 100 )) + '%</td>';
                         contentTable  += '      <td>' + sentimentLabel + sentimentScore + '</td>';
                         contentTable  += '      <td>' + joyLabel + '</td>';
                         contentTable  += '      <td>' + fearLabel + '</td>';
                         contentTable  += '      <td>' + angerLabel + '</td>';
                         contentTable  += '      <td>' + disgustLabel + '</td>';
-                        contentTable  += '      <td>' + sadnessLabel + '</td>';
-                        contentTable  += '      <td>' + ( Math.round(keyword['relevance'] * 100 )) + '%</td></tr>';
+                        contentTable  += '      <td>' + sadnessLabel + '</td></tr>';
 
                     }
                     contentTable += '</tbody></table>';
@@ -643,10 +684,10 @@ function kontxtExperimentFormPost(return_text) {
 
             let jsonResponse = JSON.parse(response);
 
-            let contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Relevance</th></th></thead><tbody>';
+            let contentTable = '<table id="kontxt_intents" class="widefat"><thead><th>Intent</th><th>Score</th></th></thead><tbody>';
             for( let elem in jsonResponse ) {
                 contentTable  += '<tr><td>' + jsonResponse[elem]['class_name'] + '</td>';
-                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '%</td></tr>';
+                contentTable  += '<td>' + ( Math.round(jsonResponse[elem]['confidence'] * 100 )) + '</td></tr>';
 
             }
             contentTable += '</tbody></table>';
@@ -895,7 +936,7 @@ function kontxtJourney( date_from, date_to ) {
 
                     let data = [{
                         type: "sankey",
-                        arrangement: "fixed",
+                        arrangement: "freeform",
                         valueformat: ".0f",
                         valuesuffix: " sessions",
                         orientation: "h",
@@ -920,18 +961,16 @@ function kontxtJourney( date_from, date_to ) {
                         font: {
                             size: 10
                         },
-                        hovermode: false
+                        hovermode: true
                     };
 
                     Plotly.newPlot('journey_results_chart', data, layout).then();
 
                     jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
 
-                    document.getElementById('journey_results_chart').on('plotly_click', function(data) {
+                    document.getElementById('journey_results_chart').on('plotly_hover', function(data) {
 
                         jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
-
-                        jQuery( '#journey_node_details_table' ).html( '' );
 
                         let nodeLabel = data["points"][0]["label"];
                         let dateFrom    =  jQuery( '#date_from' ).val();
@@ -939,53 +978,57 @@ function kontxtJourney( date_from, date_to ) {
 
                         if( nodeLabel ) {
 
-                            jQuery('#journey_node_details_box').show();
-                            jQuery('#journey_node_details_header').html('Node details for ' + nodeLabel );
+                            setTimeout(
+                                function()
+                                {
 
-                            let data = jQuery.param({
-                                'action': 'kontxt_analyze_results',
-                                'apikey': kontxtAjaxObject.apikey,
-                                'dimension': 'journeyNode',
-                                'filter': nodeLabel,
-                                'from_date': dateFrom,
-                                'to_date': dateTo
-                            });
+                                jQuery('#journey_node_details_box').show();
+                                jQuery('#journey_node_details_header').html('Node details for ' + nodeLabel );
 
-                            jQuery.ajax({
-                                type: 'post',
-                                url: kontxtAjaxObject.ajaxurl,
-                                security: security,
-                                data: data,
-                                cache: false,
-                                success: function (response) {
+                                let data = jQuery.param({
+                                    'action': 'kontxt_analyze_results',
+                                    'apikey': kontxtAjaxObject.apikey,
+                                    'dimension': 'journeyNode',
+                                    'filter': nodeLabel,
+                                    'from_date': dateFrom,
+                                    'to_date': dateTo
+                                });
 
-                                    if (response.status === 'error') {
-                                        jQuery('#kontxt-analyze-results-status').html(response.message).show();
-                                        return false;
+                                jQuery.ajax({
+                                    type: 'post',
+                                    url: kontxtAjaxObject.ajaxurl,
+                                    security: security,
+                                    data: data,
+                                    cache: false,
+                                    success: function (response) {
+
+                                        if (response.status === 'error') {
+                                            jQuery('#kontxt-analyze-results-status').html(response.message).show();
+                                            return false;
+                                        }
+
+                                        let jsonResponse = JSON.parse( response );
+
+                                        contentTable = '<table id="journey_node_results" class="widefat"><thead><th><strong>Event Value</strong></th><th><strong>Count</strong></th></thead><tbody>';
+
+                                        for ( let elem in jsonResponse ) {
+
+                                            contentTable += '<tr><td>' + jsonResponse[elem]['event_value'] + '</td>';
+                                            contentTable += '<td>' + jsonResponse[elem]['event_count'] + '</td></tr>';
+
+                                        }
+
+                                        contentTable += '</tbody></table>';
+
+                                        jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
+
+                                        jQuery( '#journey_node_details_table' ).html( contentTable );
+
                                     }
 
-                                    let jsonResponse = JSON.parse( response );
+                                });
 
-                                    contentTable = '<table id="journey_node_results" class="widefat"><thead><th><strong>Event Value</strong></th><th><strong>Count</strong></th></thead><tbody>';
-
-                                    for ( let elem in jsonResponse ) {
-
-                                        contentTable += '<tr><td>' + jsonResponse[elem]['event_value'] + '</td>';
-                                        contentTable += '<td>' + jsonResponse[elem]['event_count'] + '</td></tr>';
-
-                                    }
-
-                                    contentTable += '</tbody></table>';
-
-                                    jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
-
-                                    jQuery( '#journey_node_details_table' ).html( contentTable );
-
-                                    console.log( JSON.parse( response) );
-
-                                }
-
-                            });
+                            }, 1000 )
 
                         }
 

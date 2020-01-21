@@ -118,9 +118,6 @@ include_once 'kontxt-banner.php';
 
                                 <dl>
 
-                                    <dt><strong>shop_home</strong></dt>
-                                    <dd>View of your WooCommerce home page</dd>
-
                                     <dt><strong>shop_page_home</strong></dt>
                                     <dd>View of your WooCommerce home page </dd>
 
