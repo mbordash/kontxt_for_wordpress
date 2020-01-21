@@ -30,3 +30,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
     exit;
 }
+
+$option_name = 'KONTXT';
+
+delete_option( $option_name . '_apikey' );
+delete_option( $option_name . '_apiuid' );

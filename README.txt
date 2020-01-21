@@ -1,10 +1,10 @@
 === KONTXT Semantic Engine ===
-Contributors: mbordash, imijic
-Tags: woocommerce, commerce, journey, search, seo, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, analytics, recommendations
+Contributors: mbordash, imijic, smelucci, jmmurray
+Tags: woocommerce, commerce, analytics, reports, journey, search, seo, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, recommendations
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.1
+Stable tag: 1.0.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -23,15 +23,14 @@ Use these top of the funnel behavioral insights to analyze trends for demand pla
 Features of our WordPress plugin:
 
 * Supports language understanding for core Wordpress functionality as well as popular plugins: Woo Commerce and Contact Form 7
-
-Supports natural language understanding concepts including:
+* Supports natural language understanding concepts including:
 * Intent detection
-*   Tone & Sentiment analysis (positive, mixed, neutral, negative)
-*   Emotion detection and breakdown
-*   Keyword extraction
-*   Journey path analysis
-*   Breakdown of your traffic along the metrics above
-*   Time Series analysis along the metrics above
+* Tone & Sentiment analysis (positive, mixed, neutral, negative)
+* Emotion detection and breakdown
+* Keyword extraction
+* Journey path analysis
+* Breakdown of your traffic along the metrics above
+* Time Series analysis along the metrics above
 
 == Installation ==
 
@@ -74,6 +73,9 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 
 == Changelog ==
+
+= 1.0.4 =
+Bug fix & improvement release; improved journey analysis UI, fixed keyword labeling; introduced ALBERT model for intent classification
 
 = 1.0 =
 Initial release
