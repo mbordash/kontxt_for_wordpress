@@ -66,6 +66,7 @@ class Kontxt_Activator {
 
 				update_option( $option_name . '_apikey', $apiKey);
 				update_option( $option_name . '_apiuid', $apiUid);
+				update_option( $option_name . '_optin', 'yes');
 
 				return true;
 

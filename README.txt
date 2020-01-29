@@ -1,10 +1,10 @@
 === KONTXT Semantic Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
-Tags: woocommerce, commerce, analytics, reports, journey, search, seo, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, recommendations
+Tags: reports, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, recommendations
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.4
+Stable tag: 1.0.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -73,6 +73,9 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 
 == Changelog ==
+
+= 1.0.6 =
+Reporting and performance improvements
 
 = 1.0.4 =
 Bug fix & improvement release; improved journey analysis UI, fixed keyword labeling; introduced ALBERT model for intent classification

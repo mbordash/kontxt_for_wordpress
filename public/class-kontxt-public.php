@@ -7,7 +7,7 @@
  * enqueue the admin-specific stylesheet and JavaScript.
  *
  * @package    Kontxt
- * @subpackage Kontxt/admin
+ * @subpackage Kontxt/public
  * @author     Michael Bordash <mbordash@realnetworks.com>
  */
 class Kontxt_Public {
@@ -78,10 +78,15 @@ class Kontxt_Public {
 
 		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
+		$prodRecs       = get_option( $this->option_name . '_product_recs' );
+		$contentRecs    = get_option( $this->option_name . '_content_recs' );
+
 		$kontxt_ajax_info = array(
 			'ajaxurl'   => admin_url( 'admin-ajax.php' ),
 			'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
-			'action' => 'kontxt_send_event'
+			'action' => 'kontxt_send_event',
+			'return_product_recs' => $prodRecs,
+			'return_content_recs' => $contentRecs
 		);
 
 
@@ -333,6 +338,14 @@ class Kontxt_Public {
 	 */
 	public function kontxt_send_event( $eventData, $service = 'public_event' ) {
 
+		$returnContentRecs  = false;
+		$returnProductRecs  = false;
+		$silent             = true;
+		$userClass          = 'public';
+		$responseBody       = array();
+
+		// grab variables from the POST
+
 		//check to see if event data is passed to us via a function or if we have event data in the request object from a direct call
 		if( isset( $_POST['eventData'] ) && $_POST['eventData'] !== '' && $_POST['eventData'] !== false ) {
 
@@ -343,6 +356,19 @@ class Kontxt_Public {
 
 		}
 
+		if( isset( $_POST['return_product_recs'] ) && $_POST['return_product_recs'] === 'yes' ) {
+
+			$returnProductRecs = true;
+			$silent = false;
+
+		}
+
+		if( isset( $_POST['return_content_recs'] ) && $_POST['return_content_recs'] === 'yes' ) {
+
+			$returnContentRecs = true;
+			$silent = false;
+
+		}
 
 		//get and check API key exists, pass key along server side request
 	    $apiKey             = get_option( $this->option_name . '_apikey' );
@@ -376,35 +402,101 @@ class Kontxt_Public {
 
 	        $requestId = sanitize_text_field( $requestId );
 
-	        	$service   = sanitize_text_field( $service );
+            $service   = sanitize_text_field( $service );
 
-		        $requestBody = array(
-			        'api_uid'                => $apiUid,
-			        'api_key'                => $apiKey,
-			        'kontxt_text_to_analyze' => [$eventData],
-			        'service'                => $service,
-			        'request_id'             => $requestId,
-			        'current_user_username'  => $current_user_username,
-			        'current_session_id'     => $current_session,
-			        'user_class'             => 'public',
-			        'silent'                 => true
-		        );
+            //error_log( $current_user_username );
 
-		        $args = array(
-			        'timeout'   => '1',
-		        	'body'      => $requestBody,
-			        'headers'   => 'Content-type: application/x-www-form-urlencoded',
-                    'blocking'  => false,
-                    'method'    => 'GET',
-                    'sslverify' => false
-		        );
+	        $requestBody = array(
 
-		        wp_remote_request( $this->api_host, $args );
+		        'api_uid'                => $apiUid,
+		        'api_key'                => $apiKey,
+		        'kontxt_text_to_analyze' => [$eventData],
+		        'service'                => $service,
+		        'request_id'             => $requestId,
+		        'current_user_username'  => $current_user_username,
+		        'current_session_id'     => $current_session,
+		        'user_class'             => $userClass,
+		        'silent'                 => $silent,
+		        'return_product_recs'    => $returnProductRecs,
+		        'return_content_recs'    => $returnContentRecs
+
+	        );
+
+	        $args = array(
+
+	            'body'      => $requestBody,
+		        'headers'   => 'Content-type: application/x-www-form-urlencoded',
+                'method'    => 'GET',
+                'sslverify' => false
+
+	        );
+
+            $response = wp_remote_request( $this->api_host, $args );
+
+            if( $response['response']['code'] === 200 && $silent === false ) {
+
+            	$recResults = json_decode( $response['body'] );
+
+            	foreach( $recResults as $items ) {
+
+            		if( $returnProductRecs === true ) {
+
+            			$product = wc_get_product( $items->item_id );
+
+            			$responseBody[] = array(
+
+            				'item_id' => $items->item_id,
+				            'item_url'=> esc_url( $product->get_permalink() ),
+				            'item_image' => $product->get_image('woocommerce_thumbnail'),
+				            'item_name' => wp_kses_post( $product->get_name() ),
+				            'item_price' => $product->get_price_html()
+
+			            );
+
+
+		            } else if( $returnContentRecs === 'yes' ) {
+
+						$post = get_post( $items->item_id );
+
+						$responseBody[] = array(
+
+							'item_id' => $items->item_id,
+							'item_url'=> get_permalink( $items->item_id ),
+							'item_image' => get_the_post_thumbnail( $items->item_id ),
+							'item_name' => $post->post_title
+
+						);
+
+		            }
+
+	            }
+
+                echo json_encode( $responseBody );
+
+	            die();
+
+            }
 
         }
 
-        return false;
     }
+
+
+	/**
+	 *
+	 */
+	public function kontxt_generate_recs( ) {
+
+		$prodRecs       = get_option( $this->option_name . '_product_recs' );
+		$contentRecs    = get_option( $this->option_name . '_content_recs' );
+
+		if( $prodRecs === 'yes' || $contentRecs === 'yes' ) {
+
+			include_once('partials/kontxt-recommendations.php');
+
+		}
+
+	}
 
 	/**
 	 * @return string

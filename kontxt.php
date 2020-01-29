@@ -9,10 +9,10 @@
  * @wordpress-plugin
  * Plugin Name:       KONTXT Semantic Engine
  * Plugin URI:        https://www.kontxt.com
- * Description:       Kontxt™ Semantic Engine is an AI-backed content analyzer and recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
- * Version:           1.0.4
- * Author:            Michael Bordash
- * Author URI:        https://github.com/mbordash
+ * Description:       KONTXT™ Semantic Engine is an AI-backed content analyzer and recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
+ * Version:           1.0.7
+ * Author:            RealNetworks KONTXT
+ * Author URI:        https://kontxt.com/kontxt-semantic-engine-for-retail/
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
  * Text Domain:       kontxt
  * Domain Path:       /languages

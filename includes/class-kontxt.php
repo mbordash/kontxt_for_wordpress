@@ -177,10 +177,10 @@ class Kontxt {
 			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );
 
 			// capture page/product view events
-			$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
+			$this->loader->add_action( 'wp_ajax_nopriv_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
 
 			// capture page/product view events
-			$this->loader->add_action( 'wp_ajax_nopriv_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
+			$this->loader->add_action( 'wp_ajax_kontxt_send_event', $plugin_public, 'kontxt_send_event', 15 );
 
 			// capture sentiment on comment post
 			$this->loader->add_action( 'comment_post', $plugin_public, 'kontxt_comment_post', 15 );
@@ -197,6 +197,8 @@ class Kontxt {
 			// capture gravity form submission
 			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture', 15 );
 
+			// including class for content recs
+			$this->loader->add_filter( 'the_content', $plugin_public, 'kontxt_generate_recs');
 
 		}
 
