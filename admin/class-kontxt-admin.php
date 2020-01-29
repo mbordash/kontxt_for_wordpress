@@ -391,7 +391,6 @@ class Kontxt_Admin {
 			array( $this, 'display_journey_page' )
 		);
 
-
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
 			__( 'KONTXT Settings', 'kontxt' ),
@@ -534,11 +533,21 @@ class Kontxt_Admin {
 		    array( 'label_for' => $this->option_name . '_email' )
 	    );
 
+	    add_settings_field(
+		    $this->option_name . '_product_recs',
+		    __( 'Activate recommendations block?', 'kontxt' ),
+		    array( $this, $this->option_name . '_recs_cb' ),
+		    $this->plugin_name,
+		    $this->option_name . '_general',
+		    array( 'label_for' => $this->option_name . '_product_recs' )
+	    );
 
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_email' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_optin', array( $this, $this->option_name . '_sanitize_option' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_product_recs', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_content_recs', array( $this, $this->option_name . '_sanitize_text' ) );
 
 
     }
@@ -575,6 +584,39 @@ class Kontxt_Admin {
 				<?php _e( 'No', 'kontxt' ); ?>
             </label>
         </fieldset>
+
+		<?php
+	}
+
+	/**
+	 * Render the radio input field for emotion option
+	 *
+	 * @since  1.0.0
+	 */
+	public function kontxt_recs_cb() {
+
+		$prodRecs       = get_option( $this->option_name . '_product_recs' );
+		$contentRecs    = get_option( $this->option_name . '_content_recs' );
+
+		?>
+
+        <p>If enabled, KONTXT machine learning will show recommended articles or products from your site.</p>
+
+		<fieldset>
+			<label>
+				<input type="checkbox" name="<?php echo $this->option_name . '_product_recs' ?>" id="<?php echo $this->option_name . '_product_recs' ?>" value="yes" <?php checked( $prodRecs, 'yes' ); ?>>
+				<?php _e( 'Product recommendations (for WooCommerce stores)', 'kontxt' ); ?>
+			</label>
+			<br />
+			<label>
+				<input type="checkbox" name="<?php echo $this->option_name . '_content_recs' ?>" id="<?php echo $this->option_name . '_content_recs' ?>" value="yes" <?php checked( $contentRecs, 'yes' ); ?>>
+				<?php _e( 'Content recommendations (for Wordress blog articles)', 'kontxt' ); ?>
+			</label>
+
+		</fieldset>
+
+        <p>Depending on the volume of your traffic,
+        it may take a few hours or days before KONTXT machine learning determines recommendations for your visitors.</p>
 
 		<?php
 	}

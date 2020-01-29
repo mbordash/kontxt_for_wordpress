@@ -497,10 +497,26 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
                     jQuery('#emotion-results-success').show();
 
-                    contentTable = '<table id="emotion_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Name/Average</strong></th></thead><tbody>';
+                    contentTable = '<table id="emotion_results_id" class="widefat">' +
+                        '               <thead>' +
+                        '                   <th><strong>Date</strong></th>' +
+                        '                   <th><strong>Joy</strong></th>' +
+                        '                   <th><strong>Fear</strong></th>' +
+                        '                   <th><strong>Anger</strong></th>' +
+                        '                   <th><strong>Disgust</strong></th>' +
+                        '                   <th><strong>Sadness</strong></th>' +
+                        '               </thead><tbody>';
                     for( let elem in jsonResponse ) {
-                        contentTable  += '<tr><td>' + jsonResponse[elem]['event_date']  + '</td>';
-                        contentTable  += '<td>' + jsonResponse[elem]['event_value_name'] + '</td></tr>';
+                        let emotion = JSON.parse(jsonResponse[elem]['event_value_name']);
+
+                        contentTable  += '<tr>' +
+                            '               <td>' + jsonResponse[elem]['event_date']  + '</td>' +
+                            '               <td>' + Math.round( emotion['joy'] * 100 ) + '%</td>' +
+                            '               <td>' + Math.round( emotion['fear'] * 100 ) + '%</td>' +
+                            '               <td>' + Math.round( emotion['anger'] * 100 ) + '%</td>' +
+                            '               <td>' + Math.round( emotion['disgust'] * 100 ) + '%</td>' +
+                            '               <td>' + Math.round( emotion['sadness'] * 100 ) + '%</td>' +
+                            '             </tr>';
 
                     }
                     contentTable += '</tbody></table>';
