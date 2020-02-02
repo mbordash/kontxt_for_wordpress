@@ -55,7 +55,9 @@ class Kontxt_Public {
 		 * class.
 		 */
 
-    }
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/kontxt-public.css', array(), $this->version, 'all' );
+
+	}
 
 	/**
 	 * Register the JavaScript for the admin area.
@@ -149,6 +151,37 @@ class Kontxt_Public {
 		}
 	}
 
+	public function kontxt_search_capture( $query ) {
+
+		// capture text input actively if search optimization is enabled
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+		if( $optimizeSearch === 'yes') {
+
+			$searchQuery         = get_search_query();
+			$kontxt_search_query = [];
+
+			if ( !is_admin() && $query->is_main_query() && $searchQuery ) {
+
+				$kontxt_search_query['search_query'] = array(
+					'searchQuery'   => $searchQuery,
+					'state'         => 'active'
+				);
+
+				// statistically interesting to see which search queries returned no results
+				if ( ! have_posts() ) {
+					$kontxt_search_query['no_search_results'] = array(
+						'searchQuery'   => $searchQuery,
+						'state'         => 'active'
+					);
+				}
+			}
+
+			$this->kontxt_send_event( $kontxt_search_query, 'public_event' );
+
+		}
+
+	}
 
 	/**
 	 * @param $data
@@ -182,6 +215,7 @@ class Kontxt_Public {
 		$kontxtCartArr = [];
 
 		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+
 			$cartData = WC()->cart->get_cart_contents();
 
 			$cartDataArray[] = array();
@@ -246,17 +280,31 @@ class Kontxt_Public {
 	 */
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 
-		$pageName = null;
+		// this captures various event data passively via passing back results to the DOM
+		// for round trip ticket back to the local API
 
-		// capture text input
-		$searchQuery = get_search_query();
+		$pageName       = null;
+		$searchQuery    = get_search_query();
 
-		if( $searchQuery ) {
-			$kontxt_user_session['search_query'] =  $searchQuery;
+		// capture text input passively if search optimization is disabled
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
 
-			// statistically interesting to see which search queries returned not results
-			if ( !have_posts() ) {
-				$kontxt_user_session['no_search_results'] =  $searchQuery;
+		if( $optimizeSearch !== 'yes') {
+
+			if ( $searchQuery ) {
+
+				$kontxt_user_session['search_query'] = array(
+					'searchQuery' => $searchQuery,
+					'state'       => 'passive'
+				);
+
+				// statistically interesting to see which search queries returned no results
+				if ( ! have_posts() ) {
+					$kontxt_user_session['no_search_results'] = array(
+						'searchQuery' => $searchQuery,
+						'state'       => 'passive'
+					);
+				}
 			}
 		}
 
@@ -280,8 +328,8 @@ class Kontxt_Public {
 			];
 		}
 
-		// get commerce related major actions
-		if ( class_exists( 'WooCommerce', false )  ) {
+		// get commerce related major actions; check if not search query otherwise we'll get duplicate events
+		if ( !$searchQuery && class_exists( 'WooCommerce', false )  ) {
 
 			if( is_shop() ) {
 
@@ -433,15 +481,16 @@ class Kontxt_Public {
 
             $response = wp_remote_request( $this->api_host, $args );
 
-            if( $response['response']['code'] === 200 && $silent === false ) {
+            if( is_array( $response ) && !is_wp_error( $response ) && $silent === false ) {
 
             	$recResults = json_decode( $response['body'] );
+
 
             	foreach( $recResults as $items ) {
 
             		if( $returnProductRecs === true ) {
 
-            			$product = wc_get_product( $items->item_id );
+			            $product = wc_get_product( $items->item_id );
 
             			$responseBody[] = array(
 
@@ -453,8 +502,7 @@ class Kontxt_Public {
 
 			            );
 
-
-		            } else if( $returnContentRecs === 'yes' ) {
+		            } else if( $returnContentRecs === true ) {
 
 						$post = get_post( $items->item_id );
 
@@ -490,7 +538,7 @@ class Kontxt_Public {
 		$prodRecs       = get_option( $this->option_name . '_product_recs' );
 		$contentRecs    = get_option( $this->option_name . '_content_recs' );
 
-		if( $prodRecs === 'yes' || $contentRecs === 'yes' ) {
+		if( !is_admin() && ( $prodRecs === 'yes' || $contentRecs === 'yes' ) ) {
 
 			include_once('partials/kontxt-recommendations.php');
 

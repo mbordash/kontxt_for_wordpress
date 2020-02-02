@@ -167,13 +167,19 @@ class Kontxt {
 			}
 
 			if ( false === wp_doing_cron() ) {
+
 				$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+				$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+
 			}
 
 			// capture all page state information from site user
 			//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
-			// capture page/product view events
+			//capture search requests
+			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_capture' );
+
+			// capture user reg events
 			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );
 
 			// capture page/product view events
@@ -198,7 +204,7 @@ class Kontxt {
 			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture', 15 );
 
 			// including class for content recs
-			$this->loader->add_filter( 'the_content', $plugin_public, 'kontxt_generate_recs');
+			$this->loader->add_filter( 'wp_footer', $plugin_public, 'kontxt_generate_recs');
 
 		}
 

@@ -47,7 +47,7 @@ jQuery(function($) {
                 let recsList;
 
                 // if we received a payload with recs, let's build an output array and enable the div
-                console.log( response );
+
                 if( arraySize >= 1 ) {
 
                     if( recsType === '#kontxt_product_recs' ) {
@@ -60,8 +60,8 @@ jQuery(function($) {
                             counter++;
 
                             recsList += '<li>' +
-                                '<a class="woocommerce-LoopProduct-link woocommerce-loop-product__link" href="' + jsonResponse[item]['item_url'] + '">' + jsonResponse[item]['item_image'] +
-                                '<span class="product-title">' + jsonResponse[item]['item_name'] + '</span></a>' +
+                                '<span class="product-title"><a class="woocommerce-LoopProduct-link woocommerce-loop-product__link" href="' + jsonResponse[item]['item_url'] + '">' + jsonResponse[item]['item_image'] +
+                                '' + jsonResponse[item]['item_name'] + '</span></a>' +
                                 '</li>';
                             if (counter >= 3) {
                                 break;
@@ -74,7 +74,7 @@ jQuery(function($) {
 
                     if( recsType === '#kontxt_content_recs' ) {
 
-                        recsList = '<div class="widget widget_recent_entries"><ul>';
+                        recsList = '<div><ul class="kontxt_content_recs">';
                         counter = 0;
 
                         for (let item in jsonResponse) {

@@ -45,12 +45,6 @@ jQuery(function($) {
 
     $( "#date_to" ).datepicker({dateFormat: "yy-mm-dd"}).datepicker('setDate', new Date());
 
-    // Experiments UI
-    document.addEventListener('visibilitychange', () => {
-        console.log(document.visibilityState);
-        window.dispatchEvent(new Event('resize'));
-    });
-
     // capture KONTXT form post and pass to handler
     jQuery( '#kontxt-experiment-input-button' ).on( 'click', function( e ) {
         e.preventDefault();
@@ -889,6 +883,12 @@ function kontxtExperimentFormPost(return_text) {
         error: function(response) {
             jQuery('#spinner').removeClass('is-active').addClass('is-inactive');
         }
+    });
+
+    // Experiments UI
+    document.addEventListener('visibilitychange', () => {
+        console.log(document.visibilityState);
+        window.dispatchEvent(new Event('resize'));
     });
 
     return false;
