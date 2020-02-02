@@ -1,20 +1,20 @@
 === KONTXT Semantic Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
-Tags: reports, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series, recommendations
+Tags: ai, recommendations, product, content, personalized, related, reporting, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.7
+Stable tag: 1.0.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
-KONTXT™ Semantic Engine is an AI-backed content analyzer and recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by KONTXT™ state of the art Natural Language Processing machine learning system.
+KONTXT™ Semantic Engine is an AI site analyzer and content & product recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by KONTXT™ state of the art Natural Language Processing machine learning system.
 
 == Description ==
 
 KONTXT™ Semantic Engine leverages the latest deep learning semantic techniques to make predictions about your customers’ intents based on their inbound queries through chat, support requests, and search.
 
-KONTXT™ Semantic Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent (e.g. Discovery, Customer Support, Research Compare, Buy Now, Solve Problem). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer queries, allowing to group common queries into clusters and analyze their intent and effectiveness in the customer journey (coming soon).
+KONTXT™ Semantic Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer queries, allowing to group common queries into clusters and analyze their intent and effectiveness in the customer journey.
 
 Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customer and plots the major journey points that your customer take across your site.
 
@@ -23,6 +23,7 @@ Use these top of the funnel behavioral insights to analyze trends for demand pla
 Features of our WordPress plugin:
 
 * Supports language understanding for core Wordpress functionality as well as popular plugins: Woo Commerce and Contact Form 7
+* Content and product recommendations for your visitors based on machine learning
 * Supports natural language understanding concepts including:
 * Intent detection
 * Tone & Sentiment analysis (positive, mixed, neutral, negative)
@@ -71,8 +72,12 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 3. Experiment :: test your content in real-time
 
+4. Personalized recommendations powered by AI
 
 == Changelog ==
+
+= 1.0.11 =
+Introducing content and product recommendations powered by KONTXT machine learning
 
 = 1.0.6 =
 Reporting and performance improvements
@@ -84,3 +89,5 @@ Bug fix & improvement release; improved journey analysis UI, fixed keyword label
 Initial release
 
 == Upgrade Notice ==
+
+Copyright 2020 RealNetowrks, Inc. All Rights Reserved.

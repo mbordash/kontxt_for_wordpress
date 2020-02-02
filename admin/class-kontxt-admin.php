@@ -542,12 +542,22 @@ class Kontxt_Admin {
 		    array( 'label_for' => $this->option_name . '_product_recs' )
 	    );
 
+	    add_settings_field(
+		    $this->option_name . '_optimize_search',
+		    __( 'Optimize search results?', 'kontxt' ),
+		    array( $this, $this->option_name . '_optimize_search_cb' ),
+		    $this->plugin_name,
+		    $this->option_name . '_general',
+		    array( 'label_for' => $this->option_name . '_optimize_search' )
+	    );
+
 	    register_setting( $this->plugin_name, $this->option_name . '_apiuid', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_apikey', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_email', array( $this, $this->option_name . '_sanitize_email' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_optin', array( $this, $this->option_name . '_sanitize_option' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_product_recs', array( $this, $this->option_name . '_sanitize_text' ) );
 	    register_setting( $this->plugin_name, $this->option_name . '_content_recs', array( $this, $this->option_name . '_sanitize_text' ) );
+	    register_setting( $this->plugin_name, $this->option_name . '_optimize_search', array( $this, $this->option_name . '_sanitize_text' ) );
 
 
     }
@@ -563,7 +573,34 @@ class Kontxt_Admin {
     }
 
 	/**
-	 * Render the radio input field for emotion option
+	 * Render the radio input field for global option
+	 *
+	 * @since  1.0.12
+	 */
+	public function kontxt_optimize_search_cb() {
+
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+		?>
+        <p>If enabled, KONTXT machine learning will attempt to optimize search results using semantic intent detection.</p>
+
+        <fieldset>
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_optimize_search' ?>" id="<?php echo $this->option_name . '_optimize_search' ?>" value="yes" <?php checked( $optimizeSearch, 'yes' ); ?>>
+				<?php _e( 'Yes', 'kontxt' ); ?>
+            </label>
+            <br />
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_optimize_search' ?>" value="no" <?php checked( $optimizeSearch, 'no' ); ?>>
+				<?php _e( 'No', 'kontxt' ); ?>
+            </label>
+        </fieldset>
+
+		<?php
+	}
+
+	/**
+	 * Render the radio input field for global option
 	 *
 	 * @since  1.0.0
 	 */
@@ -589,7 +626,7 @@ class Kontxt_Admin {
 	}
 
 	/**
-	 * Render the radio input field for emotion option
+	 * Render the radio input field for recs option
 	 *
 	 * @since  1.0.0
 	 */
