@@ -9,32 +9,47 @@
  * @author     Michael Bordash <mbordash@realnetworks.com>
  */
 
+
 if( class_exists( 'WooCommerce', false )  ) {
-	if( is_product() ) {
+	if(  !is_admin()  && is_product() ) {
 
 		?>
 
+
 		<div id="kontxt_product_recs" style="display: none">
 
-			<h3><span><?php esc_attr_e( 'Recommendations for you', 'wp_public_style' ); ?></span></h3>
-
-            <div id="kontxt_recs_objects"></div>
+			<input type="checkbox" id="kontxt_recs_showblock">
+			<div id="kontxt_slideout">
+				<label id="kontxt_slideout_tab" for="kontxt_recs_showblock" title="KONTXT Slider">
+					Recommendations
+				</label>
+				<div id="kontxt_slideout_inner">
+					<div id="kontxt_recs_objects"></div>
+				</div>
+			</div>
 
 		</div>
+
 
 		<?php
 	}
 }
 
-if ( get_post_type() === 'post' ) {
+if (  !is_admin() && get_post_type() === 'post' ) {
 
 ?>
 
     <div id="kontxt_content_recs" style="display: none">
 
-        <h3><span><?php esc_attr_e( 'Recommendations for you', 'wp_public_style' ); ?></span></h3>
-
-        <div id="kontxt_recs_objects"></div>
+	    <input type="checkbox" id="kontxt_recs_showblock">
+	    <div id="kontxt_slideout">
+		    <label id="kontxt_slideout_tab" for="kontxt_recs_showblock" title="KONTXT Slider">
+                Recommendations
+		    </label>
+		    <div id="kontxt_slideout_inner">
+			    <div id="kontxt_recs_objects"></div>
+		    </div>
+	    </div>
 
     </div>
 
