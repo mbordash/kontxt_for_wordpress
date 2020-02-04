@@ -19,7 +19,7 @@ class Kontxt_Public {
 	private $stop_words;
 
 	/**
-	 * Kontxt_Public constructor.
+	 * Kontxt_Public constructor
 	 * Kontxt_Public construct
 	 *
 	 * @param $plugin_name
@@ -181,7 +181,7 @@ class Kontxt_Public {
 			foreach ( $search_terms as $term ) {
 
 				$counter++;
-				$term = trim( $term );
+				$term = preg_replace("/[^A-Za-z0-9 ]/", '', $term);
 
 				if( in_array( $term, $this->stop_words ) ) {
 					continue;
@@ -244,31 +244,55 @@ class Kontxt_Public {
 				'CustomerSupport'   => 'page'
 			);
 
-			error_log( print_r( $intentResults,true));
 			// loop through elements in intentResults and assign a confidence to the WP type
 			// this will provide the values for re-ranking the results based on intent
 			// we will assign the highest confidence for the post type
+
+			$sortOrder =[];
+
 			foreach( $intentResults as $intent ) {
 
 				switch( $intent->class_name ) {
 					case 'SolveMyProblem':
 					case 'Discovery':
-						if( $intent->confidence > $postWeight ) {
-							$postWeight = $intent->confidence;
+						if( isset( $sortOrder['post'] ) ) {
+							if( $intent->confidence > $sortOrder['post'] ) {
+								$sortOrder['post'] = $intent->confidence;
+							}
+						} else {
+							$sortOrder['post'] = $intent->confidence;
 						}
 						break;
 					case 'ResearchCompare':
 					case 'BuyNow':
-						if( $intent->confidence > $productWeight ) {
-							$productWeight = $intent->confidence;
+						if( isset( $sortOrder['product'] ) ) {
+						    if( $intent->confidence > $sortOrder['product'] ) {
+							    $sortOrder['product'] = $intent->confidence;
+						    }
+						} else {
+							$sortOrder['product'] = $intent->confidence;
 						}
 						break;
 					case 'CustomerSupport':
-						$pageWeight = $intent->confidence;
+						$sortOrder['page'] = $intent->confidence;
 						break;
 				}
 			}
+			arsort( $sortOrder );
 
+
+			$orderby = "(
+		                    CASE
+		                        WHEN wp_posts.post_title LIKE '%what are the best music events this winter?%' THEN 1
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[0] . "' THEN 2
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[1] . "' THEN 3
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[2] . "' THEN 4
+		                        ELSE 5 
+		                    END
+						)
+			";
+
+			error_log( print_r( $intentResults, true ) ) ;
 			error_log( print_r( $postWeight . ' ' . $productWeight . ' ' . $pageWeight ,true ) );
 
 		}
@@ -626,11 +650,9 @@ class Kontxt_Public {
 						            'item_url'   => esc_url( $product->get_permalink() ),
 						            'item_image' => $product->get_image( 'woocommerce_thumbnail' ),
 						            'item_name'  => wp_kses_post( $product->get_name() ),
-						            'item_price' => $product->get_price_html()
+						            'item_price' => $product->get_price()
 
 					            );
-
-					            echo json_encode( $responseBody );
 
 				            } else if ( $returnContentRecs === true ) {
 
@@ -645,11 +667,11 @@ class Kontxt_Public {
 
 					            );
 
-					            echo json_encode( $responseBody );
-
 				            }
 
 			            }
+			            echo  json_encode( $responseBody );
+			            die;
 		            } else {
 		            	return null;
 		            }
