@@ -16,6 +16,7 @@ class Kontxt_Public {
 	private $version;
 	private $option_name;
 	private $api_host;
+	private $stop_words;
 
 	/**
 	 * Kontxt_Public constructor.
@@ -25,14 +26,16 @@ class Kontxt_Public {
 	 * @param $version
 	 * @param $option_name
 	 * @param $api_host
+	 * @param $stop_words
 	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host )
+	public function __construct( $plugin_name, $version, $option_name, $api_host, $stop_words )
 	{
 
-		$this->plugin_name      = $plugin_name;
-		$this->version          = $version;
-		$this->option_name      = $option_name;
-		$this->api_host         = $api_host;
+		$this->plugin_name  = $plugin_name;
+		$this->version      = $version;
+		$this->option_name  = $option_name;
+		$this->api_host     = $api_host;
+		$this->stop_words   = $stop_words;
 
 	}
 
@@ -150,7 +153,65 @@ class Kontxt_Public {
 		}
 	}
 
-	public function kontxt_search_capture( $where, $query ) {
+	public function kontxt_search_where( $where, $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $where;
+		}
+
+		// capture text input actively if search optimization is enabled
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+		if( $optimizeSearch === 'yes') {
+
+			global $wpdb;
+
+			// explode all search terms into array.
+			$search_terms = explode( ' ', get_search_query() );
+			$count_terms  = count( $search_terms );
+
+			$type       = $wpdb->prefix . "posts.post_type";
+			$status     = $wpdb->prefix . "posts.post_status";
+			$title      = $wpdb->prefix . "posts.post_title";
+			$content    = $wpdb->prefix . "posts.post_content";
+
+			$where      = " AND ( ";
+			$counter    = 0;
+
+			foreach ( $search_terms as $term ) {
+
+				$counter++;
+				$term = trim( $term );
+
+				if( in_array( $term, $this->stop_words ) ) {
+					continue;
+				}
+
+				$where .= " ( $title LIKE '%$term%' ) OR ( $content LIKE '%$term%' ) ";
+
+				if( $counter < $count_terms ) {
+
+					$where .= " OR ";
+
+				} elseif( $counter >= 6 ) {
+					// we don't want to overwhelm MySQL so hard limit for now
+					break;
+
+				}
+			}
+
+			$where .= " ) AND ($type IN ('post', 'page', 'product' )) AND ($status = 'publish') ";
+
+		}
+
+		return $where;
+	}
+
+	public function kontxt_search_orderby( $orderby, $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $orderby;
+		}
 
 		// capture text input actively if search optimization is enabled
 		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
@@ -159,73 +220,75 @@ class Kontxt_Public {
 
 			$searchQuery         = get_search_query();
 			$kontxt_search_query = [];
+			$postWeight          = 0;
+			$productWeight       = 0;
+			$pageWeight          = 0;
 
-			if ( !is_admin() && is_search() && $query->is_main_query() && isset( $searchQuery ) ) {
+			global $wpdb;
 
-				global $wpdb;
+			$kontxt_search_query['search_query'] = array(
+				'search_query'  => $searchQuery
+			);
 
-				$kontxt_search_query['search_query'] = array(
-					'search_query'  => $searchQuery
-				);
+			$kontxt_search_query['return_search_intent'] = true;
 
-				$kontxt_search_query['return_search_intent'] = true;
+			// request intent prediction from our classifier
+			$intentResults = json_decode( $this->kontxt_send_event( $kontxt_search_query, 'public_event' ) );
 
-				// request intent prediction from our classifier
-				$intentResults = $this->kontxt_send_event( $kontxt_search_query, 'public_event' );
+			// for reference, this array is unused at present
+			$intentToTypeMap = array(
+				'Discovery'         => 'post',
+				'SolveMyProblem'    => 'post',
+				'BuyNow'            => 'product',
+				'ResearchCompare'   => 'product',
+				'CustomerSupport'   => 'page'
+			);
 
-				error_log( print_r( $intentResults, true ) );
+			error_log( print_r( $intentResults,true));
+			// loop through elements in intentResults and assign a confidence to the WP type
+			// this will provide the values for re-ranking the results based on intent
+			// we will assign the highest confidence for the post type
+			foreach( $intentResults as $intent ) {
 
-				// Overwrite the existing WHERE clause.
-				$where = '';
-
-				// explode all search terms into array.
-				$search_terms = explode( ' ', get_search_query() );
-				$count_terms  = count( $search_terms );
-
-				// Tables names.
-				$type       = $wpdb->prefix . "posts.post_type";
-				$status     = $wpdb->prefix . "posts.post_status";
-				$title      = $wpdb->prefix . "posts.post_title";
-				$content    = $wpdb->prefix . "posts.post_content";
-
-				$where .= " AND ( ";
-				$counter = 0;
-				foreach ( $search_terms as $term ) {
-					$counter++;
-					$term = trim( $term );
-					$where .= " ( $title LIKE '%$term%' ) OR ( $content LIKE '%$term%' ) ";
-					if( $counter < $count_terms ) {
-						$where .= " OR ";
-					}
+				switch( $intent->class_name ) {
+					case 'SolveMyProblem':
+					case 'Discovery':
+						if( $intent->confidence > $postWeight ) {
+							$postWeight = $intent->confidence;
+						}
+						break;
+					case 'ResearchCompare':
+					case 'BuyNow':
+						if( $intent->confidence > $productWeight ) {
+							$productWeight = $intent->confidence;
+						}
+						break;
+					case 'CustomerSupport':
+						$pageWeight = $intent->confidence;
+						break;
 				}
-				$where .= " ) ";
-
-				// As WHERE clause is overwritten, you'll need to specify the post type, the status and/or anything else you need.
-				// Post Types.
-				$where .= " AND ($type IN ('post', 'page', 'product' )) ";
-				// Post status.
-				$where .= " AND ($status = 'publish') ";
-
-				error_log( print_r( $query, true ));
 			}
+
+			error_log( print_r( $postWeight . ' ' . $productWeight . ' ' . $pageWeight ,true ) );
 
 		}
 
-		return $where;
+		return $orderby;
 	}
 
-	public function kontxt_post_type( $query ) {
+	public function kontxt_search_type( $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $query;
+		}
 
 		// capture text input actively if search optimization is enabled
 		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
 
 		if( $optimizeSearch === 'yes') {
 
-			if ( ! is_admin() && $query->is_main_query() ) {
-				if ( $query->is_search ) {
-					$query->set( 'post_type', array( 'post', 'page', 'product' ) );
-				}
-			}
+				$query->set( 'post_type', array( 'post', 'page', 'product' ) );
+
 		}
 	}
 
