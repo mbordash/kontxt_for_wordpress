@@ -1,4 +1,4 @@
-=== KONTXT Semantic Engine ===
+=== KONTXT Demand Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
 Tags: ai, recommendations, product, content, personalized, related, reporting, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series
 Requires at least: 4.0
@@ -8,13 +8,13 @@ Stable tag: 1.0.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
-KONTXT™ Semantic Engine is an AI site analyzer and content & product recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by KONTXT™ state of the art Natural Language Processing machine learning system.
+KONTXT™ Demand Engine is an AI site analyzer and content & product recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by KONTXT™ state of the art Natural Language Processing machine learning system.
 
 == Description ==
 
-KONTXT™ Semantic Engine leverages the latest deep learning semantic techniques to make predictions about your customers’ intents based on their inbound queries through chat, support requests, and search.
+KONTXT™ Demand Engine leverages the latest deep learning semantic techniques to make predictions about your customers’ intents based on their inbound queries through chat, support requests, and search.
 
-KONTXT™ Semantic Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer queries, allowing to group common queries into clusters and analyze their intent and effectiveness in the customer journey.
+KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer queries, allowing to group common queries into clusters and analyze their intent and effectiveness in the customer journey.
 
 Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customer and plots the major journey points that your customer take across your site.
 

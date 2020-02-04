@@ -31,6 +31,7 @@ class Kontxt {
 	protected $option_name;
 	protected $api_host;
 	protected $kontxt_ini;
+	protected $stop_words;
 
 
 	/**
@@ -99,6 +100,11 @@ class Kontxt {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
 
+		/**
+		 * Include for stopwords used in various scenarios
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/stopwords.php';
+
 		$this->loader = new Kontxt_Loader();
 
 	}
@@ -153,7 +159,7 @@ class Kontxt {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host );
+		$plugin_public = new Kontxt_Public( $this->get_plugin_name(), $this->get_version(), $this->option_name, $this->api_host, $this->stop_words );
 
 		$optin = get_option( $this->option_name . '_optin' );
 
@@ -176,8 +182,14 @@ class Kontxt {
 			// capture all page state information from site user
 			//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
-			//capture search requests
-			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_capture' );
+			//capture search requests and modify where clause
+			$this->loader->add_action( 'posts_where', $plugin_public, 'kontxt_search_where', 10, 2 );
+
+			//capture search requests and modify where clause
+			$this->loader->add_action( 'posts_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
+
+			//override post types if search optimization enabled
+			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_type', 10 );
 
 			// capture user reg events
 			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );

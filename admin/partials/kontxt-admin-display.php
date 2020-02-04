@@ -12,7 +12,7 @@
 
 <div class="notice notice-info is-dismissible inline">
     <p>
-        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Semantic Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
+        This is a <strong>PREVIEW (alpha)</strong> release of KONTXT Demand Engine for Wordpress.  We are actively improving this plugin -- we thank you for trying it out!
         If you have any questions, comments, suggestions about our service, please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a>.
 		<?php
 		printf(
@@ -44,7 +44,7 @@
 
                     <div class="inside">
 
-                        <h3>Opt-in for KONTXT Semantic Analytics</h3>
+                        <h3>Opt-in for KONTXT</h3>
 
                         <p>In order for KONTXT to work properly, you must opt-in using the form below. If you do not wish KONTXT to perform our services, please deactivate and delete this plugin. All site data is deleted within 7 days of the last recorded activity automatically.</p>
 
