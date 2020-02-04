@@ -16,23 +16,26 @@ class Kontxt_Public {
 	private $version;
 	private $option_name;
 	private $api_host;
+	private $stop_words;
 
 	/**
-	 * Kontxt_Public constructor.
+	 * Kontxt_Public constructor
 	 * Kontxt_Public construct
 	 *
 	 * @param $plugin_name
 	 * @param $version
 	 * @param $option_name
 	 * @param $api_host
+	 * @param $stop_words
 	 */
-	public function __construct( $plugin_name, $version, $option_name, $api_host )
+	public function __construct( $plugin_name, $version, $option_name, $api_host, $stop_words )
 	{
 
-		$this->plugin_name      = $plugin_name;
-		$this->version          = $version;
-		$this->option_name      = $option_name;
-		$this->api_host         = $api_host;
+		$this->plugin_name  = $plugin_name;
+		$this->version      = $version;
+		$this->option_name  = $option_name;
+		$this->api_host     = $api_host;
+		$this->stop_words   = $stop_words;
 
 	}
 
@@ -90,7 +93,6 @@ class Kontxt_Public {
 			'return_product_recs' => $prodRecs,
 			'return_content_recs' => $contentRecs
 		);
-
 
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
 		wp_localize_script( $this->plugin_name, 'kontxtUserObject', $this->kontxt_capture_session() );
@@ -151,7 +153,65 @@ class Kontxt_Public {
 		}
 	}
 
-	public function kontxt_search_capture( $query ) {
+	public function kontxt_search_where( $where, $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $where;
+		}
+
+		// capture text input actively if search optimization is enabled
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+		if( $optimizeSearch === 'yes') {
+
+			global $wpdb;
+
+			// explode all search terms into array.
+			$search_terms = explode( ' ', get_search_query() );
+			$count_terms  = count( $search_terms );
+
+			$type       = $wpdb->prefix . "posts.post_type";
+			$status     = $wpdb->prefix . "posts.post_status";
+			$title      = $wpdb->prefix . "posts.post_title";
+			$content    = $wpdb->prefix . "posts.post_content";
+
+			$where      = " AND ( ";
+			$counter    = 0;
+
+			foreach ( $search_terms as $term ) {
+
+				$counter++;
+				$term = preg_replace("/[^A-Za-z0-9 ]/", '', $term);
+
+				if( in_array( $term, $this->stop_words ) ) {
+					continue;
+				}
+
+				$where .= " ( $title LIKE '%$term%' ) OR ( $content LIKE '%$term%' ) ";
+
+				if( $counter < $count_terms ) {
+
+					$where .= " OR ";
+
+				} elseif( $counter >= 6 ) {
+					// we don't want to overwhelm MySQL so hard limit for now
+					break;
+
+				}
+			}
+
+			$where .= " ) AND ($type IN ('post', 'page', 'product' )) AND ($status = 'publish') ";
+
+		}
+
+		return $where;
+	}
+
+	public function kontxt_search_orderby( $orderby, $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $orderby;
+		}
 
 		// capture text input actively if search optimization is enabled
 		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
@@ -160,28 +220,102 @@ class Kontxt_Public {
 
 			$searchQuery         = get_search_query();
 			$kontxt_search_query = [];
+			$postWeight          = 0;
+			$productWeight       = 0;
+			$pageWeight          = 0;
 
-			if ( !is_admin() && $query->is_main_query() && $searchQuery ) {
+			global $wpdb;
 
-				$kontxt_search_query['search_query'] = array(
-					'searchQuery'   => $searchQuery,
-					'state'         => 'active'
-				);
+			$kontxt_search_query['search_query'] = array(
+				'search_query'  => $searchQuery
+			);
 
-				// statistically interesting to see which search queries returned no results
-				if ( ! have_posts() ) {
-					$kontxt_search_query['no_search_results'] = array(
-						'searchQuery'   => $searchQuery,
-						'state'         => 'active'
-					);
+			$kontxt_search_query['return_search_intent'] = true;
+
+			// request intent prediction from our classifier
+			$intentResults = json_decode( $this->kontxt_send_event( $kontxt_search_query, 'public_event' ) );
+
+			// for reference, this array is unused at present
+			$intentToTypeMap = array(
+				'Discovery'         => 'post',
+				'SolveMyProblem'    => 'post',
+				'BuyNow'            => 'product',
+				'ResearchCompare'   => 'product',
+				'CustomerSupport'   => 'page'
+			);
+
+			// loop through elements in intentResults and assign a confidence to the WP type
+			// this will provide the values for re-ranking the results based on intent
+			// we will assign the highest confidence for the post type
+
+			$sortOrder =[];
+
+			foreach( $intentResults as $intent ) {
+
+				switch( $intent->class_name ) {
+					case 'SolveMyProblem':
+					case 'Discovery':
+						if( isset( $sortOrder['post'] ) ) {
+							if( $intent->confidence > $sortOrder['post'] ) {
+								$sortOrder['post'] = $intent->confidence;
+							}
+						} else {
+							$sortOrder['post'] = $intent->confidence;
+						}
+						break;
+					case 'ResearchCompare':
+					case 'BuyNow':
+						if( isset( $sortOrder['product'] ) ) {
+						    if( $intent->confidence > $sortOrder['product'] ) {
+							    $sortOrder['product'] = $intent->confidence;
+						    }
+						} else {
+							$sortOrder['product'] = $intent->confidence;
+						}
+						break;
+					case 'CustomerSupport':
+						$sortOrder['page'] = $intent->confidence;
+						break;
 				}
 			}
+			arsort( $sortOrder );
 
-			$this->kontxt_send_event( $kontxt_search_query, 'public_event' );
+
+			$orderby = "(
+		                    CASE
+		                        WHEN wp_posts.post_title LIKE '%what are the best music events this winter?%' THEN 1
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[0] . "' THEN 2
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[1] . "' THEN 3
+		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[2] . "' THEN 4
+		                        ELSE 5 
+		                    END
+						)
+			";
+
+			error_log( print_r( $intentResults, true ) ) ;
+			error_log( print_r( $postWeight . ' ' . $productWeight . ' ' . $pageWeight ,true ) );
 
 		}
 
+		return $orderby;
 	}
+
+	public function kontxt_search_type( $query ) {
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+			return $query;
+		}
+
+		// capture text input actively if search optimization is enabled
+		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+		if( $optimizeSearch === 'yes') {
+
+				$query->set( 'post_type', array( 'post', 'page', 'product' ) );
+
+		}
+	}
+
 
 	/**
 	 * @param $data
@@ -294,15 +428,13 @@ class Kontxt_Public {
 			if ( $searchQuery ) {
 
 				$kontxt_user_session['search_query'] = array(
-					'searchQuery' => $searchQuery,
-					'state'       => 'passive'
+					'search_query'  => $searchQuery
 				);
 
 				// statistically interesting to see which search queries returned no results
 				if ( ! have_posts() ) {
 					$kontxt_user_session['no_search_results'] = array(
-						'searchQuery' => $searchQuery,
-						'state'       => 'passive'
+						'search_query'  => $searchQuery
 					);
 				}
 			}
@@ -388,6 +520,7 @@ class Kontxt_Public {
 
 		$returnContentRecs  = false;
 		$returnProductRecs  = false;
+		$returnSearchIntent = false;
 		$silent             = true;
 		$userClass          = 'public';
 		$responseBody       = array();
@@ -416,6 +549,14 @@ class Kontxt_Public {
 			$returnContentRecs = true;
 			$silent = false;
 
+		}
+
+		if( !is_object( $eventData ) ) {
+			if( isset( $eventData['return_search_intent'] ) ) {
+
+				$returnSearchIntent = true;
+				$silent             = false;
+			}
 		}
 
 		//get and check API key exists, pass key along server side request
@@ -466,7 +607,8 @@ class Kontxt_Public {
 		        'user_class'             => $userClass,
 		        'silent'                 => $silent,
 		        'return_product_recs'    => $returnProductRecs,
-		        'return_content_recs'    => $returnContentRecs
+		        'return_content_recs'    => $returnContentRecs,
+		        'return_search_intent'   => $returnSearchIntent
 
 	        );
 
@@ -481,53 +623,64 @@ class Kontxt_Public {
 
             $response = wp_remote_request( $this->api_host, $args );
 
-            if( is_array( $response ) && !is_wp_error( $response ) && $silent === false ) {
+            if ( is_array( $response ) && ! is_wp_error( $response ) && $silent === false ) {
 
-            	$recResults = json_decode( $response['body'] );
+	            $recResults = json_decode( $response['body'] );
 
+	            //error_log(print_r($recResults,true));
 
-            	foreach( $recResults as $items ) {
+	            // look through results and check if we need to return recommendations inline
+	            if( is_array( $recResults ) ) {
 
-            		if( $returnProductRecs === true ) {
+		            if ( $returnSearchIntent === true ) {
 
-			            $product = wc_get_product( $items->item_id );
+			            return json_encode( $recResults );
 
-            			$responseBody[] = array(
+		            } elseif( $returnProductRecs === true || $returnContentRecs === true ) {
 
-            				'item_id' => $items->item_id,
-				            'item_url'=> esc_url( $product->get_permalink() ),
-				            'item_image' => $product->get_image('woocommerce_thumbnail'),
-				            'item_name' => wp_kses_post( $product->get_name() ),
-				            'item_price' => $product->get_price_html()
+			            foreach ( $recResults as $items ) {
 
-			            );
+				            if ( $returnProductRecs === true ) {
 
-		            } else if( $returnContentRecs === true ) {
+					            $product = wc_get_product( $items->item_id );
 
-						$post = get_post( $items->item_id );
+					            $responseBody[] = array(
 
-						$responseBody[] = array(
+						            'item_id'    => $items->item_id,
+						            'item_url'   => esc_url( $product->get_permalink() ),
+						            'item_image' => $product->get_image( 'woocommerce_thumbnail' ),
+						            'item_name'  => wp_kses_post( $product->get_name() ),
+						            'item_price' => $product->get_price()
 
-							'item_id' => $items->item_id,
-							'item_url'=> get_permalink( $items->item_id ),
-							'item_image' => get_the_post_thumbnail( $items->item_id ),
-							'item_name' => $post->post_title
+					            );
 
-						);
+				            } else if ( $returnContentRecs === true ) {
 
+					            $post = get_post( $items->item_id );
+
+					            $responseBody[] = array(
+
+						            'item_id'    => $items->item_id,
+						            'item_url'   => get_permalink( $items->item_id ),
+						            'item_image' => get_the_post_thumbnail( $items->item_id ),
+						            'item_name'  => $post->post_title
+
+					            );
+
+				            }
+
+			            }
+			            echo  json_encode( $responseBody );
+			            die;
+		            } else {
+		            	return null;
 		            }
-
 	            }
-
-                echo json_encode( $responseBody );
-
-	            die();
-
             }
 
         }
 
-    }
+	}
 
 
 	/**
