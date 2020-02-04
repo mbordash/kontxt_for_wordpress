@@ -177,7 +177,10 @@ class Kontxt {
 			//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
 			//capture search requests
-			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_capture' );
+			$this->loader->add_action( 'posts_where', $plugin_public, 'kontxt_search_capture', 10, 2 );
+
+			//override post types if search optimization enabled
+			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_post_type', 10 );
 
 			// capture user reg events
 			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );
