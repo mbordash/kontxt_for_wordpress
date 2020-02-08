@@ -4,7 +4,7 @@ Tags: ai, recommendations, product, content, personalized, related, reporting, w
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -75,6 +75,9 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 4. Personalized recommendations powered by AI
 
 == Changelog ==
+
+= 1.0.12 =
+Introducing search optimization powered by KONTXT machine learning; optimized journey analytics to connect offsite sources to goals
 
 = 1.0.11 =
 Introducing content and product recommendations powered by KONTXT machine learning

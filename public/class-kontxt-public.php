@@ -1,5 +1,7 @@
 <?php
 
+use writecrow\Lemmatizer\Lemmatizer;
+
 /**
  * The public-specific functionality of the plugin.
  *
@@ -166,50 +168,36 @@ class Kontxt_Public {
 
 			global $wpdb;
 
-			// explode all search terms into array.
-			$search_terms = explode( ' ', get_search_query() );
-			$count_terms  = count( $search_terms );
-
 			$type       = $wpdb->prefix . "posts.post_type";
 			$status     = $wpdb->prefix . "posts.post_status";
 			$title      = $wpdb->prefix . "posts.post_title";
 			$content    = $wpdb->prefix . "posts.post_content";
 
-			$where      = " AND ( ";
-			$counter    = 0;
+			// explode all search terms into array.
+			$search_regex = $this->getLemmas();
 
-			foreach ( $search_terms as $term ) {
-
-				$counter++;
-				$term = preg_replace("/[^A-Za-z0-9 ]/", '', $term);
-
-				if( in_array( $term, $this->stop_words ) ) {
-					continue;
-				}
-
-				$where .= " ( $title LIKE '%$term%' ) OR ( $content LIKE '%$term%' ) ";
-
-				if( $counter < $count_terms ) {
-
-					$where .= " OR ";
-
-				} elseif( $counter >= 6 ) {
-					// we don't want to overwhelm MySQL so hard limit for now
-					break;
-
-				}
-			}
-
-			$where .= " ) AND ($type IN ('post', 'page', 'product' )) AND ($status = 'publish') ";
+			$where  = " AND ( 
+							( $title REGEXP '" . $search_regex . "' ) OR 
+							( $content REGEXP '" . $search_regex . "' ) 
+						) AND (
+							$type IN ('post', 'page', 'product' )
+						) AND (
+							$status = 'publish'
+						)
+			";
 
 		}
-
+		error_log( $where );
 		return $where;
 	}
 
-	public function kontxt_search_orderby( $orderby, $query ) {
+	public function kontxt_search_orderby( $orderby, $query = null ) {
 
-		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
+		if( ! $query ) {
+			return $orderby;
+		}
+
+		if ( ! $query->is_main_query() || is_admin() || ! is_search() || ! get_search_query() ) {
 			return $orderby;
 		}
 
@@ -218,16 +206,13 @@ class Kontxt_Public {
 
 		if( $optimizeSearch === 'yes') {
 
-			$searchQuery         = get_search_query();
 			$kontxt_search_query = [];
-			$postWeight          = 0;
-			$productWeight       = 0;
-			$pageWeight          = 0;
+			$search_regex = $this->getLemmas();
 
 			global $wpdb;
 
 			$kontxt_search_query['search_query'] = array(
-				'search_query'  => $searchQuery
+				'search_query'  => get_search_query( )
 			);
 
 			$kontxt_search_query['return_search_intent'] = true;
@@ -250,53 +235,53 @@ class Kontxt_Public {
 
 			$sortOrder =[];
 
-			foreach( $intentResults as $intent ) {
+			if( $intentResults ) {
+				foreach ( $intentResults as $intent ) {
 
-				switch( $intent->class_name ) {
-					case 'SolveMyProblem':
-					case 'Discovery':
-						if( isset( $sortOrder['post'] ) ) {
-							if( $intent->confidence > $sortOrder['post'] ) {
+					switch ( $intent->class_name ) {
+						case 'SolveMyProblem':
+						case 'Discovery':
+							if ( isset( $sortOrder['post'] ) ) {
+								if ( $intent->confidence > $sortOrder['post'] ) {
+									$sortOrder['post'] = $intent->confidence;
+								}
+							} else {
 								$sortOrder['post'] = $intent->confidence;
 							}
-						} else {
-							$sortOrder['post'] = $intent->confidence;
-						}
-						break;
-					case 'ResearchCompare':
-					case 'BuyNow':
-						if( isset( $sortOrder['product'] ) ) {
-						    if( $intent->confidence > $sortOrder['product'] ) {
-							    $sortOrder['product'] = $intent->confidence;
-						    }
-						} else {
-							$sortOrder['product'] = $intent->confidence;
-						}
-						break;
-					case 'CustomerSupport':
-						$sortOrder['page'] = $intent->confidence;
-						break;
+							break;
+						case 'ResearchCompare':
+						case 'BuyNow':
+							if ( isset( $sortOrder['product'] ) ) {
+								if ( $intent->confidence > $sortOrder['product'] ) {
+									$sortOrder['product'] = $intent->confidence;
+								}
+							} else {
+								$sortOrder['product'] = $intent->confidence;
+							}
+							break;
+						case 'CustomerSupport':
+							$sortOrder['page'] = $intent->confidence;
+							break;
+					}
 				}
-			}
-			arsort( $sortOrder );
+				arsort( $sortOrder );
 
 
-			$orderby = "(
+				$orderby = "(
 		                    CASE
-		                        WHEN wp_posts.post_title LIKE '%what are the best music events this winter?%' THEN 1
+		                        WHEN wp_posts.post_title REGEXP  '" . $search_regex . "' THEN 1
 		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[0] . "' THEN 2
 		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[1] . "' THEN 3
 		                        WHEN wp_posts.post_type = '" . array_keys( $sortOrder )[2] . "' THEN 4
 		                        ELSE 5 
 		                    END
 						)
-			";
-
-			error_log( print_r( $intentResults, true ) ) ;
-			error_log( print_r( $postWeight . ' ' . $productWeight . ' ' . $pageWeight ,true ) );
+				";
+			}
 
 		}
 
+		error_log( $orderby );
 		return $orderby;
 	}
 
@@ -311,7 +296,7 @@ class Kontxt_Public {
 
 		if( $optimizeSearch === 'yes') {
 
-				$query->set( 'post_type', array( 'post', 'page', 'product' ) );
+			$query->set( 'post_type', array( 'post', 'page', 'product' ) );
 
 		}
 	}
@@ -658,14 +643,17 @@ class Kontxt_Public {
 
 					            $post = get_post( $items->item_id );
 
-					            $responseBody[] = array(
+					            if( $post ) {
 
-						            'item_id'    => $items->item_id,
-						            'item_url'   => get_permalink( $items->item_id ),
-						            'item_image' => get_the_post_thumbnail( $items->item_id ),
-						            'item_name'  => $post->post_title
+									$responseBody[] = array(
 
-					            );
+										'item_id'    => $items->item_id,
+										'item_url'   => get_permalink( $items->item_id ),
+										'item_image' => get_the_post_thumbnail( $items->item_id ),
+										'item_name'  => $post->post_title
+
+									);
+								}
 
 				            }
 
@@ -693,9 +681,29 @@ class Kontxt_Public {
 
 		if( !is_admin() && ( $prodRecs === 'yes' || $contentRecs === 'yes' ) ) {
 
-			include_once('partials/kontxt-recommendations.php');
+			include_once( 'partials/kontxt-recommendations.php' );
 
 		}
+
+	}
+
+	function kontxt_search_form( $form ) {
+		global $wp_query;
+
+		if( !is_admin() ) {
+			include_once( 'partials/kontxt-search-form.php' );
+		}
+
+	}
+
+	function kontxt_search_template( $template ) {
+		global $wp_query;
+
+		if (!$wp_query->is_search) {
+			return $template;
+		}
+
+        return dirname( __FILE__ ) . '/partials/kontxt-search-results.php';
 
 	}
 
@@ -705,6 +713,26 @@ class Kontxt_Public {
 	public function genKey() {
 
 		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+
+	}
+
+	public function getLemmas( ) {
+
+		// explode all search terms into array.
+		$search_terms = explode( ' ', get_search_query( ) );
+		$search_terms = array_diff( $search_terms, $this->stop_words );
+		$search_terms = array_slice( $search_terms, 0, 5 );
+		$search_lemma = [];
+
+		foreach ( $search_terms as $term ) {
+			if( Lemmatizer::getLemma( $term ) ) {
+				$search_lemma[] = Lemmatizer::getLemma( $term );
+			} else {
+				$search_lemma[] = $term;
+			}
+		}
+
+		return implode( '|', $search_lemma );
 
 	}
 

@@ -50,3 +50,15 @@
     margin: 0;
     padding: 0;
 }
+
+
+
+.site-header .site-branding {
+    width: 33.9130434783%;
+    float: left;
+    margin-right: 4.347826087%; }
+.woocommerce-active .site-header .site-search {
+    width: 61.7391304348%;
+    float: right;
+    margin-right: 0;
+    clear: none; }
