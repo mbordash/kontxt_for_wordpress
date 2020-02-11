@@ -182,15 +182,6 @@ class Kontxt {
 			// capture all page state information from site user
 			//$this->loader->add_action( 'wp', $plugin_public, 'kontxt_capture_session');
 
-			//capture search requests and modify where clause
-			$this->loader->add_action( 'posts_where', $plugin_public, 'kontxt_search_where', 10, 2 );
-
-			//capture search requests and modify where clause
-			$this->loader->add_action( 'posts_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
-
-			//override post types if search optimization enabled
-			$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_type', 10 );
-
 			// capture user reg events
 			$this->loader->add_action( 'user_register', $plugin_public, 'kontxt_user_register', 15 );
 
@@ -216,7 +207,27 @@ class Kontxt {
 			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture', 15 );
 
 			// including class for content recs
-			$this->loader->add_filter( 'wp_footer', $plugin_public, 'kontxt_generate_recs');
+			$this->loader->add_filter( 'wp_footer', $plugin_public, 'kontxt_generate_recs' );
+
+			// including class for search optimization
+			$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+			if( $optimizeSearch === 'yes') {
+
+				//capture search requests and modify where clause
+				$this->loader->add_action( 'posts_where', $plugin_public, 'kontxt_search_where', 10, 2 );
+
+				//capture search requests and modify where clause
+				$this->loader->add_action( 'posts_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
+				$this->loader->add_action( 'woocommerce_default_catalog_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
+
+				//override post types if search optimization enabled
+				$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_type', 10 );
+				$this->loader->add_filter( 'get_search_form', $plugin_public, 'kontxt_search_form' );
+				$this->loader->add_filter( 'get_product_search_form', $plugin_public, 'kontxt_search_form' );
+				$this->loader->add_filter( 'template_include', $plugin_public, 'kontxt_search_template' );
+
+			}
 
 		}
 

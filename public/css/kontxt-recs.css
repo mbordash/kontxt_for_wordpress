@@ -28,10 +28,10 @@
     position: absolute;
     bottom: -50px;
     left: 35px;
-    background: #3492eb;
-    width: 255px;
+    background: #91c1ef;
+    width: 265px;
     padding: 15px;
-    height: 250px;
+    height: 260px;
     cursor:auto;
     -webkit-border-radius: 5px 0 0 5px;
     -moz-border-radius: 5px 0 0 5px;
@@ -41,12 +41,8 @@
 #kontxt_recs_showblock{display:none;}
 
 .kontxt_content_recs {
-    margin: 1;
+    margin: 5px;
     padding: 0;
+    list-style: none;
 }
 
-.kontxt_content_recs ul {
-    display: block;
-    margin: 0;
-    padding: 0;
-}

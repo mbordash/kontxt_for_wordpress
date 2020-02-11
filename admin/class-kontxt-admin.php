@@ -348,6 +348,15 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
+			__( 'KONTXT Journey Analytics', 'kontxt' ),
+			__( 'Journey', 'kontxt' ),
+			'manage_options',
+			$this->plugin_name . "_journey",
+			array( $this, 'display_journey_page' )
+		);
+
+		$this->plugin_screen_hook_suffix = add_submenu_page(
+			$this->plugin_name,
 			__( 'KONTXT Sentiment', 'kontxt' ),
 			__( 'Sentiment', 'kontxt' ),
 			'manage_options',
@@ -380,15 +389,6 @@ class Kontxt_Admin {
 			'manage_options',
 			$this->plugin_name . "_keywords",
 			array( $this, 'display_keywords_page' )
-		);
-
-		$this->plugin_screen_hook_suffix = add_submenu_page(
-			$this->plugin_name,
-			__( 'KONTXT Journey Analytics', 'kontxt' ),
-			__( 'Journey', 'kontxt' ),
-			'manage_options',
-			$this->plugin_name . "_journey",
-			array( $this, 'display_journey_page' )
 		);
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
