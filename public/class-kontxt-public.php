@@ -39,6 +39,11 @@ class Kontxt_Public {
 		$this->api_host     = $api_host;
 		$this->stop_words   = $stop_words;
 
+		$this->prodRecs       = get_option( $this->option_name . '_product_recs' );
+		$this->contentRecs    = get_option( $this->option_name . '_content_recs' );
+		$this->optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+
+
 	}
 
 	/**
@@ -60,7 +65,13 @@ class Kontxt_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/kontxt-public.css', array(), $this->version, 'all' );
+		if( !is_admin() && ( $this->prodRecs === 'yes' || $this->contentRecs === 'yes' ) ) {
+			wp_enqueue_style( $this->plugin_name . '-recs', plugin_dir_url( __FILE__ ) . 'css/kontxt-recs.css', array(), $this->version, 'all' );
+		}
+
+		if( !is_admin() && $this->optimizeSearch === 'yes') {
+			wp_enqueue_style( $this->plugin_name . '-search', plugin_dir_url( __FILE__ ) . 'css/kontxt-search.css', array(), $this->version, 'all' );
+		}
 
 	}
 
@@ -85,15 +96,14 @@ class Kontxt_Public {
 
 		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-public-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
-		$prodRecs       = get_option( $this->option_name . '_product_recs' );
-		$contentRecs    = get_option( $this->option_name . '_content_recs' );
+
 
 		$kontxt_ajax_info = array(
 			'ajaxurl'   => admin_url( 'admin-ajax.php' ),
 			'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
 			'action' => 'kontxt_send_event',
-			'return_product_recs' => $prodRecs,
-			'return_content_recs' => $contentRecs
+			'return_product_recs' => $this->prodRecs,
+			'return_content_recs' => $this->contentRecs
 		);
 
 		wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_ajax_info );
@@ -161,10 +171,7 @@ class Kontxt_Public {
 			return $where;
 		}
 
-		// capture text input actively if search optimization is enabled
-		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
-
-		if( $optimizeSearch === 'yes') {
+		if( $this->optimizeSearch === 'yes') {
 
 			global $wpdb;
 
@@ -187,7 +194,6 @@ class Kontxt_Public {
 			";
 
 		}
-		error_log( $where );
 		return $where;
 	}
 
@@ -202,9 +208,8 @@ class Kontxt_Public {
 		}
 
 		// capture text input actively if search optimization is enabled
-		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
 
-		if( $optimizeSearch === 'yes') {
+		if( $this->optimizeSearch === 'yes') {
 
 			$kontxt_search_query = [];
 			$search_regex = $this->getLemmas();
@@ -277,14 +282,20 @@ class Kontxt_Public {
 		                    END
 						)
 				";
+
+				// error_log( print_r( $orderby, true ) ) ;
 			}
 
 		}
 
-		error_log( $orderby );
 		return $orderby;
 	}
 
+	/**
+	 * @param $query
+	 *
+	 * @return mixed
+	 */
 	public function kontxt_search_type( $query ) {
 
 		if ( ! $query->is_main_query() || is_admin() || ! is_search() ) {
@@ -292,11 +303,10 @@ class Kontxt_Public {
 		}
 
 		// capture text input actively if search optimization is enabled
-		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
-
-		if( $optimizeSearch === 'yes') {
+		if( $this->optimizeSearch === 'yes') {
 
 			$query->set( 'post_type', array( 'post', 'page', 'product' ) );
+			$query->set( 'posts_per_page', 25 );
 
 		}
 	}
@@ -406,9 +416,8 @@ class Kontxt_Public {
 		$searchQuery    = get_search_query();
 
 		// capture text input passively if search optimization is disabled
-		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
 
-		if( $optimizeSearch !== 'yes') {
+		if( $this->optimizeSearch !== 'yes') {
 
 			if ( $searchQuery ) {
 
@@ -643,7 +652,7 @@ class Kontxt_Public {
 
 					            $post = get_post( $items->item_id );
 
-					            if( $post ) {
+					            if( get_post_status( $post ) === 'publish' && get_post_type( $post ) === 'post' ) {
 
 									$responseBody[] = array(
 
@@ -676,10 +685,8 @@ class Kontxt_Public {
 	 */
 	public function kontxt_generate_recs( ) {
 
-		$prodRecs       = get_option( $this->option_name . '_product_recs' );
-		$contentRecs    = get_option( $this->option_name . '_content_recs' );
 
-		if( !is_admin() && ( $prodRecs === 'yes' || $contentRecs === 'yes' ) ) {
+		if( !is_admin() && ( $this->prodRecs === 'yes' || $this->contentRecs === 'yes' ) ) {
 
 			include_once( 'partials/kontxt-recommendations.php' );
 
@@ -725,13 +732,14 @@ class Kontxt_Public {
 		$search_lemma = [];
 
 		foreach ( $search_terms as $term ) {
-			if( Lemmatizer::getLemma( $term ) ) {
+			if( strlen( $term ) > 3 && Lemmatizer::getLemma( $term ) ) {
 				$search_lemma[] = Lemmatizer::getLemma( $term );
-			} else {
+			} elseif( strlen( $term ) > 3 ) {
 				$search_lemma[] = $term;
 			}
 		}
 
+		//error_log( print_r( $search_lemma, true ) );
 		return implode( '|', $search_lemma );
 
 	}

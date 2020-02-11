@@ -7,7 +7,7 @@
 api_host = 'http://localhost/wp-json/kontxt/v1/analyze'
 
 ; production
-;api_host = 'https://api.kontxt.cloud/wp-json/kontxt/v1/analyze'
+; api_host = 'https://api.kontxt.cloud/wp-json/kontxt/v1/analyze'
 
 ;*/
 

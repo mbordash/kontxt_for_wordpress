@@ -1,52 +1,48 @@
 <?php
+get_header();
+global $wp_query;
+?>
+<section id="primary" class="content-area">
+    <main id="main" class="site-main" role="main">
 
-/**
- * Provide an updated search results template, opt-in by site manager
- *
- * @since      1.0.7
- * @package    Kontxt
- * @subpackage Kontxt/public
- * @author     Michael Bordash <mbordash@realnetworks.com>
- */
+        <?php
 
+        if ( have_posts() ) :
 
-get_header(); ?>
+            while ( have_posts() ) : the_post();
 
+        ?>
+        <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>><a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark">
+            <?php
+                if ( has_post_thumbnail() ) {
+                    the_post_thumbnail( 'full' );
+                }
+            ?></a>
 
-    <div id="primary" class="content-area">
-        hey now!
-        <main id="main" class="site-main" role="main">
+            <h3 class="alpha entry-title"><a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark"><?php echo get_the_title(); ?> </a></h3>
 
-			<?php if ( have_posts() ) : ?>
+        </article><!-- #post-## -->
 
-                <header class="page-header">
-                    <h1 class="page-title">
-						<?php
-						/* translators: %s: search term */
-						printf( esc_attr__( 'Search Results for: %s', 'kontxt' ), '<span>' . get_search_query() . '</span>' );
-						?>
-                    </h1>
-                </header><!-- .page-header -->
+        <?php
+            endwhile;
+        ?>
 
-				<?php
-				get_template_part( 'loop' );
+        <article id="" <?php post_class(); ?>>
 
-			else :
+            <h2 class="alpha entry-title">No results found.</h2>
 
-				get_template_part( 'content', 'none' );
+        </article><!-- #post-## -->
 
-			endif;
-			?>
+        <?php
+            endif;
+        ?>
 
-        </main><!-- #main -->
-    </div><!-- #primary -->
+    </main>
+</section>
 
 <?php
 
-if( has_action( 'storefront_sidebar' ) ) {
-
-	do_action( 'storefront_sidebar' );
-
-}
+the_posts_pagination( array( 'mid_size' => 2 ) );
 
 get_footer();
+?>

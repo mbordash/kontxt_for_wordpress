@@ -4,7 +4,7 @@ Tags: ai, recommendations, product, content, personalized, related, reporting, w
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.12
+Stable tag: 1.1.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -12,26 +12,21 @@ KONTXT™ Demand Engine is an AI site analyzer and content & product recommendat
 
 == Description ==
 
-KONTXT™ Demand Engine leverages the latest deep learning semantic techniques to make predictions about your customers’ intents based on their inbound queries through chat, support requests, and search.
+KONTXT™ Demand Engine improves WordPress and WooCommerce search results, and provides both content and product recommendations.  Our plugin operates for both content sites or storefronts and sites with a mix of both blog articles and products.
 
-KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer queries, allowing to group common queries into clusters and analyze their intent and effectiveness in the customer journey.
+How does it work? KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer behaviors.
 
 Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customer and plots the major journey points that your customer take across your site.
 
-Use these top of the funnel behavioral insights to analyze trends for demand planning, inventory optimization, brand sentiment and relationship optimization. These insights will help you improve your product and content set which result in better search results and improvements to your customer’s journey impacting loyalty, attrition and sales.
-
 Features of our WordPress plugin:
 
+* Improved search results including masonry/pinterest styled template (instant on/off control on the KONTXT > Settings page after install)
+* Content and product recommendations widget (instant on/off control on the KONTXT > Settings page after install)
 * Supports language understanding for core Wordpress functionality as well as popular plugins: Woo Commerce and Contact Form 7
-* Content and product recommendations for your visitors based on machine learning
-* Supports natural language understanding concepts including:
-* Intent detection
-* Tone & Sentiment analysis (positive, mixed, neutral, negative)
-* Emotion detection and breakdown
-* Keyword extraction
-* Journey path analysis
-* Breakdown of your traffic along the metrics above
-* Time Series analysis along the metrics above
+* Customer journey path & flow analysis
+* Customer intent detection and analysis
+* Tone, Sentiment & Emotional analysis
+* Keyword extraction for Google AdWords optimization
 
 == Installation ==
 
@@ -74,10 +69,18 @@ Search is the best way to understand the intent behind your customers visit.  Yo
 
 4. Personalized recommendations powered by AI
 
+5. Masonry / Pinterest-style search results template
+
 == Changelog ==
 
+= 1.1.2 =
+Introduced masonry pinterest-style search results template
+
+= 1.1.1 =
+Improved search optimization
+
 = 1.0.12 =
-Introducing search optimization powered by KONTXT machine learning; optimized journey analytics to connect offsite sources to goals
+Introducing search optimization powered by KONTXT machine learning; optimized journey analytics to connect inbound sources to goals
 
 = 1.0.11 =
 Introducing content and product recommendations powered by KONTXT machine learning
