@@ -100,11 +100,6 @@ class Kontxt {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-kontxt-public.php';
 
-		/**
-		 * Include for stopwords used in various scenarios
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/stopwords.php';
-
 		$this->loader = new Kontxt_Loader();
 
 	}
@@ -221,7 +216,7 @@ class Kontxt {
 				$this->loader->add_action( 'posts_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
 				$this->loader->add_action( 'woocommerce_default_catalog_orderby', $plugin_public, 'kontxt_search_orderby', 10, 2 );
 
-				//override post types if search optimization enabled
+				//override post types and prepare cognitive enhancements if search optimization enabled
 				$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_type', 10 );
 				$this->loader->add_filter( 'get_search_form', $plugin_public, 'kontxt_search_form' );
 				$this->loader->add_filter( 'get_product_search_form', $plugin_public, 'kontxt_search_form' );
