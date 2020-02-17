@@ -7,7 +7,6 @@ jQuery(function($) {
 
     let data = {
         'action'    : 'kontxt_send_event',
-        'apikey'    : kontxtAjaxObject.apikey,
         'eventData' : JSON.stringify(kontxtUserObject)
     };
 
@@ -17,14 +16,14 @@ jQuery(function($) {
     if( document.getElementById( 'kontxt_product_recs' ) !== null ) {
 
         recsType = '#kontxt_product_recs';
-        data['return_product_recs'] = kontxtAjaxObject['return_product_recs'];
+        data['return_insights'] = 'productRecs';
 
     }
 
     if( document.getElementById( 'kontxt_content_recs' ) !== null ) {
 
         recsType = '#kontxt_content_recs';
-        data['return_content_recs'] = kontxtAjaxObject['return_content_recs'];
+        data['return_insights'] = 'contentRecs';
 
     }
 

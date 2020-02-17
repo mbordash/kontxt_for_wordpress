@@ -16,7 +16,7 @@ include_once 'kontxt-banner.php';
 
     <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
 
-    <h2>Journey Analytics (preview/alpha)</h2>
+    <h2>Journey Analytics</h2>
 
     <div id="journey" class="inside">
 
@@ -135,12 +135,24 @@ include_once 'kontxt-banner.php';
 
                                 </dl>
 
+                                <h3>bbPress forum events supported:</h3>
+
+                                <dl>
+
+                                    <dt><strong>forum_page</strong></dt>
+                                    <dd>Indicating a user viewed a forum or topic page</dd>
+
+                                    <dt><strong>forum_topic_content*</strong></dt>
+                                    <dd>Indicating a user posted a topic or replied to an existing topic</dd>
+
+                                </dl>
+
                                 <h3>Gravity Forms and Contact Form 7 events supported:</h3>
 
                                 <dl>
 
                                     <dt><strong>contact_form_submitted*</strong></dt>
-                                    <dd>Event indicating a visitor used the contact form to get in touch</dd>
+                                    <dd>Indicating a visitor used the contact form to get in touch</dd>
 
                                 </dl>
 
