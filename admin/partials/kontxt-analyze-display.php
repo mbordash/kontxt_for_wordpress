@@ -68,8 +68,6 @@ include_once 'kontxt-banner.php';
                             <p>KONTXT helps you understand your relationship with your customers in real-time by analyzing how they interact with your
                                 site through both text and journey analytics.  These insights will help you craft better blog articles, product descriptions,
                                 customer care interaction, and keywords used for SEO and external search advertising.</p>
-
-                            <p>COMINGS SOON: product & content recommendations using our proprietary machine learning science.</p>
                         </div>
                     </div>
                 </div>
