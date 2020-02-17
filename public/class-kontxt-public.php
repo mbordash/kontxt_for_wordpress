@@ -47,8 +47,6 @@ class Kontxt_Public {
 			$this->returnInsights[] = 'contentRecs';
 		}
 
-
-
 	}
 
 	/**
@@ -147,7 +145,7 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtCommentArr, 'public_event' );
+		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', null, true );
 
 	}
 
@@ -162,7 +160,7 @@ class Kontxt_Public {
 			];
 
 			// send directly to backend, don't bother with js async
-			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event' );
+			$this->kontxt_send_event( $kontxtUserRegArr, 'public_event', null, true );
 
 		}
 	}
@@ -293,38 +291,40 @@ class Kontxt_Public {
 
 							if ( is_object( $intentValue ) ) {
 
-								switch ( $intentValue->class_name ) {
+								if( isset( $intentValue->class_name ) ) {
 
-									case 'SolveMyProblem':
-									case 'Discovery':
-										if ( isset( $sortOrder['post'] ) ) {
-											if ( $intentValue->confidence > $sortOrder['post'] ) {
+									switch ( $intentValue->class_name ) {
+
+										case 'SolveMyProblem':
+										case 'Discovery':
+											if ( isset( $sortOrder['post'] ) ) {
+												if ( $intentValue->confidence > $sortOrder['post'] ) {
+													$sortOrder['post'] = $intentValue->confidence;
+												}
+											} else {
 												$sortOrder['post'] = $intentValue->confidence;
 											}
-										} else {
-											$sortOrder['post'] = $intentValue->confidence;
-										}
-										break;
-									case 'ResearchCompare':
-									case 'BuyNow':
-										if ( isset( $sortOrder['product'] ) ) {
-											if ( $intentValue->confidence > $sortOrder['product'] ) {
+											break;
+										case 'ResearchCompare':
+										case 'BuyNow':
+											if ( isset( $sortOrder['product'] ) ) {
+												if ( $intentValue->confidence > $sortOrder['product'] ) {
+													$sortOrder['product'] = $intentValue->confidence;
+												}
+											} else {
 												$sortOrder['product'] = $intentValue->confidence;
 											}
-										} else {
-											$sortOrder['product'] = $intentValue->confidence;
-										}
-										break;
-									case 'CustomerSupport':
-										$sortOrder['page'] = $intentValue->confidence;
-										break;
+											break;
+										case 'CustomerSupport':
+											$sortOrder['page'] = $intentValue->confidence;
+											break;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-
 
 			arsort( $sortOrder );
 			wp_cache_set( 'kontxt_current_sort', $sortOrder );
@@ -363,6 +363,29 @@ class Kontxt_Public {
 
 	}
 
+	/**
+	 * @param $contentId
+	 */
+	public function kontxt_forum_capture( $contentId ) {
+
+		$kontxtForumPostArr = [];
+
+		// capture contact us content
+		if ( isset( $contentId ) ) {
+
+			$kontxtForumPostArr['forum_topic_content'] = [
+				'forum_topic_id' => sanitize_text_field( bbp_get_reply_topic_id( $contentId ) ),
+				'forum_reply_id' => sanitize_text_field( bbp_get_reply_id( $contentId ) ),
+				'forum_content' => sanitize_text_field( bbp_get_reply_content( $contentId ) )
+			];
+		}
+
+		// send directly to backend, don't bother with js async
+		$this->kontxt_send_event( $kontxtForumPostArr, 'public_event', null, true );
+
+	}
+
+
 	public function kontxt_cart_capture( ) {
 
 		$kontxtCartArr = [];
@@ -385,7 +408,7 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtCartArr, 'public_event' );
+		$this->kontxt_send_event( $kontxtCartArr, 'public_event', null, true );
 
 	}
 
@@ -422,7 +445,7 @@ class Kontxt_Public {
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $orderCapture, 'public_event' );
+		$this->kontxt_send_event( $orderCapture, 'public_event', null, true );
 
 	}
 
@@ -434,7 +457,7 @@ class Kontxt_Public {
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 
 		// this captures various event data passively via passing back results to the DOM
-		// for round trip ticket back to the local API
+		// for round trip async ticket back to the local API
 
 		$pageName       = null;
 		$searchQuery    = get_search_query();
@@ -472,6 +495,12 @@ class Kontxt_Public {
 			];
 		} elseif( get_post_type() === 'page' ) {
 			$kontxt_user_session['site_page'] = [
+				'title' => get_the_title(),
+				'id'    => get_the_ID(),
+				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
+			];
+		} elseif( get_post_type() === 'forum' OR get_post_type() === 'topic' OR get_post_type() === 'reply' ) {
+			$kontxt_user_session['forum_page'] = [
 				'title' => get_the_title(),
 				'id'    => get_the_ID(),
 				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
@@ -532,12 +561,12 @@ class Kontxt_Public {
 	 * @param $eventData
 	 * @param string $service
 	 * @param array $returnInsights
+	 * @param string $silent
 	 *
 	 * @return false|mixed|string
 	 */
-	public function kontxt_send_event( $eventData, $service = 'public_event', $returnInsights = [] ) {
+	public function kontxt_send_event( $eventData, $service = 'public_event', $returnInsights = [], $silent = false ) {
 
-		$silent             = true;
 		$userClass          = 'public';
 		$responseBody       = array();
 		$returnInsights[]   = $this->returnInsights;
@@ -554,11 +583,9 @@ class Kontxt_Public {
 
 		}
 
+		// override default return option if posted
 		if( isset( $_POST['return_insights'] ) ) {
 			$returnInsights[] = $_POST['return_insights'];
-			$silent = false;
-		} elseif( $returnInsights ) {
-			$silent = false;
 		}
 
 		//get and check API key exists, pass key along server side request
@@ -626,8 +653,6 @@ class Kontxt_Public {
 
 	            $recResults = json_decode( $response['body'] );
 
-		        error_log( print_r( $recResults, true )) ;
-
 		        // look through results and check if we need to return recommendations inline
 	            if( $recResults ) {
 
@@ -644,7 +669,7 @@ class Kontxt_Public {
 
 				            $product = wc_get_product( $items->item_id );
 
-				            $responseBody[] = array(
+				            $responseBody['products'] = array(
 
 					            'item_id'    => $items->item_id,
 					            'item_url'   => esc_url( $product->get_permalink() ),
@@ -661,7 +686,7 @@ class Kontxt_Public {
 
 				            if( get_post_status( $post ) === 'publish' && get_post_type( $post ) === 'post' ) {
 
-					            $responseBody[] = array(
+					            $responseBody['content'] = array(
 
 						            'item_id'    => $items->item_id,
 						            'item_url'   => get_permalink( $items->item_id ),
@@ -694,15 +719,6 @@ class Kontxt_Public {
 
 			include_once( 'partials/kontxt-recommendations.php' );
 
-		}
-
-	}
-
-	function kontxt_search_form( $form ) {
-		global $wp_query;
-
-		if( !is_admin() ) {
-			include_once( 'partials/kontxt-search-form.php' );
 		}
 
 	}

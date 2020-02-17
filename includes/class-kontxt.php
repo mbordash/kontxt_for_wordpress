@@ -201,6 +201,10 @@ class Kontxt {
 			// capture gravity form submission
 			$this->loader->add_action( 'gform_after_submission', $plugin_public, 'kontxt_contact_form_capture', 15 );
 
+			// capture forum topics and replies from bbpress
+			$this->loader->add_action( 'bbp_new_topic_post_extras', $plugin_public, 'kontxt_forum_capture', 15);
+			$this->loader->add_action( 'bbp_new_reply_post_extras', $plugin_public, 'kontxt_forum_capture', 15);
+
 			// including class for content recs
 			$this->loader->add_filter( 'wp_footer', $plugin_public, 'kontxt_generate_recs' );
 
@@ -218,8 +222,6 @@ class Kontxt {
 
 				//override post types and prepare cognitive enhancements if search optimization enabled
 				$this->loader->add_action( 'pre_get_posts', $plugin_public, 'kontxt_search_type', 10 );
-				$this->loader->add_filter( 'get_search_form', $plugin_public, 'kontxt_search_form' );
-				$this->loader->add_filter( 'get_product_search_form', $plugin_public, 'kontxt_search_form' );
 				$this->loader->add_filter( 'template_include', $plugin_public, 'kontxt_search_template' );
 
 			}
