@@ -189,16 +189,17 @@ class Kontxt_Public {
 			$title      = $wpdb->prefix . "posts.post_title";
 			$content    = $wpdb->prefix . "posts.post_content";
 
-			$where  = " AND ( 
-							( $title REGEXP '" . $lemmas . "' ) OR 
-							( $content REGEXP '" . $lemmas . "' ) 
-						) AND (
-							$type IN ('post', 'page', 'product' )
-						) AND (
-							$status = 'publish'
-						)
-			";
-
+			if( $lemmas ) {
+				$where = " AND ( 
+								( $title REGEXP '" . $lemmas . "' ) OR 
+								( $content REGEXP '" . $lemmas . "' ) 
+							) AND (
+								$type IN ('post', 'page', 'product' )
+							) AND (
+								$status = 'publish'
+							)
+				";
+			}
 		}
 		return $where;
 	}
@@ -217,7 +218,7 @@ class Kontxt_Public {
 		$sortOrder = wp_cache_get( 'kontxt_current_sort' );
 
 		// capture text input actively if search optimization is enabled
-		if( $this->optimizeSearch === 'yes') {
+		if( $this->optimizeSearch === 'yes' && $lemmas ) {
 
 			$orderby = "(
 	                    CASE
