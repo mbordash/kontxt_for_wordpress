@@ -35,6 +35,7 @@ class Kontxt_Deactivator {
 
 		$option_name = 'KONTXT';
 		$api_host    = $kontxt_ini['api_host'];
+		$api_path    = 'site';
 
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
@@ -56,7 +57,7 @@ class Kontxt_Deactivator {
 				'headers' => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get( $api_host, $opts );
+			$response = wp_remote_get( $api_host . '/' . $api_path, $opts );
 
 		}
 	}

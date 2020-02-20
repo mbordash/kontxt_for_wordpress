@@ -14,10 +14,6 @@ KONTXT™ Demand Engine is an AI site analyzer and content & product recommendat
 
 KONTXT™ Demand Engine improves WordPress and WooCommerce search results, and provides both content and product recommendations.  Our plugin operates for both content sites or storefronts and sites with a mix of both blog articles and products.
 
-How does it work? KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer behaviors.
-
-Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customers and plots the major journey points that your customers take across your site.
-
 Features of our WordPress plugin:
 
 * Improved search results including masonry/pinterest styled template (instant on/off control on the KONTXT > Settings page after install)
@@ -27,6 +23,10 @@ Features of our WordPress plugin:
 * Customer intent detection and analysis
 * Tone, Sentiment & Emotional analysis
 * Keyword extraction for Google AdWords optimization
+
+How does it work? KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer behaviors.
+
+Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customers and plots the major journey points that your customers take across your site.
 
 == Installation ==
 

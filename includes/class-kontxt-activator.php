@@ -27,6 +27,7 @@ class Kontxt_Activator {
 
 		$option_name    = 'KONTXT';
 		$api_host       = $kontxt_ini['api_host'];
+		$api_path       = 'site';
 
 		// first check to make sure the KONTXT settings are already set in wordpress options
 		// this is in case the customer de/re activated the plugin and we don't overwrite the uid/key
@@ -58,7 +59,7 @@ class Kontxt_Activator {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($api_host, $opts);
+			$response = wp_remote_get($api_host . '/' . $api_path, $opts);
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -85,16 +86,18 @@ class Kontxt_Activator {
 			$siteName   = get_bloginfo( 'name' );
 			$siteDomain = get_bloginfo( 'url' );
 			$siteEmail  = get_bloginfo( 'admin_email' );
-			$service    = 'reactivate';
+			$service    = 'update';
 
 			// register with KONTXT Site API endpoint
 			$requestBody = array(
+
 				'api_uid'       => $apiUid,
 				'api_key'       => $apiKey,
 				'site_name'     => $siteName,
 				'site_domain'   => $siteDomain,
 				'site_email'    => $siteEmail,
 				'service'       => $service
+
 			);
 
 			$opts = array(
@@ -102,7 +105,7 @@ class Kontxt_Activator {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			wp_remote_get($api_host, $opts);
+			wp_remote_get($api_host . '/' . $api_path, $opts );
 
 			return true;
 

@@ -33,6 +33,7 @@ class Kontxt_Public {
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
+		$this->api_path         = 'analyze';
 		$this->returnInsights   = [];
 
 		$this->optimizeSearch = get_option( $this->option_name . '_optimize_search' );
@@ -646,8 +647,7 @@ class Kontxt_Public {
                 'sslverify' => false
 
 	        );
-	        $response = wp_remote_request( $this->api_host, $args );
-
+	        $response = wp_remote_request( $this->api_host . '/' . $this->api_path, $args );
 
 	        if ( is_array( $response ) && ! is_wp_error( $response ) && $silent === false ) {
 

@@ -32,6 +32,7 @@ class Kontxt_Admin {
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
+		$this->api_path         = 'analyze';
 
 	}
 
@@ -200,7 +201,7 @@ class Kontxt_Admin {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($this->api_host, $opts);
+			$response = wp_remote_get($this->api_host . '/' . $this->api_path, $opts);
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -300,7 +301,7 @@ class Kontxt_Admin {
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
             );
 
-            $response = wp_remote_get($this->api_host, $opts);
+            $response = wp_remote_get($this->api_host . '/' . $this->api_path, $opts);
 
             if( $response['response']['code'] === 200 ) {
 
