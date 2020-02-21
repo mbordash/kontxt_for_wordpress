@@ -28,11 +28,12 @@ class Kontxt_Admin {
 	public function __construct( $plugin_name, $version, $option_name, $api_host )
 	{
 
-		$this->plugin_name      = $plugin_name;
-		$this->version          = $version;
-		$this->option_name      = $option_name;
-		$this->api_host         = $api_host;
-		$this->api_path         = 'analyze';
+		$this->plugin_name          = $plugin_name;
+		$this->version              = $version;
+		$this->option_name          = $option_name;
+		$this->api_host             = $api_host;
+		$this->analyze_api_path     = 'analyze';
+		$this->analytics_api_path   = 'analytics';
 
 	}
 
@@ -201,7 +202,7 @@ class Kontxt_Admin {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($this->api_host . '/' . $this->api_path, $opts);
+			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path, $opts);
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -301,7 +302,7 @@ class Kontxt_Admin {
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
             );
 
-            $response = wp_remote_get($this->api_host . '/' . $this->api_path, $opts);
+            $response = wp_remote_get($this->api_host . '/' . $this->analyze_api_path, $opts);
 
             if( $response['response']['code'] === 200 ) {
 

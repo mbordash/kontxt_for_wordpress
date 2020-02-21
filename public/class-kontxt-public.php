@@ -33,7 +33,7 @@ class Kontxt_Public {
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
-		$this->api_path         = 'analyze';
+		$this->api_path         = 'event';
 		$this->returnInsights   = [];
 
 		$this->optimizeSearch = get_option( $this->option_name . '_optimize_search' );
