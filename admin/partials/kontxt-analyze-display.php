@@ -6,6 +6,8 @@
  * Time: 11:04 PM
  */
 
+$allowed_html = get_option( 'kontxt_allowable_html' );
+
 include_once 'kontxt-banner.php';
 
 ?>
@@ -30,10 +32,14 @@ include_once 'kontxt-banner.php';
 
                         <div class="inside">
 
-                            <h3>KONTXTscore&trade; </h3>
-
-                            Your KONTXTscore is the overall analysis of your visitor sentiment.  Our proprietary algorithm considers all visitor text interaction with your site, including views, search, reviews, and other inbound
-                            text-based communication.
+                            <?php
+                            echo wp_kses(__('
+                                <h3>KONTXTscore&trade;</h3>
+    
+                                Your KONTXTscore is the overall analysis of your visitor sentiment.  Our proprietary algorithm considers all visitor text interaction with your site, including views, search, reviews, and other inbound
+                                text-based communication.
+                                ', 'kontxt'), $allowed_html );
+                            ?>
 
                             <div style="text-align: center">
                                 <div style="display: inline-block">
@@ -41,12 +47,12 @@ include_once 'kontxt-banner.php';
                                     <div id="dashboard_results_chart"></div>
 
                                     Deep analytics:
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_sentiment' ); ?>">Sentiment</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>">Emotion</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>">Semantic Intents</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>">Keywords</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>">Journey</a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_settings' ); ?>">Experiment</a>
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_sentiment' ); ?>"><?php echo __('Sentiment', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>"><?php echo __('Emotion', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>"><?php echo __('Semantic Intents', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>"><?php echo __('Keywords', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>"><?php echo __('Journey', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_settings' ); ?>"><?php echo __('Experiment', 'kontxt' ); ?></a>
 
                                 </div>
                             </div>
@@ -62,12 +68,15 @@ include_once 'kontxt-banner.php';
                     <div class="postbox">
 
                         <div class="inside">
-
-                            <h3>About KONTXT&trade;</h3>
-
-                            <p>KONTXT helps you understand your relationship with your customers in real-time by analyzing how they interact with your
-                                site through both text and journey analytics.  These insights will help you craft better blog articles, product descriptions,
-                                customer care interaction, and keywords used for SEO and external search advertising.</p>
+                            <?php
+                                echo wp_kses(__('
+                                    <h3>About KONTXT&trade;</h3>
+        
+                                    <p>KONTXT helps you understand your relationship with your customers in real-time by analyzing how they interact with your
+                                        site through both text and journey analytics.  These insights will help you craft better blog articles, product descriptions,
+                                        customer care interaction, and keywords used for SEO and external search advertising.</p>
+                                ', 'kontxt'), $allowed_html );
+                            ?>
                         </div>
                     </div>
                 </div>
@@ -78,6 +87,7 @@ include_once 'kontxt-banner.php';
 
     <script>
         jQuery(function($) {
+            "use strict";
             kontxtAnalyze('dashboard');
         });
     </script>

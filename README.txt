@@ -1,10 +1,10 @@
 === KONTXT Demand Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
-Tags: ai, recommendations, search, grid, product, content, personalized, related, reporting, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series
+Tags: search, better search, relevance, promotion, related, seo, related posts, pages, posts, related, similar posts
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.2.0
+Stable tag: 1.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -73,6 +73,9 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 
 == Changelog ==
+
+= 1.2.5 =
+Added a feedback loop for improving search results model
 
 = 1.2.0 =
 Introduced support for bbPress forum events and content analysis

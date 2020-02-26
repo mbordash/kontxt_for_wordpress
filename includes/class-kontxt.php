@@ -33,7 +33,6 @@ class Kontxt {
 	protected $kontxt_ini;
 	protected $stop_words;
 
-
 	/**
 	 * Define the core functionality of the plugin.
 	 *
@@ -58,6 +57,8 @@ class Kontxt {
 
 		$this->define_public_hooks();
 		$this->define_admin_hooks();
+
+		$this->define_allowable_html();
 
 	}
 
@@ -118,6 +119,25 @@ class Kontxt {
 		$plugin_i18n = new Kontxt_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+
+	}
+
+	private function define_allowable_html() {
+
+		$allowed_html = array(
+			'a' => array(
+				'href' => array(),
+				'title' => array(),
+				'target' => array()
+			),
+			'br' => array(),
+			'em' => array(),
+			'strong' => array(),
+			'h3' => array(),
+			'p' => array()
+		);
+
+		add_option( 'kontxt_allowable_html', $allowed_html );
 
 	}
 

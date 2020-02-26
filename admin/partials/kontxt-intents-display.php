@@ -113,6 +113,7 @@ include_once 'kontxt-banner.php';
 
     <script>
         jQuery(function($) {
+            "use strict";
             kontxtAnalyze('intents');
         });
     </script>

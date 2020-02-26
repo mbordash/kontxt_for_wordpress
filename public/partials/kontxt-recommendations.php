@@ -21,7 +21,7 @@ if( class_exists( 'WooCommerce', false )  ) {
 			<input type="checkbox" id="kontxt_recs_showblock">
 			<div id="kontxt_slideout">
 				<label id="kontxt_slideout_tab" for="kontxt_recs_showblock" title="KONTXT Slider">
-					Recommendations
+					<?php echo __( 'Recommendations', 'kontxt' ); ?>
 				</label>
 				<div id="kontxt_slideout_inner">
 					<div id="kontxt_recs_objects"></div>
@@ -44,7 +44,7 @@ if (  !is_admin() && get_post_type() === 'post' ) {
 	    <input type="checkbox" id="kontxt_recs_showblock">
 	    <div id="kontxt_slideout">
 		    <label id="kontxt_slideout_tab" for="kontxt_recs_showblock" title="KONTXT Slider">
-                Recommendations
+			    <?php echo __( 'Recommendations', 'kontxt' ); ?>
 		    </label>
 		    <div id="kontxt_slideout_inner">
 			    <div id="kontxt_recs_objects"></div>

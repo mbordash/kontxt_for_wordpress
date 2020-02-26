@@ -265,15 +265,6 @@ class Kontxt_Public {
 			// request intent prediction from our classifier
 			$intentResults = json_decode( $this->kontxt_send_event( $kontxt_search_query, 'public_event' ) );
 
-			// for reference, this array is unused at present
-			$intentToTypeMap = array(
-				'Discovery'       => 'post',
-				'SolveMyProblem'  => 'post',
-				'BuyNow'          => 'product',
-				'ResearchCompare' => 'product',
-				'CustomerSupport' => 'page'
-			);
-
 			// loop through elements in intentResults and assign a confidence to the WP type
 			// this will provide the values for re-ranking the results based on intent
 			// we will assign the highest confidence for the post type
@@ -337,7 +328,6 @@ class Kontxt_Public {
 
 	}
 
-
 	/**
 	 * @param $data
 	 */
@@ -386,7 +376,6 @@ class Kontxt_Public {
 		$this->kontxt_send_event( $kontxtForumPostArr, 'public_event', null, true );
 
 	}
-
 
 	public function kontxt_cart_capture( ) {
 
@@ -458,6 +447,8 @@ class Kontxt_Public {
 	 */
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 
+		global $wp_query;
+
 		// this captures various event data passively via passing back results to the DOM
 		// for round trip async ticket back to the local API
 
@@ -465,7 +456,7 @@ class Kontxt_Public {
 		$searchQuery    = get_search_query();
 
 		// capture text input passively if search optimization is disabled
-
+		// this is required in order to assess intents and sentiment for analytics
 		if( $this->optimizeSearch !== 'yes') {
 
 			if ( $searchQuery ) {
@@ -489,13 +480,13 @@ class Kontxt_Public {
 				'page_name'     => 'site home',
 				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 			];
-		} elseif( get_post_type() === 'post' ) {
+		} elseif( is_single() && get_post_type() === 'post' ) {
 			$kontxt_user_session['blog_post'] = [
 				'title' => get_the_title(),
 				'id'    => get_the_ID(),
 				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 			];
-		} elseif( get_post_type() === 'page' ) {
+		} elseif( is_single() && get_post_type() === 'page' ) {
 			$kontxt_user_session['site_page'] = [
 				'title' => get_the_title(),
 				'id'    => get_the_ID(),
@@ -509,8 +500,17 @@ class Kontxt_Public {
 			];
 		}
 
+		// let's look for a list/array of results from wp query and send that along with the event
+		// this is useful for search result feedback loop to connect the set returned with the subsequent product viewed
+
+		if( sizeof( wp_list_pluck( $wp_query->posts, 'ID' ) ) > 1 ) {
+
+			$kontxt_user_session['page_result_set'] = wp_list_pluck( $wp_query->posts, 'ID' );
+
+		}
+
 		// get commerce related major actions; check if not search query otherwise we'll get duplicate events
-		if ( !$searchQuery && class_exists( 'WooCommerce', false )  ) {
+		if( !$searchQuery && class_exists( 'WooCommerce', false )  ) {
 
 			if( is_shop() ) {
 
@@ -698,7 +698,8 @@ class Kontxt_Public {
 				            }
 			            }
 
-			            echo  json_encode( $responseBody );
+			            // echo & sanity check in one function
+			            echo wp_json_encode( $responseBody );
 			            die;
 
 		            } else {

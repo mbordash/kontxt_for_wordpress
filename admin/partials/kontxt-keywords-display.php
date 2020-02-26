@@ -6,6 +6,8 @@
  * Time: 11:04 PM
  */
 
+$allowed_html = get_option( 'kontxt_allowable_html' );
+
 include_once 'kontxt-banner.php';
 
 ?>
@@ -16,7 +18,7 @@ include_once 'kontxt-banner.php';
 
     <div id="spinner-analyze" class="spinner is-inactive" style="float: right;"></div>
 
-    <h2>Keywords Extracted</h2>
+    <h2><?php echo __('Keywords Extracted', 'kontxt'); ?></h2>
 
     <div id="keywords" class="inside">
 
@@ -41,13 +43,20 @@ include_once 'kontxt-banner.php';
 
                             <div class="inside">
 
-                                <h3>About</h3>
+                                <?php
 
-                                <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to extract and aggregate every meaningful keyword found within each interaction.
+                                    echo wp_kses(__('
+    
+                                        <h3>About</h3>
+        
+                                        <p>Our machine learning engine analyzes all in-bound customer communication (including search input, product reviews, contact forms) to extract and aggregate every meaningful keyword found within each interaction.
+        
+                                            Use these keywords to optimize your SEO strategy by embedding them in your meta data, blog content, and product descriptions.
+        
+                                            These keywords should also be used to optimize your advertising campaigns on external search platforms.
+                                    ', 'kontxt'), $allowed_html );
 
-                                    Use these keywords to optimize your SEO strategy by embedding them in your meta data, blog content, and product descriptions.
-
-                                    These keywords should also be used to optimize your advertising campaigns on external search platforms.
+                                ?>
 
                                 </p>
                             </div>
@@ -63,6 +72,7 @@ include_once 'kontxt-banner.php';
 
     <script>
         jQuery(function($) {
+            "use strict";
             kontxtAnalyze('keywords');
         });
     </script>

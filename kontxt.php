@@ -9,8 +9,8 @@
  * @wordpress-plugin
  * Plugin Name:       KONTXT Demand Engine
  * Plugin URI:        https://www.kontxt.com
- * Description:       KONTXT™ Demand Engine is an AI-backed content analyzer and recommendation plugin providing valuable insights about your customers’ interactions (search queries, chat dialogs and customer service questions). Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
- * Version:           1.2.0
+ * Description:       KONTXT™ Demand Engine is an AI-backed search and product recommendations plugin providing valuable insights about your customers’ interactions. Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
+ * Version:           1.2.5
  * Author:            RealNetworks KONTXT
  * Author URI:        https://kontxt.com/kontxt-demand-engine-for-retail-2/
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  * The code that runs during plugin activation.
  * This action is documented in includes/class-kontxt-activator.php
  */
-function activate_kontxt() {
+function kontxt_activate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-kontxt-activator.php';
 	Kontxt_Activator::activate();
 }
@@ -37,13 +37,13 @@ function activate_kontxt() {
  * This action is documented in includes/class-kontxt-deactivator.php
  */
 
-function deactivate_kontxt() {
+function kontxt_deactivate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-kontxt-deactivator.php';
 	Kontxt_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_kontxt' );
-register_deactivation_hook( __FILE__, 'deactivate_kontxt' );
+register_activation_hook( __FILE__, 'kontxt_activate' );
+register_deactivation_hook( __FILE__, 'kontxt_deacrivate' );
 
 /**
  * The core plugin class that is used to define internationalization,
