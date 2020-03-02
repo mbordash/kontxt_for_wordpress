@@ -19,7 +19,7 @@ global $wp_query;
                 }
             ?></a>
 
-            <h3 class="alpha entry-title"><a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark"><?php echo get_the_title(); ?> </a></h3>
+            <div class="kontxt-search-result-title"><a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark"><?php echo get_the_title(); ?> </a></div>
 
         </article><!-- #post-## -->
 
@@ -29,7 +29,7 @@ global $wp_query;
 
         <article id="" <?php post_class(); ?>>
 
-            <h2 class="alpha entry-title">No results found.</h2>
+            <div class="alpha entry-title"><?php echo __( 'No results found.', 'kontxt' ); ?></div>
 
         </article><!-- #post-## -->
 

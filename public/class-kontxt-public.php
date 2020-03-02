@@ -33,6 +33,7 @@ class Kontxt_Public {
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
+		$this->api_path         = 'log';
 		$this->returnInsights   = [];
 
 		$this->optimizeSearch = get_option( $this->option_name . '_optimize_search' );
@@ -188,16 +189,17 @@ class Kontxt_Public {
 			$title      = $wpdb->prefix . "posts.post_title";
 			$content    = $wpdb->prefix . "posts.post_content";
 
-			$where  = " AND ( 
-							( $title REGEXP '" . $lemmas . "' ) OR 
-							( $content REGEXP '" . $lemmas . "' ) 
-						) AND (
-							$type IN ('post', 'page', 'product' )
-						) AND (
-							$status = 'publish'
-						)
-			";
-
+			if( $lemmas ) {
+				$where = " AND ( 
+								( $title REGEXP '" . $lemmas . "' ) OR 
+								( $content REGEXP '" . $lemmas . "' ) 
+							) AND (
+								$type IN ('post', 'page', 'product' )
+							) AND (
+								$status = 'publish'
+							)
+				";
+			}
 		}
 		return $where;
 	}
@@ -216,7 +218,7 @@ class Kontxt_Public {
 		$sortOrder = wp_cache_get( 'kontxt_current_sort' );
 
 		// capture text input actively if search optimization is enabled
-		if( $this->optimizeSearch === 'yes') {
+		if( $this->optimizeSearch === 'yes' && $lemmas ) {
 
 			$orderby = "(
 	                    CASE
@@ -262,15 +264,6 @@ class Kontxt_Public {
 
 			// request intent prediction from our classifier
 			$intentResults = json_decode( $this->kontxt_send_event( $kontxt_search_query, 'public_event' ) );
-
-			// for reference, this array is unused at present
-			$intentToTypeMap = array(
-				'Discovery'       => 'post',
-				'SolveMyProblem'  => 'post',
-				'BuyNow'          => 'product',
-				'ResearchCompare' => 'product',
-				'CustomerSupport' => 'page'
-			);
 
 			// loop through elements in intentResults and assign a confidence to the WP type
 			// this will provide the values for re-ranking the results based on intent
@@ -335,7 +328,6 @@ class Kontxt_Public {
 
 	}
 
-
 	/**
 	 * @param $data
 	 */
@@ -384,7 +376,6 @@ class Kontxt_Public {
 		$this->kontxt_send_event( $kontxtForumPostArr, 'public_event', null, true );
 
 	}
-
 
 	public function kontxt_cart_capture( ) {
 
@@ -456,6 +447,8 @@ class Kontxt_Public {
 	 */
 	public function kontxt_capture_session( $kontxt_user_session  = [] ) {
 
+		global $wp_query;
+
 		// this captures various event data passively via passing back results to the DOM
 		// for round trip async ticket back to the local API
 
@@ -463,7 +456,7 @@ class Kontxt_Public {
 		$searchQuery    = get_search_query();
 
 		// capture text input passively if search optimization is disabled
-
+		// this is required in order to assess intents and sentiment for analytics
 		if( $this->optimizeSearch !== 'yes') {
 
 			if ( $searchQuery ) {
@@ -487,13 +480,13 @@ class Kontxt_Public {
 				'page_name'     => 'site home',
 				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 			];
-		} elseif( get_post_type() === 'post' ) {
+		} elseif( is_single() && get_post_type() === 'post' ) {
 			$kontxt_user_session['blog_post'] = [
 				'title' => get_the_title(),
 				'id'    => get_the_ID(),
 				'http_referrer' => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : ''
 			];
-		} elseif( get_post_type() === 'page' ) {
+		} elseif( is_single() && get_post_type() === 'page' ) {
 			$kontxt_user_session['site_page'] = [
 				'title' => get_the_title(),
 				'id'    => get_the_ID(),
@@ -507,8 +500,17 @@ class Kontxt_Public {
 			];
 		}
 
+		// let's look for a list/array of results from wp query and send that along with the event
+		// this is useful for search result feedback loop to connect the set returned with the subsequent product viewed
+
+		if( sizeof( wp_list_pluck( $wp_query->posts, 'ID' ) ) > 1 ) {
+
+			$kontxt_user_session['page_result_set'] = wp_list_pluck( $wp_query->posts, 'ID' );
+
+		}
+
 		// get commerce related major actions; check if not search query otherwise we'll get duplicate events
-		if ( !$searchQuery && class_exists( 'WooCommerce', false )  ) {
+		if( !$searchQuery && class_exists( 'WooCommerce', false )  ) {
 
 			if( is_shop() ) {
 
@@ -629,7 +631,6 @@ class Kontxt_Public {
 		        'api_uid'                => $apiUid,
 		        'api_key'                => $apiKey,
 		        'kontxt_text_to_analyze' => [$eventData],
-		        'service'                => $service,
 		        'request_id'             => $requestId,
 		        'current_user_username'  => $current_user_username,
 		        'current_session_id'     => $current_session,
@@ -646,8 +647,8 @@ class Kontxt_Public {
                 'sslverify' => false
 
 	        );
-	        $response = wp_remote_request( $this->api_host, $args );
 
+	        $response = wp_remote_request( $this->api_host . '/' . $this->api_path . '/' . $service, $args );
 
 	        if ( is_array( $response ) && ! is_wp_error( $response ) && $silent === false ) {
 
@@ -697,7 +698,8 @@ class Kontxt_Public {
 				            }
 			            }
 
-			            echo  json_encode( $responseBody );
+			            // echo & sanity check in one function
+			            echo wp_json_encode( $responseBody );
 			            die;
 
 		            } else {

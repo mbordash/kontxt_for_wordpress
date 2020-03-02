@@ -33,7 +33,6 @@ class Kontxt {
 	protected $kontxt_ini;
 	protected $stop_words;
 
-
 	/**
 	 * Define the core functionality of the plugin.
 	 *
@@ -58,6 +57,8 @@ class Kontxt {
 
 		$this->define_public_hooks();
 		$this->define_admin_hooks();
+
+		$this->define_allowable_html();
 
 	}
 
@@ -121,6 +122,25 @@ class Kontxt {
 
 	}
 
+	private function define_allowable_html() {
+
+		$allowed_html = array(
+			'a' => array(
+				'href' => array(),
+				'title' => array(),
+				'target' => array()
+			),
+			'br' => array(),
+			'em' => array(),
+			'strong' => array(),
+			'h3' => array(),
+			'p' => array()
+		);
+
+		add_option( 'kontxt_allowable_html', $allowed_html );
+
+	}
+
 	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
@@ -142,6 +162,9 @@ class Kontxt {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page' );
 
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
+
+		// Register plugin for Gutenberg SEO panel
+		$this->loader->add_action( 'enqueue_block_editor_assets', $plugin_admin, 'register_kontxt_seo_block' );
 
     }
 

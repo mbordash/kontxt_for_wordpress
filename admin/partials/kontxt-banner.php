@@ -6,7 +6,8 @@
  * Time: 11:04 PM
  */
 
-$optin = get_option( $this->option_name . '_optin' );
+$optin        = get_option( $this->option_name . '_optin' );
+$allowed_html = get_option( 'kontxt_allowable_html' );
 
 if( $optin === 'no' || $optin === false || !$optin || !isset($optin) || $optin === '' ) {
 	?>
@@ -15,7 +16,11 @@ if( $optin === 'no' || $optin === false || !$optin || !isset($optin) || $optin =
 
     <div class="notice notice-info is-dismissible inline">
         <p>
-            In order for KONTXT to function properly, you must opt-in to our services. Please visit the <a href="<?php echo admin_url( 'admin.php?page=kontxt_settings' ); ?>">KONTXT settings page</a> to opt-in.
+            <?php
+                echo wp_kses(__('
+                    In order for KONTXT to function properly, you must opt-in to our services. Please visit the <a href="' . admin_url( 'admin.php?page=kontxt_settings' ) . '">KONTXT settings page</a> to opt-in.
+                ', 'kontxt'), $allowed_html );
+            ?>
         </p>
     </div>
 
@@ -23,5 +28,3 @@ if( $optin === 'no' || $optin === false || !$optin || !isset($optin) || $optin =
 
 }
 ?>
-
-<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=1880329&conversionId=1851474&fmt=gif" />

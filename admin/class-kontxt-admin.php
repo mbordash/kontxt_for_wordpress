@@ -28,10 +28,12 @@ class Kontxt_Admin {
 	public function __construct( $plugin_name, $version, $option_name, $api_host )
 	{
 
-		$this->plugin_name      = $plugin_name;
-		$this->version          = $version;
-		$this->option_name      = $option_name;
-		$this->api_host         = $api_host;
+		$this->plugin_name          = $plugin_name;
+		$this->version              = $version;
+		$this->option_name          = $option_name;
+		$this->api_host             = $api_host;
+		$this->analyze_api_path     = 'analyze';
+		$this->analytics_api_path   = 'analytics';
 
 	}
 
@@ -81,7 +83,8 @@ class Kontxt_Admin {
 
         wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-admin-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
-        $kontxt_local_arr = array(
+
+		$kontxt_local_arr = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
             'apikey'    => get_option( $this->option_name . '_apikey' ),
@@ -90,13 +93,31 @@ class Kontxt_Admin {
 
         wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
 
-		wp_enqueue_script( $this->plugin_name);
+		wp_enqueue_script( $this->plugin_name );
 
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 
+		// CEO panel for Gutenberg editor
+
 	}
+
+	/**
+	 * Register Kontxt SEO panel for Gutenberg block editor
+	 */
+	public function register_kontxt_seo_block() {
+
+		wp_register_script(
+			$this->plugin_name . '_sidebar',
+			plugins_url( 'js/kontxt-admin-panel/build/index.js', __FILE__ ),
+			array( 'wp-plugins', 'wp-edit-post', 'wp-i18n', 'wp-element', 'wp-components', 'wp-compose' )
+		);
+
+		wp_enqueue_script( $this->plugin_name . '_sidebar' );
+
+	}
+
 
 	/**
 	 * Handle retrieval of analytics results
@@ -119,7 +140,8 @@ class Kontxt_Admin {
 	        	$filter = null;
 	        }
 
-		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $filter );
+	        // echo already sanity checked and encoded results
+		    echo $this->kontxt_get_results( $_POST['dimension'], $_POST['from_date'], $_POST['to_date'], $filter ) ;
 
 	    }
 
@@ -155,6 +177,7 @@ class Kontxt_Admin {
 		if ( isset( $dimension ) && $dimension !== '' ) {
 
 			$dimension = sanitize_text_field( $dimension );
+			$service = 'events';
 
 			// get current user info, if no user, set as session
 
@@ -172,7 +195,6 @@ class Kontxt_Admin {
 			$requestBody = array (
                 'api_uid'                   => $apiUid,
                 'api_key'                   => $apiKey,
-                'service'                   => 'events',
                 'event_type'                => $dimension,
                 'current_user_username'     => $current_user_username,
                 'current_session_id'        => $current_session,
@@ -194,13 +216,12 @@ class Kontxt_Admin {
 				$requestBody['to_date'] = $to_date;
 			}
 
-
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($this->api_host, $opts);
+			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path . '/' . $service, $opts);
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -211,7 +232,7 @@ class Kontxt_Admin {
 				$response_array['status'] = "error";
 				$response_array['message'] = "Plugin Error. Could not get event data. Code received: " . $response['response']['code'];
 
-				return json_encode($response_array);
+				return wp_json_encode( $response_array );
 
 			}
 		}
@@ -228,6 +249,8 @@ class Kontxt_Admin {
     public function kontxt_process_text()
     {
 
+    	$requestId = null;
+
         if (!current_user_can('manage_options')) {
             wp_die('You are not allowed to be on this page.');
         }
@@ -236,11 +259,15 @@ class Kontxt_Admin {
 
         if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
 
-            //header('Content-type: application/json');
+	        if ( isset( $_POST['request_id'] ) ) {
+		        $requestId = (string)  $_POST['request_id'];
+	        }
+
+            // echo already sanity checked json
             echo $this->kontxt_cognitive(
 	            sanitize_text_field( $_POST['kontxt_text_to_analyze'] ),
 	            sanitize_text_field( $_POST['service'] ),
-	            sanitize_text_field( $_POST['request_id'] )
+	            sanitize_text_field( $requestId )
             );
         }
 
@@ -287,7 +314,6 @@ class Kontxt_Admin {
                     'api_uid'                   => $apiUid,
                     'api_key'                   => $apiKey,
                     'kontxt_text_to_analyze'    => $textToAnalyze,
-                    'service'                   => $service,
                     'request_id'                => $requestId,
                     'current_user_username'     => $current_user_username,
                     'current_session_id'        => $current_session,
@@ -300,7 +326,7 @@ class Kontxt_Admin {
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
             );
 
-            $response = wp_remote_get($this->api_host, $opts);
+            $response = wp_remote_get($this->api_host . '/' . $this->analyze_api_path . '/' . $service , $opts);
 
             if( $response['response']['code'] === 200 ) {
 
@@ -311,7 +337,7 @@ class Kontxt_Admin {
                 $response_array['status'] = "error";
                 $response_array['message'] = "Plugin Error. Something went wrong with this request. Code received: " . $response['response']['code'];
 
-                return json_encode($response_array);
+                return wp_json_encode($response_array);
 
             }
         }
@@ -327,9 +353,11 @@ class Kontxt_Admin {
 	public function add_management_page()
 	{
 
+		$allowed_html = get_option( 'kontxt_allowable_html' );
+
 		$this->plugin_screen_hook_suffix = add_menu_page(
-			__( 'KONTXT', 'kontxt' ),
-			__( 'KONTXT', 'kontxt' ),
+			wp_kses(__( 'KONTXT', 'kontxt' ), $allowed_html ),
+			wp_kses(__( 'KONTXT', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' ),
@@ -339,8 +367,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'Dashboard', 'kontxt' ),
-			__( 'Dashboard', 'kontxt' ),
+			wp_kses(__( 'Dashboard', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Dashboard', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_analyze_page' )
@@ -348,8 +376,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Journey Analytics', 'kontxt' ),
-			__( 'Journey', 'kontxt' ),
+			wp_kses(__( 'KONTXT Journey Analytics', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Journey', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_journey",
 			array( $this, 'display_journey_page' )
@@ -357,8 +385,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Sentiment', 'kontxt' ),
-			__( 'Sentiment', 'kontxt' ),
+			wp_kses(__( 'KONTXT Sentiment', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Sentiment', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_sentiment",
 			array( $this, 'display_sentiment_page' )
@@ -366,8 +394,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Emotion', 'kontxt' ),
-			__( 'Emotion', 'kontxt' ),
+			wp_kses(__( 'KONTXT Emotion', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Emotion', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_emotion",
 			array( $this, 'display_emotion_page' )
@@ -375,8 +403,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Intents', 'kontxt' ),
-			__( 'Intents', 'kontxt' ),
+			wp_kses(__( 'KONTXT Intents', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Intents', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_intents",
 			array( $this, 'display_intents_page' )
@@ -384,8 +412,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Keywords', 'kontxt' ),
-			__( 'Keywords', 'kontxt' ),
+			wp_kses(__( 'KONTXT Keywords', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Keywords', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_keywords",
 			array( $this, 'display_keywords_page' )
@@ -393,8 +421,8 @@ class Kontxt_Admin {
 
 		$this->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_name,
-			__( 'KONTXT Settings', 'kontxt' ),
-			__( 'Settings', 'kontxt' ),
+			wp_kses(__( 'KONTXT Settings', 'kontxt' ), $allowed_html ),
+            wp_kses(__( 'Settings', 'kontxt' ), $allowed_html ),
 			'manage_options',
 			$this->plugin_name . "_settings",
 			array( $this, 'display_options_page' )
@@ -490,16 +518,18 @@ class Kontxt_Admin {
     public function register_setting()
     {
 
+	    $allowed_html = get_option( 'kontxt_allowable_html' );
+
         add_settings_section(
             $this->option_name . '_general',
-            __( '', 'kontxt' ),
+	        wp_kses(__( '', 'kontxt' ), $allowed_html ),
             array( $this, $this->option_name . '_general_cb' ),
             $this->plugin_name
         );
 
 	    add_settings_field(
 		    $this->option_name . '_optin',
-		    __( 'Opt-in to site traffic analysis from KONTXT?', 'kontxt' ),
+		    wp_kses(__( 'Opt-in to site traffic analysis from KONTXT?', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_optin_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
@@ -508,7 +538,7 @@ class Kontxt_Admin {
 
 	    add_settings_field(
 		    $this->option_name . '_apiuid',
-		    __( 'API User ID', 'kontxt' ),
+		    wp_kses(__( 'API User ID', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_apiuid_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
@@ -517,7 +547,7 @@ class Kontxt_Admin {
 
         add_settings_field(
             $this->option_name . '_apikey',
-            __( 'API Key', 'kontxt' ),
+	        wp_kses(__( 'API Key', 'kontxt' ), $allowed_html ),
             array( $this, $this->option_name . '_apikey_cb' ),
             $this->plugin_name,
             $this->option_name . '_general',
@@ -526,7 +556,7 @@ class Kontxt_Admin {
 
 	    add_settings_field(
 		    $this->option_name . '_email',
-		    __( 'Contact Email', 'kontxt' ),
+		    wp_kses(__( 'Contact Email', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_email_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
@@ -535,7 +565,7 @@ class Kontxt_Admin {
 
 	    add_settings_field(
 		    $this->option_name . '_product_recs',
-		    __( 'Activate recommendations block?', 'kontxt' ),
+		    wp_kses(__( 'Activate recommendations block?', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_recs_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
@@ -544,7 +574,7 @@ class Kontxt_Admin {
 
 	    add_settings_field(
 		    $this->option_name . '_optimize_search',
-		    __( 'Optimize search results?', 'kontxt' ),
+		    wp_kses(__( 'Optimize search results?', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_optimize_search_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',
@@ -580,18 +610,20 @@ class Kontxt_Admin {
 	public function kontxt_optimize_search_cb() {
 
 		$optimizeSearch = get_option( $this->option_name . '_optimize_search' );
+		$allowed_html = get_option( 'kontxt_allowable_html' );
 
-		?>
-        <p>If enabled, KONTXT machine learning will attempt to optimize search results using semantic intent detection.</p>
+		echo wp_kses( __('<p>If enabled, KONTXT machine learning will attempt to optimize search results using semantic intent detection & lemmas.</p>', 'kontxt' ), $allowed_html );
+
+        ?>
 
         <fieldset>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_optimize_search' ?>" id="<?php echo $this->option_name . '_optimize_search' ?>" value="yes" <?php checked( $optimizeSearch, 'yes' ); ?>>
+                <input type="radio" name="<?php echo __( $this->option_name . '_optimize_search', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_optimize_search', 'kontxt' );  ?>" value="yes" <?php checked( $optimizeSearch, 'yes' ); ?>>
 				<?php _e( 'Yes', 'kontxt' ); ?>
             </label>
             <br />
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_optimize_search' ?>" value="no" <?php checked( $optimizeSearch, 'no' ); ?>>
+                <input type="radio" name="<?php echo __( $this->option_name . '_optimize_search', 'kontxt' ); ?>" value="no" <?php checked( $optimizeSearch, 'no' ); ?>>
 				<?php _e( 'No', 'kontxt' ); ?>
             </label>
         </fieldset>
@@ -612,12 +644,12 @@ class Kontxt_Admin {
 
         <fieldset>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_optin' ?>" id="<?php echo $this->option_name . '_optin' ?>" value="yes" <?php checked( $optin, 'yes' ); ?>>
+                <input type="radio" name="<?php echo __( $this->option_name . '_optin', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_optin', 'kontxt' ); ?>" value="yes" <?php checked( $optin, 'yes' ); ?>>
 				<?php _e( 'Yes', 'kontxt' ); ?>
             </label>
             <br />
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_optin' ?>" value="no" <?php checked( $optin, 'no' ); ?>>
+                <input type="radio" name="<?php echo __( $this->option_name . '_optin', 'kontxt' ); ?>" value="no" <?php checked( $optin, 'no' ); ?>>
 				<?php _e( 'No', 'kontxt' ); ?>
             </label>
         </fieldset>
@@ -634,6 +666,7 @@ class Kontxt_Admin {
 
 		$prodRecs       = get_option( $this->option_name . '_product_recs' );
 		$contentRecs    = get_option( $this->option_name . '_content_recs' );
+		$allowed_html   = get_option( 'kontxt_allowable_html' );
 
 		?>
 
@@ -641,21 +674,21 @@ class Kontxt_Admin {
 
 		<fieldset>
 			<label>
-				<input type="checkbox" name="<?php echo $this->option_name . '_product_recs' ?>" id="<?php echo $this->option_name . '_product_recs' ?>" value="yes" <?php checked( $prodRecs, 'yes' ); ?>>
+				<input type="checkbox" name="<?php echo __( $this->option_name . '_product_recs', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_product_recs', 'kontxt' ); ?>" value="yes" <?php checked( $prodRecs, 'yes' ); ?>>
 				<?php _e( 'Product recommendations (for WooCommerce stores)', 'kontxt' ); ?>
 			</label>
 			<br />
 			<label>
-				<input type="checkbox" name="<?php echo $this->option_name . '_content_recs' ?>" id="<?php echo $this->option_name . '_content_recs' ?>" value="yes" <?php checked( $contentRecs, 'yes' ); ?>>
+				<input type="checkbox" name="<?php echo __( $this->option_name . '_content_recs', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_content_recs', 'kontxt' ); ?>" value="yes" <?php checked( $contentRecs, 'yes' ); ?>>
 				<?php _e( 'Content recommendations (for Wordress blog articles)', 'kontxt' ); ?>
 			</label>
 
 		</fieldset>
 
-        <p>Depending on the volume of your traffic,
-        it may take a few hours or days before KONTXT machine learning determines recommendations for your visitors.</p>
-
 		<?php
+
+		echo wp_kses( __('<p>Depending on the volume of your traffic, it may take a few hours or days before KONTXT machine learning determines recommendations for your visitors.</p>', 'kontxt' ), $allowed_html );
+
 	}
 
 	/**
@@ -666,13 +699,14 @@ class Kontxt_Admin {
 	public function kontxt_email_cb()
 	{
 
-		$email = get_option( $this->option_name . '_email' );
+		$email          = get_option( $this->option_name . '_email' );
+		$allowed_html   = get_option( 'kontxt_allowable_html' );
 
 		?>
 
         <fieldset>
             <label>
-                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_email' ?>" id="<?php echo $this->option_name . '_email' ?>" value="<?php echo $email; ?>">
+                <input class="regular-text" type="text" name="<?php echo __( $this->option_name . '_email', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_email', 'kontxt' ); ?>" value="<?php echo wp_kses( __( $email, 'kontxt' ), $allowed_html ) ?>">
             </label>
         </fieldset>
 
@@ -689,12 +723,13 @@ class Kontxt_Admin {
     {
 
         $apikey = get_option( $this->option_name . '_apikey' );
+	    $allowed_html   = get_option( 'kontxt_allowable_html' );
 
         ?>
 
         <fieldset>
             <label>
-                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_apikey' ?>" id="<?php echo $this->option_name . '_apikey' ?>" value="<?php echo $apikey; ?>" readonly>
+                <input class="regular-text" type="text" name="<?php echo __( $this->option_name . '_apikey', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_apikey', 'kontxt' ); ?>" value="<?php echo wp_kses( __( $apikey, 'kontxt' ), $allowed_html ) ?>" readonly>
             </label>
         </fieldset>
 
@@ -711,12 +746,13 @@ class Kontxt_Admin {
 	{
 
 		$apiuid = get_option( $this->option_name . '_apiuid' );
+		$allowed_html   = get_option( 'kontxt_allowable_html' );
 
 		?>
 
         <fieldset>
             <label>
-                <input class="regular-text" type="text" name="<?php echo $this->option_name . '_apiuid' ?>" id="<?php echo $this->option_name . '_apiuid' ?>" value="<?php echo $apiuid; ?>" readonly>
+                <input class="regular-text" type="text" name="<?php echo __( $this->option_name . '_apiuid', 'kontxt' );  ?>" id="<?php echo __( $this->option_name . '_apiuid', 'kontxt' ); ?>" value="<?php echo wp_kses( __( $apiuid, 'kontxt' ), $allowed_html ) ?>" readonly>
             </label>
         </fieldset>
 
