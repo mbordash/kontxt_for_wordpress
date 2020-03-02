@@ -1,10 +1,10 @@
 === KONTXT Demand Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
-Tags: ai, recommendations, search, grid, product, content, personalized, related, reporting, woocommerce, analytics, search, seo, automatic, cognitive, article, admin, post, ai, machine learning, content, intent, sentiment, time series
+Tags: search, seo, relevance, woocommerce, admin, promotion, related, related posts, pages, posts, related, similar posts
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.2.0
+Stable tag: 1.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -14,12 +14,9 @@ KONTXT™ Demand Engine is an AI site analyzer and content & product recommendat
 
 KONTXT™ Demand Engine improves WordPress and WooCommerce search results, and provides both content and product recommendations.  Our plugin operates for both content sites or storefronts and sites with a mix of both blog articles and products.
 
-How does it work? KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer behaviors.
-
-Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customers and plots the major journey points that your customers take across your site.
-
 Features of our WordPress plugin:
 
+* NEW! SEO tag generator for your blog articles (compatible with Gutenberg block editor)
 * Improved search results including masonry/pinterest styled template (instant on/off control on the KONTXT > Settings page after install)
 * Content and product recommendations widget (instant on/off control on the KONTXT > Settings page after install)
 * Supports language understanding for core Wordpress functionality as well as popular plugins: WooCommerce, bbPress, Contact Form 7, and Gravity Forms
@@ -27,6 +24,10 @@ Features of our WordPress plugin:
 * Customer intent detection and analysis
 * Tone, Sentiment & Emotional analysis
 * Keyword extraction for Google AdWords optimization
+
+How does it work? KONTXT™ Demand Engine analyzes all search queries and customer’s interactions with your site and predicts their semantic intent ("why are they on your site and what do they really want?"). It also applies advanced parts-of-speech and semantic slot filling techniques to identify the main elements of your customer behaviors.
+
+Moreover, it detects the emotional content for each interaction enabling you to analyze your brand’s connection with your customers and plots the major journey points that your customers take across your site.
 
 == Installation ==
 
@@ -71,8 +72,16 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 5. Sentiment Analytics :: deep insights on how your brand connects with your visitors
 
+6. Keyword tag generator for SEO
+
 
 == Changelog ==
+
+= 1.3.0 =
+New tag generator for blog articles compatible with Gutenberg block editor
+
+= 1.2.5 =
+Added a feedback loop for improving search results model
 
 = 1.2.0 =
 Introduced support for bbPress forum events and content analysis

@@ -1,5 +1,7 @@
 jQuery(function($) {
 
+    "use strict";
+
     // check for events (viewProductID, pageID, searchText, reviewTextPresent )
     // loop through API calls to cognitive
 
@@ -16,14 +18,14 @@ jQuery(function($) {
     if( document.getElementById( 'kontxt_product_recs' ) !== null ) {
 
         recsType = '#kontxt_product_recs';
-        data['return_insights'] = 'productRecs';
+        data.return_insights = 'productRecs';
 
     }
 
     if( document.getElementById( 'kontxt_content_recs' ) !== null ) {
 
         recsType = '#kontxt_content_recs';
-        data['return_insights'] = 'contentRecs';
+        data.return_insights = 'contentRecs';
 
     }
 
@@ -31,7 +33,7 @@ jQuery(function($) {
 
         type: 'post',
         url: kontxtAjaxObject.ajaxurl,
-        security: kontxtAjaxObject['security'],
+        security: kontxtAjaxObject.security,
         data: jQuery.param( data ),
         action: 'kontxt_send_event',
         cache: false,
@@ -52,15 +54,15 @@ jQuery(function($) {
                     if( recsType === '#kontxt_product_recs' ) {
 
                         recsList = '<ul class="product_list_widget">';
-                        counter = 0;
+                        let counter = 0;
 
                         for (let item in jsonResponse) {
 
                             counter++;
 
                             recsList += '<li>' +
-                                '<span class="product-title"><a class="woocommerce-LoopProduct-link woocommerce-loop-product__link" href="' + jsonResponse[item]['item_url'] + '">' + jsonResponse[item]['item_image'] +
-                                '' + jsonResponse[item]['item_name'] + '</span></a>' +
+                                '<span class="product-title"><a class="woocommerce-LoopProduct-link woocommerce-loop-product__link" href="' + jsonResponse[item].item_url + '">' + jsonResponse[item].item_image +
+                                '' + jsonResponse[item].item_name + '</span></a>' +
                                 '</li>';
                             if (counter >= 3) {
                                 break;
@@ -74,14 +76,14 @@ jQuery(function($) {
                     if( recsType === '#kontxt_content_recs' ) {
 
                         recsList = '<div><ul class="kontxt_content_recs">';
-                        counter = 0;
+                        let counter = 0;
 
                         for (let item in jsonResponse) {
 
                             counter++;
 
                             recsList += '<li>' +
-                                '<a aria-current="page" href="' + jsonResponse[item]['item_url'] + '">' + jsonResponse[item]['item_name'] + '</a>' +
+                                '<a aria-current="page" href="' + jsonResponse[item].item_url + '">' + jsonResponse[item].item_name + '</a>' +
                                 '</li>';
                             if (counter >= 3) {
                                 break;
