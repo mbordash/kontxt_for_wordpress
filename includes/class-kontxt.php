@@ -163,6 +163,9 @@ class Kontxt {
 
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
 
+		// Register plugin for Gutenberg SEO panel
+		$this->loader->add_action( 'enqueue_block_editor_assets', $plugin_admin, 'register_kontxt_seo_block' );
+
     }
 
 	/**

@@ -51,7 +51,6 @@ class Kontxt_Activator {
 				'site_name'                 => $siteName,
 				'site_domain'               => $siteDomain,
 				'site_email'                => $siteEmail,
-				'service'                   => $service
 			);
 
 			$opts = array(
@@ -59,7 +58,7 @@ class Kontxt_Activator {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($api_host . '/' . $api_path, $opts);
+			$response = wp_remote_get($api_host . '/' . $api_path . '/' . $service, $opts );
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -95,9 +94,7 @@ class Kontxt_Activator {
 				'api_key'       => $apiKey,
 				'site_name'     => $siteName,
 				'site_domain'   => $siteDomain,
-				'site_email'    => $siteEmail,
-				'service'       => $service
-
+				'site_email'    => $siteEmail
 			);
 
 			$opts = array(
@@ -105,7 +102,7 @@ class Kontxt_Activator {
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			wp_remote_get($api_host . '/' . $api_path, $opts );
+			wp_remote_get($api_host . '/' . $api_path . '/' . $service, $opts );
 
 			return true;
 

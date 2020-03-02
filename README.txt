@@ -1,10 +1,10 @@
 === KONTXT Demand Engine ===
 Contributors: mbordash, imijic, smelucci, jmmurray
-Tags: search, better search, relevance, promotion, related, seo, related posts, pages, posts, related, similar posts
+Tags: search, seo, relevance, woocommerce, admin, promotion, related, related posts, pages, posts, related, similar posts
 Requires at least: 4.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.2.5
+Stable tag: 1.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -16,6 +16,7 @@ KONTXT™ Demand Engine improves WordPress and WooCommerce search results, and p
 
 Features of our WordPress plugin:
 
+* NEW! SEO tag generator for your blog articles (compatible with Gutenberg block editor)
 * Improved search results including masonry/pinterest styled template (instant on/off control on the KONTXT > Settings page after install)
 * Content and product recommendations widget (instant on/off control on the KONTXT > Settings page after install)
 * Supports language understanding for core Wordpress functionality as well as popular plugins: WooCommerce, bbPress, Contact Form 7, and Gravity Forms
@@ -71,8 +72,13 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 5. Sentiment Analytics :: deep insights on how your brand connects with your visitors
 
+6. Keyword tag generator for SEO
+
 
 == Changelog ==
+
+= 1.3.0 =
+New tag generator for blog articles compatible with Gutenberg block editor
 
 = 1.2.5 =
 Added a feedback loop for improving search results model

@@ -83,7 +83,8 @@ class Kontxt_Admin {
 
         wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/kontxt-admin-functions.js', array( 'jquery', 'wp-rich-text', 'wp-element', 'wp-rich-text' ), $this->version, true );
 
-        $kontxt_local_arr = array(
+
+		$kontxt_local_arr = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'security'  => wp_create_nonce( 'kontxt-ajax-string' ),
             'apikey'    => get_option( $this->option_name . '_apikey' ),
@@ -92,13 +93,31 @@ class Kontxt_Admin {
 
         wp_localize_script( $this->plugin_name, 'kontxtAjaxObject', $kontxt_local_arr );
 
-		wp_enqueue_script( $this->plugin_name);
+		wp_enqueue_script( $this->plugin_name );
 
 		wp_enqueue_script( $this->plugin_name . '-plotly', plugin_dir_url( __FILE__ ) . 'js/plotly.min.js', null, $this->version, true );
         wp_enqueue_script( 'jquery-ui-dialog' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 
+		// CEO panel for Gutenberg editor
+
 	}
+
+	/**
+	 * Register Kontxt SEO panel for Gutenberg block editor
+	 */
+	public function register_kontxt_seo_block() {
+
+		wp_register_script(
+			$this->plugin_name . '_sidebar',
+			plugins_url( 'js/kontxt-admin-panel/build/index.js', __FILE__ ),
+			array( 'wp-plugins', 'wp-edit-post', 'wp-i18n', 'wp-element', 'wp-components', 'wp-compose' )
+		);
+
+		wp_enqueue_script( $this->plugin_name . '_sidebar' );
+
+	}
+
 
 	/**
 	 * Handle retrieval of analytics results
@@ -158,6 +177,7 @@ class Kontxt_Admin {
 		if ( isset( $dimension ) && $dimension !== '' ) {
 
 			$dimension = sanitize_text_field( $dimension );
+			$service = 'events';
 
 			// get current user info, if no user, set as session
 
@@ -175,7 +195,6 @@ class Kontxt_Admin {
 			$requestBody = array (
                 'api_uid'                   => $apiUid,
                 'api_key'                   => $apiKey,
-                'service'                   => 'events',
                 'event_type'                => $dimension,
                 'current_user_username'     => $current_user_username,
                 'current_session_id'        => $current_session,
@@ -197,13 +216,12 @@ class Kontxt_Admin {
 				$requestBody['to_date'] = $to_date;
 			}
 
-
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded'
 			);
 
-			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path, $opts);
+			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path . '/' . $service, $opts);
 
 			if( $response['response']['code'] === 200 ) {
 
@@ -231,6 +249,8 @@ class Kontxt_Admin {
     public function kontxt_process_text()
     {
 
+    	$requestId = null;
+
         if (!current_user_can('manage_options')) {
             wp_die('You are not allowed to be on this page.');
         }
@@ -239,11 +259,15 @@ class Kontxt_Admin {
 
         if ( isset( $_POST['kontxt_text_to_analyze'] ) && $_POST['kontxt_text_to_analyze'] !== '' ) {
 
+	        if ( isset( $_POST['request_id'] ) ) {
+		        $requestId = (string)  $_POST['request_id'];
+	        }
+
             // echo already sanity checked json
             echo $this->kontxt_cognitive(
 	            sanitize_text_field( $_POST['kontxt_text_to_analyze'] ),
 	            sanitize_text_field( $_POST['service'] ),
-	            sanitize_text_field( $_POST['request_id'] )
+	            sanitize_text_field( $requestId )
             );
         }
 
@@ -290,7 +314,6 @@ class Kontxt_Admin {
                     'api_uid'                   => $apiUid,
                     'api_key'                   => $apiKey,
                     'kontxt_text_to_analyze'    => $textToAnalyze,
-                    'service'                   => $service,
                     'request_id'                => $requestId,
                     'current_user_username'     => $current_user_username,
                     'current_session_id'        => $current_session,
@@ -303,7 +326,7 @@ class Kontxt_Admin {
                 'headers'   => 'Content-type: application/x-www-form-urlencoded'
             );
 
-            $response = wp_remote_get($this->api_host . '/' . $this->analyze_api_path, $opts);
+            $response = wp_remote_get($this->api_host . '/' . $this->analyze_api_path . '/' . $service , $opts);
 
             if( $response['response']['code'] === 200 ) {
 

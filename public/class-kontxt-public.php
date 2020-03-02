@@ -33,7 +33,7 @@ class Kontxt_Public {
 		$this->version          = $version;
 		$this->option_name      = $option_name;
 		$this->api_host         = $api_host;
-		$this->api_path         = 'event';
+		$this->api_path         = 'log';
 		$this->returnInsights   = [];
 
 		$this->optimizeSearch = get_option( $this->option_name . '_optimize_search' );
@@ -631,7 +631,6 @@ class Kontxt_Public {
 		        'api_uid'                => $apiUid,
 		        'api_key'                => $apiKey,
 		        'kontxt_text_to_analyze' => [$eventData],
-		        'service'                => $service,
 		        'request_id'             => $requestId,
 		        'current_user_username'  => $current_user_username,
 		        'current_session_id'     => $current_session,
@@ -648,7 +647,8 @@ class Kontxt_Public {
                 'sslverify' => false
 
 	        );
-	        $response = wp_remote_request( $this->api_host . '/' . $this->api_path, $args );
+
+	        $response = wp_remote_request( $this->api_host . '/' . $this->api_path . '/' . $service, $args );
 
 	        if ( is_array( $response ) && ! is_wp_error( $response ) && $silent === false ) {
 
