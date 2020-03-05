@@ -44,14 +44,6 @@ include_once 'kontxt-banner.php';
                     </select>
 
                     <input id="kontxt-intent-filter" class="button-primary" type="submit" value="Filter " />
-                    <!--
-                    <select id="overlay" name="overlay" style="vertical-align: top;">
-                        <option selected value="">No overlay</option>
-                        <option value="intents">Intents</option>
-                    </select>
-
-                    <input id="kontxt-intent-overlay" class="button-primary" type="submit" value="Overlay " />
-                    -->
 
                 </div>
 

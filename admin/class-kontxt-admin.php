@@ -680,7 +680,7 @@ class Kontxt_Admin {
 			<br />
 			<label>
 				<input type="checkbox" name="<?php echo __( $this->option_name . '_content_recs', 'kontxt' ); ?>" id="<?php echo __( $this->option_name . '_content_recs', 'kontxt' ); ?>" value="yes" <?php checked( $contentRecs, 'yes' ); ?>>
-				<?php _e( 'Content recommendations (for Wordress blog articles)', 'kontxt' ); ?>
+				<?php _e( 'Content recommendations (for WordPress blog articles)', 'kontxt' ); ?>
 			</label>
 
 		</fieldset>

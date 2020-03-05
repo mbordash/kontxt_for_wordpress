@@ -67,11 +67,12 @@ jQuery(function($) {
         let dimension =  jQuery( '#dimension' ).val();
         let date_from =  jQuery( '#date_from' ).val();
         let date_to =  jQuery( '#date_to' ).val();
+        let filter = jQuery( '#filter').val();
 
         if( dimension === 'journey' ) {
-            kontxtJourney(date_from, date_to);
+            kontxtJourney('journeyEvents', date_from, date_to, filter);
         } else {
-            kontxtAnalyze(dimension, date_from, date_to);
+            kontxtAnalyze(dimension, date_from, date_to, filter );
         }
     });
 
@@ -120,179 +121,38 @@ jQuery(function($) {
         }
 
         if( filter ) {
-            kontxtFilter(filter, date_from, date_to);
+
+            switch (dimension) {
+
+                case "sentiment":
+                    kontxtAnalyze( 'sentimentByIntent', date_from, date_to, filter );
+                    break;
+
+                case "journey":
+                    kontxtJourney( 'journeyEventsByIntent', date_from, date_to, filter );
+                    break;
+
+            }
+
         } else {
-            kontxtAnalyze( dimension, date_from, date_to);
+            switch (dimension) {
+
+                case "journey":
+                    kontxtJourney('journeyEvents', date_from, date_to, filter);
+                    break;
+
+                default:
+                    kontxtAnalyze(dimension, date_from, date_to);
+                    break;
+            }
+
         }
     });
 
 });
 
-function kontxtFilter( filter, date_from, date_to ) {
 
-    "use strict";
-
-    let data = jQuery.param({
-        'action':       'kontxt_analyze_results',
-        'apikey':       kontxtAjaxObject.apikey,
-        'dimension':    'sentimentByIntent',
-        'filter':       filter,
-        'from_date':    date_from,
-        'to_date':      date_to
-    });
-
-    let security = kontxtAjaxObject.security;
-
-    jQuery.ajax({
-        type: 'post',
-        url: kontxtAjaxObject.ajaxurl,
-        security: security,
-        data: data,
-        cache: false,
-        success: function (response) {
-
-            if ( response.status === 'error' ) {
-                jQuery('#kontxt-analyze-results-status').html(response.message).show();
-                return false;
-            }
-
-            let jsonResponse = JSON.parse(response);
-
-            let eventDates = jsonResponse.map(function (e) {
-                return Date.parse(e.event_date);
-            });
-
-            let eventValues = jsonResponse.map(function (e) {
-                return e.event_value;
-            });
-
-            let data2 = [];
-            let layout2;
-            let contentTable;
-
-            data2 = [{
-                type: 'scatter',
-                fill: 'tozeroy',
-                y: eventValues,
-                x: eventDates,
-                name: 'Sentiment'
-            }];
-
-            layout2 = {
-                yaxis: {
-                    range: [-1, 1]
-                },
-                xaxis: {
-                    autorange: true,
-                    type: 'date'
-                }
-            };
-
-            jQuery('#sentiment-results-success').show();
-
-            contentTable = '<table id="sentiment_results_id" class="widefat"><thead><th><strong>Date</strong></th><th><strong>Average</strong></th></thead><tbody>';
-            jsonResponse.forEach(function (element) {
-                contentTable += '<tr><td>' + element.event_date + '</td>';
-                contentTable += '<td>' + element.event_value + '</td></tr>';
-            });
-            contentTable += '</tbody></table>';
-
-            if (data2.length > 0) {
-                Plotly.newPlot('sentiment_results_chart', data2, layout2).then();
-            }
-
-            jQuery('#sentiment_results_table').html(contentTable).show();
-
-            jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
-        },
-        error: function (response) {
-            jQuery('#kontxt-results-status').html(response.message);
-            return false;
-        }
-    });
-}
-
-function kontxtOverlay( overlay, date_from, date_to ) {
-
-    "use strict";
-
-    let data = jQuery.param({
-        'action':       'kontxt_analyze_results',
-        'apikey':       kontxtAjaxObject.apikey,
-        'dimension':    overlay,
-        'from_date':    date_from,
-        'to_date':      date_to
-    });
-
-    const security = kontxtAjaxObject.security;
-
-    jQuery.ajax({
-        type: 'post',
-        url: kontxtAjaxObject.ajaxurl,
-        security: security,
-        data: data,
-        cache: false,
-        success: function (response) {
-
-            let jsonResponse = JSON.parse(response);
-
-            let eventDates = jsonResponse.map(function (e) {
-                return Date.parse(e.event_date);
-            });
-
-            let eventValues = jsonResponse.map(function (e) {
-                return e.event_value;
-            });
-
-            let groupBy = function (xs, key) {
-                return xs.reduce(function (rv, x) {
-                    (rv[x[key]] = rv[x[key]] || []).push(x);
-                    return rv;
-                }, {});
-            };
-
-            let data2 = [];
-
-            let groupByIntent = groupBy(jsonResponse, 'event_value_name');
-
-            groupByIntent.forEach(function (element) {
-
-                let eventValueDate = groupByIntent[element].map(function (e) {
-                    return Date.parse(e.event_date);
-                });
-
-                let eventValueCount = groupByIntent[element].map(function (e) {
-                    return e.event_value_count;
-                });
-
-                data2.push({
-                    x: eventValueDate,
-                    y: eventValueCount,
-                    name: element,
-                    stackgroup: 'one',
-                    yaxis: 'y2'
-                });
-
-            });
-
-            Plotly.addTraces(
-                'sentiment_results_chart',
-                data2
-            ).then();
-            Plotly.relayout(
-                'sentiment_results_chart',
-                {
-                    ['yaxis2']: {
-                        overlaying: 'y1',
-                        side: 'right'
-                    }
-                }
-            ).then();
-        }
-    });
-}
-
-function kontxtAnalyze( dimension, date_from, date_to) {
+function kontxtAnalyze( dimension, date_from, date_to, filter) {
 
     "use strict";
 
@@ -306,6 +166,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
         'action':       'kontxt_analyze_results',
         'apikey':       kontxtAjaxObject.apikey,
         'dimension':    dimension,
+        'filter':       filter,
         'from_date':    date_from,
         'to_date':      date_to
     });
@@ -349,7 +210,11 @@ function kontxtAnalyze( dimension, date_from, date_to) {
 
             switch( dimension ) {
 
+                case 'sentimentByIntent':
+                    dimension = 'sentiment';
+
                 case 'sentiment':
+
                     data = [{
                         type: 'scatter',
                         fill: 'tozeroy',
@@ -400,7 +265,6 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                             name: elem,
                             stackgroup: 'one'
                         } );
-
                     }
 
                     layout = {
@@ -420,7 +284,6 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                         contentTable += '<tr><td>' + element.event_date + '</td>';
                         contentTable += '<td>' + element.event_value_name + '</td>';
                         contentTable += '<td>' + element.event_value_count + '</td></tr>';
-
                     });
                     contentTable += '</tbody></table>';
 
@@ -597,10 +460,12 @@ function kontxtAnalyze( dimension, date_from, date_to) {
                         contentTable  += '<tr><td>' + element.event_type  + '</td>';
                         contentTable  += '<td>' + element.event_key  + '</td>';
                         contentTable  += '<td>' + element.event_value  + '</td>';
-                        contentTable  += '<td>' + element.created + '</td></tr>';
+                        contentTable  += '<td>' + element.event_date + '</td></tr>';
 
                     });
                     contentTable += '</tbody></table>';
+
+                    console.log(contentTable);
 
                     break;
 
@@ -643,7 +508,7 @@ function kontxtAnalyze( dimension, date_from, date_to) {
             }
 
             if( data.length > 0 ) {
-                Plotly.newPlot( dimension + '_results_chart', data, layout );
+                Plotly.react(dimension + '_results_chart', data, layout);
             }
 
             jQuery('#' + dimension + '_results_table').html( contentTable ).show();
@@ -906,7 +771,7 @@ function kontxtExperimentFormPost(return_text) {
 }
 
 
-function kontxtJourney( date_from, date_to ) {
+function kontxtJourney( dimension, date_from, date_to, filter ) {
 
     "use strict";
 
@@ -920,6 +785,7 @@ function kontxtJourney( date_from, date_to ) {
         'action':       'kontxt_analyze_results',
         'apikey':       kontxtAjaxObject.apikey,
         'service':      'events',
+        'filter':       filter,
         'from_date':    date_from,
         'to_date':      date_to
     });
@@ -948,7 +814,7 @@ function kontxtJourney( date_from, date_to ) {
                 type: 'post',
                 url: kontxtAjaxObject.ajaxurl,
                 security: security,
-                data: data + '&dimension=journeyEvents',
+                data: data + '&dimension=' + dimension,
                 cache: false,
                 success: function (response) {
                     if (response.status === 'error') {
@@ -993,7 +859,7 @@ function kontxtJourney( date_from, date_to ) {
                         hovermode: true
                     };
 
-                    Plotly.newPlot('journey_results_chart', data, layout).then();
+                    Plotly.react('journey_results_chart', data, layout).then();
 
                     jQuery('#spinner-analyze').removeClass('is-active').addClass('is-inactive');
 

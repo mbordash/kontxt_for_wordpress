@@ -1,6 +1,6 @@
 jQuery(function($) {
 
-    "use strict";
+        "use strict";
 
     // check for events (viewProductID, pageID, searchText, reviewTextPresent )
     // loop through API calls to cognitive

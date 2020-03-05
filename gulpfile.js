@@ -18,3 +18,19 @@ gulp.task('zip', function () {
         .pipe(zip('kontxt-for-wordpress.zip'))
         .pipe(gulp.dest('./../'));
 });
+
+gulp.task('copy', function () {
+    return gulp.src([
+        './**/*',
+        '!./{node_modules,node_modules/**/*}',
+        '!./assets/{sass,sass/*}',
+        '!./gulpfile.js',
+        '!./package.json',
+        '!./package-lock.json',
+        '!./admin/js/kontxt-admin-panel/{node_modules,node_modules/**/*}',
+        '!./admin/js/kontxt-admin-panel/package.json',
+        '!./admin/js/kontxt-admin-panel/package-lock.json',
+        '!./admin/js/kontxt-admin-panel/{src,src/*}',
+    ])
+        .pipe(gulp.dest('./../kontxt-svn/trunk/'));
+});

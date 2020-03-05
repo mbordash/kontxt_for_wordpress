@@ -32,12 +32,22 @@ include_once 'kontxt-banner.php';
 
                     <input id="kontxt-events-date" class="button-primary" type="submit" value="Get " />
 
+                    <label for="filter"><?php echo __('Filter', 'kontxt' ); ?></label> <select id="filter" name="filter" style="vertical-align: top;">
+                        <option selected value="">All intents</option>
+                        <option value="BuyNow">Buy Now</option>
+                        <option value="ResearchCompare">Research & Compare</option>
+                        <option value="SolveMyProblem">Solve My Problem</option>
+                        <option value="Discovery">Discovery</option>
+                        <option value="CustomerSupport">Customer Support</option>
+                    </select>
+
+                    <input id="kontxt-intent-filter" class="button-primary" type="submit" value="Filter " />
+
                 </div>
 
             </form>
 
         </div>
-
 
         <div id="journey-results-box" class="wrap">
 
@@ -174,7 +184,7 @@ include_once 'kontxt-banner.php';
     <script>
         jQuery(function($) {
             "use strict";
-            kontxtJourney();
+            kontxtJourney('journeyEvents');
         });
     </script>
 
