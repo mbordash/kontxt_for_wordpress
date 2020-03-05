@@ -25,6 +25,8 @@ global $wp_query;
 
         <?php
             endwhile;
+
+            else:
         ?>
 
         <article id="" <?php post_class(); ?>>

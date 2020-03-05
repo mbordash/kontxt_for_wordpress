@@ -657,14 +657,16 @@ class Kontxt_Public {
 		        // look through results and check if we need to return recommendations inline
 	            if( $recResults ) {
 
-	            	if( array_key_exists('intents', $recResults ) || array_key_exists( 'lemmas', $recResults ) ) {
+		            if( array_key_exists('intents', $recResults ) || array_key_exists( 'lemmas', $recResults ) ) {
 
 			            return json_encode( $recResults );
 
 		            } elseif( array_key_exists('productRecs', $recResults ) || array_key_exists('contentRecs', $recResults ) ) {
 
-	            		$products = $recResults->productRecs;
+
+			            $products = $recResults->productRecs;
 	            		$content = $recResults->contentRecs;
+
 
 			            foreach ( $products as $items ) {
 

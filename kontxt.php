@@ -10,7 +10,7 @@
  * Plugin Name:       KONTXT Demand Engine
  * Plugin URI:        https://www.kontxt.com
  * Description:       KONTXT™ Demand Engine is an AI-backed search and product recommendations plugin providing valuable insights about your customers’ interactions. Powered by Kontxt™ state of the art Natural Language Processing machine learning system.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Author:            RealNetworks KONTXT
  * Author URI:        https://kontxt.com/kontxt-demand-engine-for-retail-2/
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
