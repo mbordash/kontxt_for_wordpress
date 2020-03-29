@@ -218,7 +218,8 @@ class Kontxt_Admin {
 
 			$opts = array(
 				'body'      => $requestBody,
-				'headers'   => 'Content-type: application/x-www-form-urlencoded'
+				'headers'   => 'Content-type: application/x-www-form-urlencoded',
+                'timeout'   => 30
 			);
 
 			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path . '/' . $service, $opts);
@@ -574,7 +575,7 @@ class Kontxt_Admin {
 
 	    add_settings_field(
 		    $this->option_name . '_optimize_search',
-		    wp_kses(__( 'Optimize search results?', 'kontxt' ), $allowed_html ),
+		    wp_kses(__( 'Optimize search results? (English only)', 'kontxt' ), $allowed_html ),
 		    array( $this, $this->option_name . '_optimize_search_cb' ),
 		    $this->plugin_name,
 		    $this->option_name . '_general',

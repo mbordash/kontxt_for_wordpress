@@ -503,7 +503,7 @@ class Kontxt_Public {
 		// let's look for a list/array of results from wp query and send that along with the event
 		// this is useful for search result feedback loop to connect the set returned with the subsequent product viewed
 
-		if( sizeof( wp_list_pluck( $wp_query->posts, 'ID' ) ) > 1 ) {
+		if( is_search() && sizeof( wp_list_pluck( $wp_query->posts, 'ID' ) ) > 1 ) {
 
 			$kontxt_user_session['page_result_set'] = wp_list_pluck( $wp_query->posts, 'ID' );
 
