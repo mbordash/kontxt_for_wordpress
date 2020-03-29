@@ -868,10 +868,11 @@ function kontxtJourney( dimension, date_from, date_to, filter ) {
                         jQuery('#spinner-analyze').removeClass('is-inactive').addClass('is-active');
 
                         let nodeLabel = data.points[0].label;
-                        let dateFrom    =  jQuery( '#date_from' ).val();
-                        let dateTo      =  jQuery( '#date_to' ).val();
+                        let dateFrom     =  jQuery( '#date_from' ).val();
+                        let dateTo       =  jQuery( '#date_to' ).val();
+                        let excludeNodes = [ 'one page and out', 'localhost', 'page_result_set', 'session_abandoned' ];
 
-                        if( nodeLabel ) {
+                        if( nodeLabel && ! excludeNodes.includes( nodeLabel ) ) {
 
                             setTimeout(
                                 function()
@@ -904,11 +905,72 @@ function kontxtJourney( dimension, date_from, date_to, filter ) {
 
                                         let jsonResponse = JSON.parse( response );
 
-                                        contentTable = '<table id="journey_node_results" class="widefat"><thead><th><strong>Event Value</strong></th><th><strong>Count</strong></th></thead><tbody>';
+
+                                        contentTable = '<table id="journey_node_results" class="widefat"><thead><th><strong>Metric</strong></th><th><strong>URL Referrer</strong></th></strong></td><th><strong>Count</strong></th></thead><tbody>';
 
                                         jsonResponse.forEach(function (element) {
 
-                                            contentTable += '<tr><td>' + element.event_value + '</td>';
+                                            let eventValue = JSON.parse( element.event_value);
+                                            let eventValueElement = null;
+
+                                            switch( nodeLabel ) {
+
+                                                case 'shop_page_product':
+                                                    eventValueElement = eventValue.view_product_name;
+                                                    break;
+
+                                                case 'blog_post':
+                                                case 'site_page':
+                                                    eventValueElement = eventValue.title;
+                                                    break;
+
+                                                case 'shop_page_category':
+                                                    eventValueElement = eventValue.view_category_name;
+                                                    break;
+
+                                                case 'shop_page_home':
+                                                case 'site_home':
+                                                    eventValueElement = eventValue.page_name;
+                                                    break;
+
+                                                case 'no_search_results':
+                                                case 'search_query':
+                                                    eventValueElement = eventValue.search_query;
+                                                    break;
+
+                                                case 'order_received':
+                                                    eventValueElement = 'Order ID: ' + eventValue.order_id + ' Order Value: $' + eventValue.order_total;
+                                                    break;
+
+                                                case 'forum_topic_content':
+                                                    eventValueElement = eventValue.forum_content;
+                                                    break;
+
+                                                case 'forum_page':
+                                                    eventValueElement = eventValue.title;
+                                                    break;
+
+                                                case 'comment_submitted':
+                                                    eventValueElement = eventValue.comment_text;
+                                                    break;
+
+                                                case 'contact_form_submitted':
+                                                    eventValueElement = eventValue.contact_form_message;
+                                                    break;
+
+                                                case 'cart_add':
+                                                    eventValueElement = Object.values(eventValue)[0].cart_product_name;
+                                                    break;
+
+                                                case 'user_register':
+                                                    eventValueElement = eventValue.user_id;
+                                                    break;
+
+
+                                            }
+
+                                            contentTable += '<tr><td>' + eventValueElement + '</td>';
+                                            contentTable += '<td>' + ( eventValue.http_referrer == null ? 'N/A' : eventValue.http_referrer ) + '</td>';
                                             contentTable += '<td>' + element.event_count + '</td></tr>';
 
                                         });
