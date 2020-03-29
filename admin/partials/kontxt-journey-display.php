@@ -83,8 +83,7 @@ include_once 'kontxt-banner.php';
 
                                 <h3>About</h3>
 
-                                <p>This is a preview of our new journey analytics function, so please expect some odd visuals while we work out the kinks! This
-                                    has no effect on your wordpress site or store at all.  Our machine learning engine analyzes customer journeys to help discover the optimal paths between inception and transaction.
+                                <p>Our machine learning engine analyzes customer journeys to help discover where your visitors start and end.
                                     Use these insights to help shape your site navigation and help your customers along the path.
 
                                     We've trained our journey analyzer on basic content and shop site events, however, we offer customized event discovery including article, product, and custom business logic flows for more advanced analysis and recommendations.  Please <a target="_blank" href="https://kontxt.com/more-information/">contact us</a> for details.

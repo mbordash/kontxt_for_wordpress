@@ -48,10 +48,10 @@ include_once 'kontxt-banner.php';
 
                                     Deep analytics:
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_sentiment' ); ?>"><?php echo __('Sentiment', 'kontxt' ); ?></a> |
+                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>"><?php echo __('Journey', 'kontxt' ); ?></a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_emotion' ); ?>"><?php echo __('Emotion', 'kontxt' ); ?></a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_intents' ); ?>"><?php echo __('Semantic Intents', 'kontxt' ); ?></a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_keywords' ); ?>"><?php echo __('Keywords', 'kontxt' ); ?></a> |
-                                        <a href="<?php echo admin_url( 'admin.php?page=kontxt_journey' ); ?>"><?php echo __('Journey', 'kontxt' ); ?></a> |
                                         <a href="<?php echo admin_url( 'admin.php?page=kontxt_settings' ); ?>"><?php echo __('Experiment', 'kontxt' ); ?></a>
 
                                 </div>
