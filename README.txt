@@ -2,9 +2,9 @@
 Contributors: mbordash, imijic, smelucci, jmmurray
 Tags: search, seo, relevance, woocommerce, admin, promotion, related, related posts, pages, posts, related, similar posts
 Requires at least: 4.0
-Tested up to: 5.3.2
+Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 1.4
+Stable tag: 1.4.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -78,8 +78,8 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 == Changelog ==
 
-= 1.4 =
-Improved journey reporting event details
+= 1.4.1 =
+Improved journey reporting event details & support for WordPress 5.4
 
 = 1.3.4 =
 Performance improvements for journey analytics
