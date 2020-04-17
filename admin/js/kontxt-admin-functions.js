@@ -651,12 +651,14 @@ function kontxtExperimentFormPost(return_text) {
 
                 if (sentimentScore > 0 ) {
                     sentimentText = "positive";
-                } else {
+                } else if (sentimentScore < 0) {
                     sentimentText = "negative";
+                } else {
+                    sentimentText = "neutral";
                 }
             }
 
-            let toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment with an offset of ' + Math.round(sentimentScore * 100) / 100 + ' from neutral using a range of -1 to 1.';
+            let toneAnalysis = 'We detected a <strong>' + sentimentText + '</strong> sentiment.';
 
             jQuery('#overall_tone').html( toneAnalysis ).show();
 
