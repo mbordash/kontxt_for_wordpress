@@ -10,7 +10,7 @@
  * Plugin Name:       KONTXT Improves WordPress Search
  * Plugin URI:        https://www.kontxt.com
  * Description:       KONTXT™ improves search for both WordPress and WooCommerce sites. We use advanced machine learning and analytics to better understand the intent behind your customers' visit and use this data to present a better set of search results.  Plus, we included a Pinterest-style search results which has shown to better capture your visitors' attention and keep them coming back.
- * Version:           1.4.1
+ * Version:           1.4.2
  * Author:            RealNetworks KONTXT
  * Author URI:        https://kontxt.com/kontxt-demand-engine-for-retail-2/
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.en.html
