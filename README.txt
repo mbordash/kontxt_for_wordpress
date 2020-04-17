@@ -4,7 +4,7 @@ Tags: search, seo, relevance, woocommerce, admin, promotion, related, related po
 Requires at least: 4.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -17,7 +17,7 @@ KONTXT™ improves search for both WordPress and WooCommerce sites. We use advan
 
 But wait-- there's more!
 
-* NEW! SEO tag generator for your blog articles (compatible with Gutenberg block editor)
+* SEO tag generator for your blog articles (compatible with Gutenberg block editor)
 * Improved search results including masonry/pinterest styled template (instant on/off control on the KONTXT > Settings page after install)
 * Content and product recommendations widget (instant on/off control on the KONTXT > Settings page after install)
 * Supports language understanding for core Wordpress functionality as well as popular plugins: WooCommerce, bbPress, Contact Form 7, and Gravity Forms
@@ -77,6 +77,9 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 
 == Changelog ==
+
+= 1.4.2 =
+Minor bug fixes and improvements
 
 = 1.4.1 =
 Improved journey reporting event details & support for WordPress 5.4
