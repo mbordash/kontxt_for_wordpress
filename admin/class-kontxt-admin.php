@@ -219,7 +219,7 @@ class Kontxt_Admin {
 			$opts = array(
 				'body'      => $requestBody,
 				'headers'   => 'Content-type: application/x-www-form-urlencoded',
-                'timeout'   => 30
+                'timeout'   => 45
 			);
 
 			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path . '/' . $service, $opts);
