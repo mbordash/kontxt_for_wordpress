@@ -4,7 +4,7 @@ Tags: search, seo, relevance, woocommerce, admin, promotion, related, related po
 Requires at least: 4.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -78,7 +78,7 @@ Search is the best way to understand the intent behind your customers visit.  Af
 
 == Changelog ==
 
-= 1.4.2 =
+= 1.4.3 =
 Minor bug fixes and improvements
 
 = 1.4.1 =

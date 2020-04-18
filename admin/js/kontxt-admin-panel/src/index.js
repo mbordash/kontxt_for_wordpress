@@ -66,7 +66,8 @@ const MyDisabled = withState( {
 
                 setState( ( state ) => ( { isDisabled: ! state.isDisabled } ) );
 
-            }
+            },
+            timeout: 10000
         });
     };
 
