@@ -97,11 +97,8 @@ jQuery(function($) {
                     jQuery( recsType ).show();
                     jQuery( '#kontxt_recs_objects' ).html( recsList );
 
-
                 }
-
             }
-
         }
     });
 

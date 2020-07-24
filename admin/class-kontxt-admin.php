@@ -224,7 +224,7 @@ class Kontxt_Admin {
 
 			$response = wp_remote_get($this->api_host . '/' . $this->analytics_api_path . '/' . $service, $opts);
 
-			if( $response['response']['code'] === 200 ) {
+			if( !is_wp_error( $response ) ) {
 
 				return sanitize_text_field( $response['body'] );
 
