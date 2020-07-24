@@ -117,36 +117,58 @@ class Kontxt_Public {
 	/**
 	 * @param $commentId
 	 */
-	public function kontxt_comment_post( $commentId ) {
+	public function kontxt_comment_post( $commentId = 0 ) {
 
 		$kontxtCommentArr = [];
 
 		// capture comment content
 		if ( $commentId ) {
 
-			$comment = get_comment( intval( $commentId ) );
+			$commentIntVal = intval( $commentId);
+			$comment_product_name = null;
+			$comment = get_comment(  $commentIntVal );
 
 			$comment_text   = sanitize_text_field( $comment->comment_content );
-			$comment_product_id = $comment->comment_post_ID;
-			if( function_exists('wc_get_product' ) ) {
-				$comment_product_name = wc_get_product( $comment_product_id )->get_name();
-			}
-			$comment_rating = get_comment_meta( $commentId, 'rating', true);
+			$comment_post_id = $comment->comment_post_ID;
 
-			if ( ! empty( $comment_text ) ) {
+			if( !empty( $comment_text ) ) {
+				switch ( get_post_type( $comment_post_id ) ) {
 
-				$kontxtCommentArr['comment_submitted'] = [
-					'comment_text' => $comment_text,
-					'comment_rating' => $comment_rating,
-					'comment_product_id' => $comment_product_id,
-					'comment_product_name' => $comment_product_name
-				];
+					case "post":
+						$kontxtCommentArr['post_comment_submitted'] = [
+							'comment_text'       => $comment_text,
+							'comment_post_id'    => $comment_post_id,
+							'comment_post_title' => get_the_title( $comment_post_id )
+						];
+						break;
 
+					case "page":
+						$kontxtCommentArr['page_comment_submitted'] = [
+							'comment_text'       => $comment_text,
+							'comment_page_id'    => $comment_post_id,
+							'comment_page_title' => get_the_title( $comment_post_id )
+						];
+						break;
+
+					case "product":
+
+						if ( function_exists( 'wc_get_product' ) ) {
+							$comment_product_name = wc_get_product( $comment_post_id )->get_name();
+							$comment_rating       = get_comment_meta( $commentId, 'rating', true );
+
+							$kontxtCommentArr['product_comment_submitted'] = [
+								'comment_text'         => $comment_text,
+								'comment_rating'       => $comment_rating,
+								'comment_product_id'   => $comment_post_id,
+								'comment_product_name' => $comment_product_name
+							];
+						}
+				}
 			}
 		}
 
 		// send directly to backend, don't bother with js async
-		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', null, true );
+		$this->kontxt_send_event( $kontxtCommentArr, 'public_event', true );
 
 	}
 

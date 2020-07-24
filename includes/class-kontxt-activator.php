@@ -26,6 +26,7 @@ class Kontxt_Activator {
 		$kontxt_ini = parse_ini_file(plugin_dir_path( __FILE__ ) . '../app.ini.php' );
 
 		$option_name    = 'KONTXT';
+		$application    = 'WordPress Semantic Engine';
 		$api_host       = $kontxt_ini['api_host'];
 		$api_path       = 'site';
 
@@ -48,6 +49,7 @@ class Kontxt_Activator {
 			// register with KONTXT Site API endpoint
 			$requestBody = array(
 				'api_uid'                   => $apiUid,
+				'application'               => $application,
 				'site_name'                 => $siteName,
 				'site_domain'               => $siteDomain,
 				'site_email'                => $siteEmail,
@@ -92,6 +94,7 @@ class Kontxt_Activator {
 
 				'api_uid'       => $apiUid,
 				'api_key'       => $apiKey,
+				'application'   => $application,
 				'site_name'     => $siteName,
 				'site_domain'   => $siteDomain,
 				'site_email'    => $siteEmail
